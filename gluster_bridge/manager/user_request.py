@@ -4,8 +4,8 @@ from tendrl.gluster_bridge.common.types import OsdMap
 from tendrl.gluster_bridge.common.types import PgSummary
 from tendrl.gluster_bridge.common.types import USER_REQUEST_COMPLETE
 from tendrl.gluster_bridge.common.types import USER_REQUEST_SUBMITTED
+from tendrl.gluster_bridge import config
 from tendrl.gluster_bridge.log import log
-from tendrl.gluster_bridge.manager import config
 from tendrl.gluster_bridge.util import now
 import uuid
 

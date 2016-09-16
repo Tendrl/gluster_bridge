@@ -17,9 +17,9 @@ from tendrl.gluster_bridge.common.types import MonStatus
 from tendrl.gluster_bridge.common.types import OSD
 from tendrl.gluster_bridge.common.types import OsdMap
 from tendrl.gluster_bridge.common.types import ServiceId
+from tendrl.gluster_bridge import config
 from tendrl.gluster_bridge.gevent_util import nosleep
 from tendrl.gluster_bridge.log import log
-from tendrl.gluster_bridge.manager import config
 from tendrl.gluster_bridge.util import now
 import uuid
 

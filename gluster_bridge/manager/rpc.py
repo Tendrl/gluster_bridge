@@ -2,8 +2,8 @@ import etcd
 import gevent.event
 import json
 import subprocess
+from tendrl.gluster_bridge import config
 from tendrl.gluster_bridge.log import log
-from tendrl.gluster_bridge.manager import config
 import time
 import traceback
 import uuid

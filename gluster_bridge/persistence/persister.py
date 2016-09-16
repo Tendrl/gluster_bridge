@@ -9,8 +9,8 @@ try:
 except ImportError:
     msgpack = None
 
+from tendrl.gluster_bridge import config
 from tendrl.gluster_bridge.log import log
-from tendrl.gluster_bridge.manager import config
 from tendrl.gluster_bridge.persistence.sync_objects import SyncObject
 
 

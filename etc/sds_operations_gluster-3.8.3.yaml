@@ -12,6 +12,7 @@ object_details:
             pre_condition : ["atoms.<atom_name>.<condition_function>1"...]
             post_condition: ["atoms.<atom_name>.<condition_function>1"...]
           name: Meaningful name for this atom, should be something that is distinguishable and understandable for notification, debugging, storing and any other similar purposes
+          description: meaningful description for this atom
           outputs:
           - A set, string or list of items that this will be providing (or could provide) to others, used to correlate and associate the thing/s this atom produces, if it produces anything at all.
 

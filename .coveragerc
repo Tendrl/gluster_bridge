@@ -1,6 +1,7 @@
 [run]
 branch = True
 source = gluster_bridge
+omit = gluster_bridge/tests/*
 
 [report]
 ignore_errors = True

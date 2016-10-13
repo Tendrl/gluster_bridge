@@ -11,81 +11,432 @@ object_details:
     attrs:
       volname:
         type: String
+	value: etcd
+	help: Gluster volume name
       stripe_count:
         type: Integer
+	value: etcd
+	help: Stripe count of volume
       replica_count:
         type: Integer
+	value: etcd
+	help: Replica count of volume
       disperse_count:
         type: Integer
+	value: etcd
+	help: Disperse count of volume
       redundancy_count:
         type: Integer
+	value: etcd
+	help: Redundancy count of volume
       transport:
         type: String
+	value: etcd
+	help: Transport type for volume
       brickdetails:
         type: list[brick]
+	value: etcd
+	help: List of bricks for volume
       force:
         type: Boolean
+	value: None
+	help: If force execute the action
       directory:
         type: String
+	value: etcd
+	help: Directory details for volume
       bitrot:
         type: Boolean
+	value: etcd
+	help: Bitrot enabled flag for volume
       scrub-frequency:
         type: Integer
+	value: etcd
+	help: Scrub frequency for the volume
       scrub-throttle:
         type: Integer
+	value: etcd
+	help: Scrub throttle value for volume
 
     atoms:
         info:
+          run: "gluster_bridge.atoms.volume.get"
           type: "get"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "volume_info"
+          outputs:
+            - "volname"
+            - "type"
+            - "status"
+            - "no_of_bricks"
+            - "transport"
+            - "brickdetails"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+          version: "0.1.0"
         create:
           run: "gluster_bridge.atoms.volume.create"
           type: "create"
           conditions:
-            pre_condition : ["atoms.<atom_name>.<condition_function>1"...]
-            post_condition: ["atoms.<atom_name>.<condition_function>1"...]
-          name: Meaningful name for this atom, should be something that is distinguishable and understandable for notification, debugging, storing and any other similar purposes
+            pre_condition : None
+            post_condition: None
+          name: "create_volume"
           outputs:
-          - A set, string or list of items that this will be providing (or could provide) to others, used to correlate and associate the thing/s this atom produces, if it produces anything at all.
-
-          global_inputs:
-          - An immutable input_name => value dictionary which specifies any initial inputs that should be automatically injected into the atoms scope before the atom execution commences (this allows for providing atom local values that do not need to be provided by other atoms/dependents).
+            - "volname"
+          global_inputs: None
           local_inputs:
-          - A set or list of required inputs for this atom’s execute method
-          version: An immutable version that associates version information with this atom. It can be useful in resuming older versions of atoms. Standard major, minor versioning concepts should apply
+            - "volname"
+            - ["stripe_count"]
+            - ["replica_count"]
+            - ["transport"]
+            - "brickdetails"
+            - "force"
+          version: "0.1.0"
         delete:
+          run: "gluster_bridge.atoms.volume.delete"
           type: "delete"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "delete_volume"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+          version: "0.1.0"
         start:
+          run: "gluster_bridge.atoms.volume.start"
           type: "action"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "start_volume"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+          version: "0.1.0"
         stop:
+          run: "gluster_bridge.atoms.volume.stop"
           type: "action"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "stop_volume"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+          version: "0.1.0"
         set:
+          run: "gluster_bridge.atoms.volume.set"
           type: "update"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "set_volume_options"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+            - "option_name"
+            - "option_value"
+          version: "0.1.0"
         get:
           type: "get"
         add_brick:
+          run: "gluster_bridge.atoms.volume.add_brick"
           type: "action"
-        remove-brick:
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "add_brick"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+            - "brick_name"
+          version: "0.1.0"
+        remove_brick_start:
+          run: "gluster_bridge.atoms.volume.remobe_brick_start"
           type: "action"
-        replace-brick:
-          type: "action"
-        rebalance_start:
-          type: "action"
-        rebalance_stop:
-          type: "action"
-        rebalance_status:
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "remove_brick_start"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+            - "brick_name"
+          version: "0.1.0"
+        remove_brick_status:
+          run: "gluster_bridge.atoms.volume.remove_brick_status"
           type: "get"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "remove_brick_status"
+          outputs:
+            - "node"
+            - "rebalanced_files"
+            - "size"
+            - "scanned_files"
+            - "status"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+            - "brick_name"
+          version: "0.1.0"
+        remove_brick_commit:
+          run: "gluster_bridge.atoms.volume.remove_brick_commit"
+          type: "action"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "remove_brick_commit"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+            - "brick_name"
+          version: "0.1.0"
+        replace_brick_start:
+          run: "gluster_bridge.atoms.volume.replace_brick_start"
+          type: "action"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "replace_brick_start"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+            - "source_brick"
+            - "destination_brick"
+          version: "0.1.0"
+        replace_brick_status:
+          run: "gluster_bridge.atoms.volume.replace_brick_status"
+          type: "get"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "replace_brick_status"
+          outputs:
+            - "current_file"
+            - "files_migrated"
+            - "status"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+            - "source_brick"
+            - "destination_brick"
+          version: "0.1.0"
+        replace_brick_pause:
+          run: "gluster_bridge.atoms.volume.replace_brick_pause"
+          type: "action"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "replace_brick_pause"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+            - "source_brick"
+            - "destination_brick"
+          version: "0.1.0"
+        replace_brick_abort:
+          run: "gluster_bridge.atoms.volume.replace_brick_abort"
+          type: "action"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "replace_brick_abort"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+            - "source_brick"
+            - "destination_brick"
+          version: "0.1.0"
+        rebalance_start:
+          run: "gluster_bridge.atoms.volume.rebalance_start"
+          type: "action"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "rebalance_start"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+            - ["fix_layout"]
+            - ["force"]
+          version: "0.1.0"
+        rebalance_stop:
+          run: "gluster_bridge.atoms.volume.rebalance_stop"
+          type: "action"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "rebalance_stop"
+          outputs:
+            - "node"
+            - "rebalanced_files"
+            - "size"
+            - "scanned_files"
+            - "status"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+          version: "0.1.0"
+        rebalance_status:
+          run: "gluster_bridge.atoms.volume.rebalance_status"
+          type: "get"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "rebalance_status"
+          outputs:
+            - "node"
+            - "rebalanced_files"
+            - "size"
+            - "scanned_files"
+            - "status"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+          version: "0.1.0"
         log:
           type: "update"
         log_locate:
           type: "get"
         log_rotate:
+          run: "gluster_bridge.atoms.volume.log_rotate"
           type: "action"
-        bitrot:
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "log_rotate"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+          version: "0.1.0"
+        bitrot_enable:
+          run: "gluster_bridge.atoms.volume.bitrot_enable"
           type: "update"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "bitrot_enable"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+          version: "0.1.0"
+        bitrot_disable:
+          run: "gluster_bridge.atoms.volume.bitrot_disable"
+          type: "update"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "bitrot_disable"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+          version: "0.1.0"
+        bitrot_scrub_pause:
+          run: "gluster_bridge.atoms.volume.bitrot_scrub_pause"
+          type: "update"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "bitrot_scrub_pause"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+          version: "0.1.0"
+        bitrot_scrub_resume:
+          run: "gluster_bridge.atoms.volume.bitrot_scrub_resume"
+          type: "update"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "bitrot_scrub_resume"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+          version: "0.1.0"
+        bitrot_scrub_status:
+          run: "gluster_bridge.atoms.volume.bitrot_scrub_status"
+          type: "get"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "bitrot_scrub_status"
+          outputs:
+            - "volname"
+            - "state"
+            - "impact"
+            - "frequency"
+            - "error_log"
+            - "scrubber_log"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+          version: "0.1.0"
         bitrot_scrub_throttle:
+          run: "gluster_bridge.atoms.volume.bitrot_scrub_throttle"
           type: "update"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "bitrot_scrub_throttle"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+            - "mode"
+          version: "0.1.0"
         bitrot_scrub_frequency:
+          run: "gluster_bridge.atoms.volume.bitrot_scrub_frequency"
           type: "update"
+          conditions:
+            pre_condition: None
+            post_condition: None
+          name: "bitrot_scrub_frequency"
+          outputs:
+            - "success"
+          global_inputs: None
+          local_inputs:
+            - "volname"
+            - "frequency"
+          version: "0.1.0"
         bitrot_scrub:
           type: "update"
   brick:
@@ -101,48 +452,228 @@ object_details:
 
   peer:
     attrs:
-    - hostname
+      hostname
+	type: String
+	value: etcd
+	help: FQDN name of the host
     atoms:
       probe:
+	run: "gluster_bridge.atoms.host.peer_probe"
         type: "action"
+	conditions:
+	  pre_condition: None
+	  post_condition: None
+	name: "peer_probe"
+	outputs:
+	  - "success"
+	global_inputs: None
+	local_inputs:
+	  - "hostname"
+	version: "0.1.0"
       detach:
+	run: "gluster_bridge.atoms.host.detach"
         type: "action"
+	conditions:
+	  pre_condition: None
+	  post_condition: None
+	name: "detach"
+	outputs:
+	  - "success"
+	global_inputs: None
+	local_inputs:
+	  - "hostname"
+	version: "0.1.0"
       status:
+	run: "gluster_bridge.atoms.host.peer_status"
         type: "get"
+	conditions:
+	  pre_condition: None
+	  post_condition: None
+	name: "peer_status"
+	outputs:
+	  - "status"
+	global_inputs: None
+	local_inputs:
+	  - "hostname"
+	version: "0.1.0"
+
   snapshot:
     attrs:
-    - snapname
-    - volname
-    - description
-    - force
-    - clonename
-    - snap-max-hard-limit
-    - snap-max-soft-limit
-    - auto-delete
-    - activate-on-create
+      snapname:
+	type: String
+	value: etcd
+	help: Name of the volume snapshot
+      volname:
+	type: String
+	value: etcd
+	help: Gluster volume name
+      description:
+	type: String
+	value: etcd
+	help: Description of the snapshot
+      force:
+	type: Boolean
+	value: None
+	help: Whether to force create snapshot
+      clonename:
+	type: String
+	value: etcd
+	help: Clone name for the snapshot
+      snap-max-hard-limit:
+	type: Integer
+	value: etcd
+	help: Hard limit for maximum no of snapshots
+      snap-max-soft-limit:
+	type: Integer
+	value: etcd
+	help: Soft limit for maximum no of snapshots
+      auto-delete:
+	type: Boolean
+	value: etcd
+	help: Whether to auto delete the snapshot
+      activate-on-create:
+	type: Boolean
+	value: etcd
+	help: Whether to auto activate snapshot post creation
+
     atoms:
       create:
+	run: "gluster_bridge.atoms.snapshot.create"
         type: "create"
+	conditions:
+	  pre_condition: None
+	  post_condition: None
+	name: "create_snapshot"
+	outputs:
+	  - "success"
+	global_inputs: None
+	local_inputs:
+	  - "snapname"
+	  - "volname"
+	  - "description"
+	  - "force"
+	version: "0.1.0"
       restore:
+	run: "gluster_bridge.atoms.snapshot.restore"
         type: "action"
+	conditions:
+	  pre_condition: None
+	  post_condition: None
+	outputs:
+	  - "success"
+	global_inputs: None
+	local_inputs:
+	  - "snapname"
+	version: "0.1.0"
       clone:
+	run: "gluster_bridge.atoms.snapshot.clone"
         type: "create"
+	conditions:
+	  pre_condition: None
+	  post_condition: None
+	name: "clone_snapshot"
+	outputs:
+	  - "success"
+	global_inputs: None
+	local_inputs:
+	  - "snapname"
+	  - "clonename"
+	version: "0.1.0"
       delete:
+	run: "gluster_bridge.atoms.snapshot.delete"
         type: "delete"
+	conditions:
+	  pre_condition: None
+	  post_condition: None
+	name: "delete_snapshot"
+	outputs:
+	  - "success"
+	global_inputs: None
+	local_inputs:
+	  - "snapname"
+	version: "0.1.0"
       list:
+	run: "gluster_bridge.atoms.snapshot.get"
         type: "get"
+	conditions:
+	  pre_condition: None
+	  post_condition: None
+	name: "get_snapshots"
+	outputs:
+	  - list[snapshot]
+	global_inputs: None
+	local_inputs:
+	  - "volname"
+	version: "0.1.0"
       info:
+	run: "gluster_bridge.atoms.snapshot.info"
         type: "get"
+	conditions:
+	  pre_condition: None
+	  post_condition: None
+	name: "snapshot_info"
+	outputs:
+	  - snapshot
+	global_inputs: None
+	local_inputs:
+	  - "snapname"
+	version: "0.1.0"
       status:
+	run: "gluster_bridge.atoms.snapshot.status"
         type: "get"
+	conditions:
+	  pre_condition: None
+	  post_condition: None
+	name: "snapshot_status"
+	outputs:
+	  - "status"
+	global_inputs: None
+	local_inputs:
+	  - "snapname"
+	version: "0.1.0"
       config:
+	run: "gluster_bridge.atoms.snapshot.config"
         type: "update"
+	conditions:
+	  pre_condition: None
+	  post_condition: None
+	name: "config_snapshot"
+	outputs:
+	  - "success"
+	global_inputs: None
+	local_inputs
+	  - "volname"
+	  - "snap-max-hard-limit"
+	  - "snap-max-soft-limit"
+	  - "configname"
+	  - "configvalue"
+	version: "0.1.0"
       activate:
+	run: "gluster_bridge.atoms.snapshot.activate"
         type: "action"
+	conditions:
+	  pre_condition: None
+	  post_condition: None
+	name: "activate_snapshot"
+	outputs:
+	  - "success"
+	global_inputs: None
+	local_inputs:
+	  - "snapname"
+	version: "0.1.0"
       deactivate:
+	run: "gluster_bridge.atoms.snapshot.deactivate"
         type: "action"
-
-
+	conditions:
+	  pre_condition: None
+	  post_condition: None
+	name: "deactivate_snapshot"
+	outputs:
+	  - "success"
+	global_inputs: None
+	local_inputs:
+	  - "snapname"
+	version: "0.1.0"
 
   flows:
     CreateVolume:
@@ -156,5 +687,192 @@ object_details:
       run: "gluster_bridge.flows.create_volume"
       type: Create
 
+    DeleteVolume:
+      uuid: "91a8b656-903b-11e6-ae22-56b6b6499611"
+      description: "Delete an existing volume"
+      atoms: ["volume.delete"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.delete_volume"
+      type: Delete
 
+    StartVolume:
+      uuid: "e5429376-903c-11e6-ae22-56b6b6499611"
+      description: "Start a volume"
+      atoms: ["volume.start"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.start_volume"
+      type: Start
 
+    StopVolume:
+      uuid: "cc4661e2-9044-11e6-ae22-56b6b6499611"
+      description: "Stop a volume"
+      atoms: ["volume.stop"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.stop_volume"
+      type: Stop
+
+    SetVolumeOptions:
+      uuid: "5a433fd8-9045-11e6-ae22-56b6b6499611"
+      description: "Set a volume option"
+      atoms: ["volume.set"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.set_volume_option"
+      type: SetVolumeOption
+
+    AddBrick:
+      uuid: "c416a35e-9046-11e6-ae22-56b6b6499611"
+      description: "Add a brick to the volume"
+      atoms: ["volume.add_brick"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.add_brick"
+      type: AddBrick
+
+    RemoveBrickStart:
+      uuid: "80375772-9047-11e6-ae22-56b6b6499611"
+      description: "Start a remove brick on volume"
+      atoms: ["volume.remove_brick_start"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.remove_brick_start"
+      type: RemoveBrickStart
+
+    RemoveBrickCommit:
+      uuid: "8a01cbbc-904b-11e6-ae22-56b6b6499611"
+      description: "Commit a remove brick task on volume"
+      atoms: ["volume.remove_brick_commit"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.remove_brick_commit"
+      type: RemoveBrickCommit
+
+    ReplaceBrickStart:
+      uuid: "2dd06e6a-904c-11e6-ae22-56b6b6499611"
+      description: "Start a replace brick on volume"
+      atoms: ["volume.replace_brick_start"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.replace_brick_start"
+      type: ReplaceBrickStart
+
+    ReplaceBrickPause:
+      uuid: "06b266c4-904e-11e6-ae22-56b6b6499611"
+      description: "Pause a replace brick on volume"
+      atoms: ["volume.replace_brick_pause"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.replace_brick_pause"
+      type: ReplaceBrickPause
+
+    ReplaceBrickAbort:
+      uuid: "6aae6a06-904e-11e6-ae22-56b6b6499611"
+      description: "Abort a replace brick on volume"
+      atoms: ["volume.replace_brick_abort"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.replace_brick_abort"
+      type: ReplaceBrickAbort
+
+    RebalanceStart:
+      uuid: "c0a87812-905c-11e6-ae22-56b6b6499611"
+      description: "Starts a rebalance of volume"
+      atoms: ["volume.rebalance_start"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.rebalance_start"
+      type: RebalanceStart
+
+    RebalanceStop:
+      uuid: "17481172-905e-11e6-ae22-56b6b6499611"
+      description: "Stops a rebalance of volume"
+      atoms: ["volume.rebalance_stop"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.rebalance_stop"
+      type: RebalanceStop
+
+    LogRotate:
+      uuid: "c53e8ffe-905e-11e6-ae22-56b6b6499611"
+      description: "Rotates the logs for volume"
+      atoms: ["volume.log_rotate"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.log_rotate"
+      type: LogRotate
+
+    BitrotEnable:
+      uuid: "979cda3c-905f-11e6-ae22-56b6b6499611"
+      description: "Enables bitrot for volume"
+      atoms: ["volume.bitrot_enable"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.bitrot_enable"
+      type: BitrotEnable
+
+    BitrotDisable:
+      uuid: "5eb77bf4-9060-11e6-ae22-56b6b6499611"
+      description: "Disables bitrot for volume"
+      atoms: ["volume.bitrot_disable"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.bitrot_disable"
+      type: BitrotDisable
+
+    BitrotScrubPause:
+      uuid: "c3a84f02-9060-11e6-ae22-56b6b6499611"
+      description: "Pauses the bitrot scrub for volume"
+      atoms: ["volume.bitrot_scrub_pause"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.bitrot_scrub_pause"
+      type: BitrotScrubPause
+
+    BitrotScrubResume:
+      uuid: "6af4eaae-9061-11e6-ae22-56b6b6499611"
+      description: "Resumes the bitrot scrub for volume"
+      atoms: ["volume.bitrot_scrub_resume"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.bitrot_scrub_resume"
+      type: BitrotScrubResume
+
+    BitrotScrubThrottle:
+      uuid: "cb53a660-9061-11e6-ae22-56b6b6499611"
+      description: "Sets the bitrot throttle mode"
+      atoms: ["volume.bitrot_scrub_throttle"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.bitrot_scrub_throttle"
+      type: BitrotScrubThrottle
+
+    BitrotScrubFrequency:
+      uuid: "01611a0a-9065-11e6-ae22-56b6b6499611"
+      description: "Sets the bitrot scrub frequency"
+      atoms: ["volume.bitrot_scrub_frequency"]
+      conditions:
+        pre_condition: None
+        post_condition: None
+      run: "gluster_bridge.flows.bitrot_scrub_frequency"
+      type: BitrotScrubFrequency

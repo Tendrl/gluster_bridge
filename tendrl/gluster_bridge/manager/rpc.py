@@ -54,7 +54,7 @@ class EtcdRPC(object):
 
     def invoke_flow(self, flow_name, api_job):
         # TODO(rohan) parse sds_operations_gluster.yaml and correlate here
-        flow_module = 'gluster_bridge.flows.%s' %\
+        flow_module = 'tendrl.gluster_bridge.flows.%s' %\
                       self.convert_flow_name(flow_name)
         mod = __import__(flow_module, fromlist=[
             flow_name])

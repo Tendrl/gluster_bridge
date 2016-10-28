@@ -1,3 +1,3 @@
 #!/bin/bash
 
-tox -epep8 & tox -ecover
+tox -epep8 && tox -ecover

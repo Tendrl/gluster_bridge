@@ -5,6 +5,11 @@ Style Commandments
   http://docs.openstack.org/developer/hacking/   (excluding the license and trademark sections)
 
 
+Developer Workflow
+------------------
+Refer: https://guides.github.com/introduction/flow/
+
+
 Creating Unit Tests
 -------------------
 For every new feature, unit tests should be created that both test and

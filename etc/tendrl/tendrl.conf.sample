@@ -13,5 +13,5 @@ log_level = DEBUG
 
 [gluster_bridge]
 # Path to log file
-log_path = /var/log/tendrl/gluster_bridge.log
 log_level = DEBUG
+log_cfg_path = /etc/tendrl/logging.yaml

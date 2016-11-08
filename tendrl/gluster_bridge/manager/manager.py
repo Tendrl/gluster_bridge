@@ -17,6 +17,9 @@ from tendrl.gluster_bridge.persistence.servers import Brick
 from tendrl.gluster_bridge.persistence.servers import Peer
 from tendrl.gluster_bridge.persistence.servers import Volume
 
+from tendrl.gluster_bridge.config import TendrlConfig
+config = TendrlConfig()
+
 from tendrl.gluster_bridge import ini2json
 
 LOG = logging.getLogger(__name__)
@@ -185,7 +188,10 @@ def dump_stacks():
 
 
 def main():
-    log.setup_logging()
+    log.setup_logging(
+        config.get('gluster_bridge', 'log_cfg_path'),
+        config.get('gluster_bridge', 'log_level')
+    )
     m = Manager()
     m.start()
 

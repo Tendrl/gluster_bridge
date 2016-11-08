@@ -10,5 +10,6 @@ def setup_logging():
     handler = logging.FileHandler(config.get('gluster_bridge', 'log_path'))
     handler.setFormatter(logging.Formatter(FORMAT))
     root.addHandler(handler)
-    root.setLevel(logging.getLevelName(config.get('gluster_bridge', 'log_level')))
+    root.setLevel(
+        logging.getLevelName(config.get('gluster_bridge', 'log_level')))
     logging.getLogger(__name__).info("Logging setup complete!")

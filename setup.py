@@ -20,8 +20,7 @@ setup(
     license="LGPL-2.1+",
     zip_safe=False,
     install_requires=install_requires,
-    entry_points={
-        'console_scripts': [
+    entry_points={'console_scripts': [
         'tendrl-gluster-bridge = tendrl.gluster_bridge.manager.manager:main'
         ]
     }

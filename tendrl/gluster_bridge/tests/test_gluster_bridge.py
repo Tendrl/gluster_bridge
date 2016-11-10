@@ -9,8 +9,10 @@ import os
 import shutil
 import sys
 import tempfile
+sys.modules['tendrl.bridge_common.JobValidator'] = MagicMock()
 sys.modules['tendrl.bridge_common'] = MagicMock()
 sys.modules['tendrl.gluster_bridge.persistence.servers'] = MagicMock()
+sys.modules['tendrl.gluster_bridge.persistence.sds_operation'] = MagicMock()
 sys.modules['tendrl.gluster_bridge.config'] = MagicMock()
 sys.modules['tendrl.gluster_bridge.manager.rpc'] = MagicMock()
 sys.modules['tendrl.gluster_bridge.persistence.persister'] = MagicMock()
@@ -22,6 +24,8 @@ del sys.modules['logging']
 del sys.modules['tendrl.gluster_bridge.config']
 del sys.modules['tendrl.bridge_common']
 del sys.modules['tendrl.gluster_bridge.persistence.servers']
+del sys.modules['tendrl.gluster_bridge.persistence.sds_operation']
+del sys.modules['tendrl.bridge_common.JobValidator']
 
 
 class TestGluster_bridge(object):

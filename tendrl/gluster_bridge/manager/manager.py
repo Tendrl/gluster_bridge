@@ -6,18 +6,20 @@ import signal
 import subprocess
 import time
 import traceback
+import yaml
 
 import gevent.event
 import gevent.greenlet
 
+from tendrl.bridge_common.JobValidator import api
 from tendrl.bridge_common import log
+from tendrl.gluster_bridge import ini2json
 from tendrl.gluster_bridge.manager.rpc import EtcdThread
 from tendrl.gluster_bridge.persistence.persister import Persister
+from tendrl.gluster_bridge.persistence.sds_operation import SDSOperation
 from tendrl.gluster_bridge.persistence.servers import Brick
 from tendrl.gluster_bridge.persistence.servers import Peer
 from tendrl.gluster_bridge.persistence.servers import Volume
-
-from tendrl.gluster_bridge import ini2json
 
 from tendrl.gluster_bridge.config import TendrlConfig
 config = TendrlConfig()
@@ -92,6 +94,45 @@ class Manager(object):
         self._user_request_thread.start()
         self._discovery_thread.start()
         self.persister.start()
+        self.initialize_sds_definitions()
+
+    def initialize_sds_definitions(self):
+        # Read the cluster context file
+        cluster_id = ''
+        with open('/etc/tendrl/context', 'rt') as f:
+            context = yaml.safe_load(f.read())
+            cluster_id = context['cluster_id']
+
+        # Read and update SDS operations to central store
+        store = self.persister.get_store()
+        sds_defs_file = config.get(
+            'gluster_bridge',
+            'sds_definitions_path'
+        )
+
+        # Validate sds definitions file name
+        sds_defs_file_name = sds_defs_file[sds_defs_file.rfind('/') + 1:]
+        sds_name = sds_defs_file_name.split('-')[0]
+        sds_version = sds_defs_file_name[1][sds_defs_file_name[1].rfind('.')]
+        if sds_name != "tendrl_definitions_gluster":
+            raise Exception("Incorrect SDS definitions file: %s" %
+                            sds_defs_file_name)
+        if len(sds_version.split('.')) < 3:
+            raise Exception("Incorrect version of SDS definitions file" %
+                            sds_defs_file_name)
+
+        # Write the definitions to central store
+        with open(sds_defs_file, 'rt') as f:
+            sds_op_defs = yaml.safe_load(f.read())
+            store.save(
+                SDSOperation(
+                    cluster_id=cluster_id,
+                    updated=str(time.time()),
+                    data=sds_op_defs
+                )
+            )
+            self.sds_defs = sds_op_defs
+            self.api_validator = api.JobValidator(sds_op_defs)
 
     def join(self):
         LOG.info("%s joining" % self.__class__.__name__)

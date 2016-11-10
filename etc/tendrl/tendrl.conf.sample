@@ -15,3 +15,4 @@ log_level = DEBUG
 # Path to log file
 log_level = DEBUG
 log_cfg_path = /etc/tendrl/logging.yaml
+sds_definitions_path = /etc/tendrl/tendrl_definitions_gluster-3.8.3.yaml

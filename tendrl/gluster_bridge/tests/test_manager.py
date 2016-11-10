@@ -83,6 +83,7 @@ class Test_manager(TestGluster_bridge):
         self.Manager.LOG.debug.assert_called()
 
     def test_start(self):
+        self.managerobj.initialize_sds_definitions = MagicMock()
         self.managerobj.start()
         self.managerobj._user_request_thread.start.assert_called()
         self.managerobj.persister.start.assert_called()
@@ -97,11 +98,6 @@ class Test_manager(TestGluster_bridge):
     def test_dump_stacks(self):
         self.Manager.dump_stacks()
         self.Manager.LOG.errorassert_called()
-
-    def test_main(self):
-        self.Manager.gevent = MagicMock()
-        self.Manager.main()
-        self.Manager.gevent.signal.assert_called()
 
     """Mocked subprocess call to stop while loop"""
     def call(self, *args):

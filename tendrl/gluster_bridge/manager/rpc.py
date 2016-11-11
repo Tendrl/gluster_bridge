@@ -7,7 +7,9 @@ import uuid
 import etcd
 import gevent.event
 
+from tendrl.bridge_common.JobValidator import api
 from tendrl.gluster_bridge.config import TendrlConfig
+from tendrl.gluster_bridge.persistence.sds_operation import SDSOperation
 
 
 config = TendrlConfig()
@@ -30,7 +32,8 @@ class EtcdRPC(object):
             for job in jobs.children:
                 raw_job = json.loads(job.value.decode('utf-8'))
                 # Pick up the "new" job that is not locked by any other bridge
-                if raw_job['status'] == "new":
+                if raw_job['status'] == "new" and \
+                    raw_job['sds_name'] == "gluster":
                     try:
                         raw_job['status'] = "processing"
                         # Generate a request ID for tracking this job
@@ -45,6 +48,12 @@ class EtcdRPC(object):
                         self.invoke_flow(raw_job['flow'], raw_job)
                         break
                     except Exception as ex:
+                        self.api_job['status'] = 'failed'
+                        self.api_job['response'] = ex.message
+                        self.client.write(
+                            self.api_job['request_id'],
+                            json.dumps(self.api_job)
+                        )
                         LOG.error(ex)
 
     def run(self):
@@ -53,8 +62,25 @@ class EtcdRPC(object):
     def stop(self):
         pass
 
+    def validate_api_job(self, api_job):
+        sds_ops_def_obj = SDSOperation(
+            cluster_id=api_job['cluster_id']
+        )
+        self.client.read(sds_ops_def_obj)
+        api_validator = api.JobValidator(sds_ops_def_obj)
+        ret_val, msg = api_validator.validateApi(api_job)
+        if not ret_val:
+            api_job['status'] = "failed"
+            api_job['response'] = msg
+            self.client.write(
+                api_job['request_id'],
+                json.dumps(api_job)
+            )
+            raise Exception("Error validating api job: %s" % msg)
+
     def invoke_flow(self, flow_name, api_job):
-        # TODO(rohan) parse sds_operations_gluster.yaml and correlate here
+        self.validate_api_job(api_job)
+
         flow_module = 'tendrl.gluster_bridge.flows.%s' %\
                       self.convert_flow_name(flow_name)
         mod = __import__(flow_module, fromlist=[

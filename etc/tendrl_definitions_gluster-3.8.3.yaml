@@ -1,0 +1,276 @@
+---
+tendrl_schema_version: 0.3
+
+namespace.tendrl.gluster_integration:
+  object_details:
+    Tendrl_context:
+      enabled: True
+      attrs:
+        cluster_id:
+          type: String
+          help: "Tendrl managed/generated cluster id for the sds being managed by Tendrl"
+        sds_name:
+          type: String
+          help: "gluster"
+        sds_version:
+          type: String
+          help: "3.8.3"
+    Volume:
+      enabled: True
+      attrs:
+        volname:
+          type: String
+          help: "Name of gluster volume"
+        stripe_count:
+          type: Integer
+          help: "Stripe count of volume"
+        replica_count:
+          type: Integer
+          help: "Replica count of volume"
+        arbiter_count:
+          type: Integer
+          help: "Arbiter count of volume"
+        disperse_count:
+          type: Integer
+          help: "Disperse count of volume"
+        disperse_data_count:
+          type: Integer
+          help: "Disperse data count of volume"
+        redundancy_count:
+          type: Integer
+          help: "Redundancy count of volume"
+        transport:
+          type: String
+          help: "Transport type for volume"
+        brickdetails:
+          type: brick[]
+          help: "List of bricks for volume"
+        force:
+          type: Boolean
+          help: "If force execute the action"
+      value: /clusters/$cluster.id/volumes/$volume.id
+      atoms:
+        create:
+          enabled: True
+          inputs:
+            mandatory:
+              - Volume.volname
+              - Volume.brickdetails
+            optional:
+              - Volume.stripe_count
+              - Volume.replica_count
+              - Volume.arbiter_count
+              - Volume.disperse_count
+              - Volume.disperse_data_count
+              - Volume.redundancy_count
+              - Volume.transport
+              - Volume.brickdetails
+              - Volume.force
+          name: "create_volume"
+          uuid: 242f6190-9b37-11e6-950d-a24fc0d9649c
+          run: tendrl.gluster_integration.objects.volume.atoms.create.Create
+          type: Create
+          post_run:
+            - tendrl.gluster_integration.objects.volume.atoms.start.Start
+          outputs:
+            - Volume.volname
+        delete:
+          enabled: True
+          inputs:
+            mandatory:
+              - Volume.volname
+          name: "delete_volume"
+          uuid: 538da518-9b38-11e6-9f33-a24fc0d9649c
+          run: tendrl.gluster_integration.objects.volume.atoms.delete.Delete
+          type: Delete
+          pre_run:
+            - tendrl.gluster_integration.objects.volume.atoms.stop.Stop
+        start:
+          enabled: True
+          inputs:
+            mandatory:
+              - Volume.volname
+          name: "start_volume"
+          uuid: 873bf2a2-9b38-11e6-9f33-a24fc0d9649c
+          run: tendrl.gluster_integration.objects.volume.atoms.start.Start
+          type: Action
+        stop:
+          enabled: True
+          inputs:
+            mandatory:
+              - Volume.volname
+          name: "stop_volume"
+          uuid: aa92dae0-9b38-11e6-9f33-a24fc0d9649c
+          run: tendrl.gluster_integration.objects.volume.atoms.stop.Stop
+          type: Action
+        add_brick:
+          enabled: True
+          inputs:
+            mandatory:
+              - Volume.volname
+              - Volume.brickdetails
+          name: "add_brick"
+          uuid: aa92dae0-9b38-11e6-9f33-a24fc0d9649d
+          run: tendrl.gluster_integration.objects.volume.atoms.add_brick.AddBrick
+          type: Action
+    brick:
+      enabled: True
+      attrs:
+        brickdetails:
+          type: String
+          help: "Details of the brick"
+        volname:
+          type: String
+          help: "Gluster volume name"
+    peer:
+      enabled: True
+      attrs:
+        hostname:
+          type: String
+          help: "FQDN name of the host"
+      atoms:
+        probe:
+          enabled: True
+          inputs:
+            mandatory:
+              - Peer.hostname
+          name: "peer_probe"
+          uuid: 84806420-9b43-11e6-9f33-a24fc0d9649c
+          run: tendrl.gluster_integration.objects.peer.atoms.probe.Probe"
+          type: Action
+        detach:
+          enabled: True
+          inputs:
+            mandatory:
+              - Peer.hostname
+          name: "detach"
+          uuid: ade307d2-9b43-11e6-9f33-a24fc0d9649c
+          run: tendrl.gluster_integration.objects.atoms.peer.detach.Detach
+          type: Action
+  flows:
+    CreateVolume:
+      atoms:
+        - tendrl.gluster_integration.objects.volume.atoms.create.Create
+      description: "Create Volume with bricks"
+      enabled: True
+      inputs:
+        mandatory:
+          - Volume.volname
+          - Volume.brickdetails
+        optional:
+          - stripe_count
+          - replica_count
+          - arbiter_count
+          - disperse_count
+          - disperse_data_count
+          - redundancy_count
+          - transport
+          - force
+      pre_run:
+        - tendrl.gluster_integration.objects.volume.atoms.validations.volume_not_exists
+      post_run:
+        - tendrl.gluster_integration.objects.volume.atoms.validations.volume_exists
+      run: tendrl.gluster_integration.flows.create_volume.CreateVolume
+      type: Create
+      uuid: 1951e821-7aa9-4a91-8183-e73bc8275b8e
+      version: 1
+    DeleteVolume:
+      atoms:
+        - tendrl.gluster_integration.objects.volume.atoms.delete.Delete
+      description: "Delete an existing volume"
+      enabled: True
+      inputs:
+        mandatory:
+          - Volume.volname
+      pre_run:
+        - tendrl.gluster_integration.objects.volume.atoms.validations.volume_exists
+      post_run:
+        - tendrl.gluster_integration.objects.volume.atoms.validations.volume_not_exists
+      run: tendrl.gluster_integration.flows.delete_volume.DeleteVolume
+      type: Delete
+      uuid: 91a8b656-903b-11e6-ae22-56b6b6499611
+      version: 1
+    StartVolume:
+      atoms:
+        - tendrl.gluster_integration.objects.volume.atoms.start.StartVolume
+      description: "Start a volume"
+      enabled: True
+      inputs:
+        mandatory:
+          - Volume.volname
+      pre_run:
+        - tendrl.gluster_integration.objects.volume.atoms.validations.volume_exists
+        - tendrl.gluster_integration.objects.volume.atoms.validations.volume_stopped
+      post_run:
+        - tendrl.gluster_integration.objects.volume.atoms.validations.volume_started
+      run: tendrl.gluster_integration.flows.start_volume.StartVolume
+      type: Start
+      uuid: e5429376-903c-11e6-ae22-56b6b6499611
+      version: 1
+    StopVolume:
+      atoms:
+        - tendrl.gluster_integration.objects.volume.atoms.stop.Stop
+      description: "Stop a volume"
+      enabled: True
+      inputs:
+        mandatory:
+          - Volume.volname
+      pre_run:
+        - tendrl.gluster_integration.objects.volume.atoms.validations.volume_exists
+        - tendrl.gluster_integration.objects.volume.atoms.validations.volume_started
+      post_run:
+        - tendrl.gluster_integration.objects.volume.atoms.validations.volume_stopped
+      run: tendrl.gluster_integration.flows.stop_volume.StopVolume
+      type: Stop
+      uuid: cc4661e2-9044-11e6-ae22-56b6b6499611
+      version: 1
+    AddBrick:
+      atoms:
+        - tendrl.gluster_integration.objects.volume.atoms.add_brick.AddBrick
+      description: "Add a brick to the volume"
+      enabled: True
+      inputs:
+        mandatory:
+          - Volume.volname
+          - Volume.brickdetails
+      pre_run:
+        - tendrl.gluster_integration.objects.volume.atoms.validations.volume_exists
+        - tendrl.gluster_integration.objects.volume.atoms.validations.valid_bricks
+      post_run:
+        - tendrl.gluster_integration.objects.volume.atoms.validations.bricks_exists
+      run: tendrl.gluster_integration.flows.add_volume_brick.AddVolumeBrick
+      type: AddBrick
+      uuid: c416a35e-9046-11e6-ae22-56b6b6499611
+      version: 1
+    PeerProbe:
+      atoms:
+        - tendrl.gluster_integration.objects.peer.atoms.probe.Probe
+      description: "Peer probes a new node"
+      enabled: True
+      inputs:
+        mandatory:
+          - Peer.hostname
+      pre_run:
+        - tendrl.gluster_integration.objects.peer.atoms.validations.valid_gluster_node
+      post_run:
+        - tendrl.gluster_integration.objects.peer.atoms.validations.valid_cluster_peer
+      run: tendrl.gluster_integration.flows.peer_probe.PeerProbe
+      type: PeerProbe
+      uuid: 73421b1e-943a-11e6-ae22-56b6b6499611
+      version: 1
+    PeerDetach:
+      atoms:
+        - tendrl.gluster_integration.objects.peer.atoms.detach.Detach
+      description: "Detaches a node from cluster"
+      enabled: True
+      inputs:
+        mandatory:
+          - Peer.hostname
+      pre_run:
+        - tendrl.gluster_integration.objects.peer.atoms.validations.valid_cluster_peer
+      post_run:
+        - tendrl.gluster_integration.objects.peer.atoms.validations.peer_not_in_cluster
+      run: tendrl.gluster_integration.flows.peer_detach.PeerDetach
+      type: PeerDetach
+      uuid: f57f6f20-9447-11e6-ae22-56b6b6499611
+      version: 1

@@ -46,6 +46,7 @@ class EtcdRPC(object):
                         break
                     except Exception as ex:
                         LOG.error(ex)
+            gevent.sleep(2)
 
     def run(self):
         self._acceptor()

@@ -3,7 +3,7 @@ Description=Tendrl Gluster Daemon to Manage gluster tasks
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/tendrl-gluster-bridge
+ExecStart=/usr/bin/tendrl-gluster-integration
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure

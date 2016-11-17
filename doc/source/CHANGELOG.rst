@@ -13,7 +13,7 @@ Added
 =====
 - Added the basic project infrastructure
 - Integrated the ci and code coverage tools
-- Added the unit test infrastraucture
+- Added the unit test infrastructure
 - Added the etcd communication infrastructure
 - Added the job execution framework
 - Support for import gluster cluster

@@ -1,8 +1,16 @@
-# Change Log
+###########
+Change Log
+###########
+
+
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
-### Added
+*************
+[Unreleased]
+*************
+
+Added
+=====
 - Added the basic project infrastructure
 - Integrated the ci and code coverage tools
 - Added the unit test infrastraucture
@@ -12,4 +20,4 @@ All notable changes to this project will be documented in this file.
 - Support for volume CRUD opereations
 - User documentation and README
 
-[Unreleased]: <<git hub tag for this release>>
+[Unreleased]: <<github tag for this release>>

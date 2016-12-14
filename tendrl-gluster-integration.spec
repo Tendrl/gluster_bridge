@@ -21,6 +21,7 @@ Requires: python-gevent
 Requires: python-greenlet
 Requires: pytz
 Requires: tendrl-common
+Requires: tendrl-node-agent
 Requires: systemd
 
 %description

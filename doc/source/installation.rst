@@ -6,7 +6,7 @@ Environment
 2. Install Etcd>=2.3.x && <3.x (https://github.com/coreos/etcd/releases/tag/v2.3.7)
 3. Install tendrl-node-agent using the document available at the url
    https://github.com/Tendrl/node_agent/blob/master/doc/source/installation.rst
-   tendrl-node-agent is the packae which is required on every storage node
+   tendrl-node-agent is the package which is required on every storage node
 
 ============
 Installation

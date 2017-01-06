@@ -20,9 +20,9 @@ namespace.tendrl.gluster_integration:
           - Volume.transport
           - Volume.force
       post_run:
-        - tendrl.gluster_integration.objects.volume.atoms.volume_exists
+        - tendrl.gluster_integration.objects.volume.atoms.named_volume_exists
       pre_run:
-        - tendrl.gluster_integration.objects.volume.atoms.volume_not_exists
+        - tendrl.gluster_integration.objects.volume.atoms.named_volume_not_exists
       run: tendrl.gluster_integration.flows.create_volume.CreateVolume
       type: Create
       uuid: 1951e821-7aa9-4a91-8183-e73bc8275b8e

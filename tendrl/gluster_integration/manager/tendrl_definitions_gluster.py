@@ -21,9 +21,9 @@ namespace.tendrl.gluster_integration:
           - Volume.transport
           - Volume.force
       post_run:
-        - tendrl.gluster_integration.objects.Volume.atoms.volume_exists
+        - tendrl.gluster_integration.objects.volume.atoms.named_volume_exists
       pre_run:
-        - tendrl.gluster_integration.objects.Volume.atoms.volume_not_exists
+        - tendrl.gluster_integration.objects.volume.atoms.named_volume_not_exists
       run: tendrl.gluster_integration.flows.create_volume.CreateVolume
       type: Create
       uuid: 1951e821-7aa9-4a91-8183-e73bc8275b8e
@@ -57,6 +57,7 @@ namespace.tendrl.gluster_integration:
         - tendrl.gluster_integration.objects.Volume.atoms.volume_started
       pre_run:
         - tendrl.gluster_integration.objects.Volume.atoms.volume_exists
+        - tendrl.gluster_integration.objects.Volume.atoms.volume_stopped
       run: tendrl.gluster_integration.flows.start_volume.StartVolume
       type: Start
       uuid: 1951e821-7aa9-4a91-8183-e73bc8275b6e
@@ -73,6 +74,7 @@ namespace.tendrl.gluster_integration:
         - tendrl.gluster_integration.objects.Volume.atoms.volume_stopped
       pre_run:
         - tendrl.gluster_integration.objects.Volume.atoms.volume_exists
+        - tendrl.gluster_integration.objects.Volume.atoms.volume_started
       run: tendrl.gluster_integration.flows.stop_volume.StopVolume
       type: Stop
       uuid: 1951e821-7aa9-4a91-8183-e73bc8275b5e
@@ -93,7 +95,7 @@ namespace.tendrl.gluster_integration:
         update:
           help: "Last Peer update time"
           type: String
-      value: clusters/$Tendrl_context.cluster_id/Peers/$Peer.peer_uuid
+      value: /clusters/$Tendrl_context.cluster_id/Peers/$Peer.peer_uuid/
     Tendrl_context:
       attrs:
         cluster_id:
@@ -106,7 +108,7 @@ namespace.tendrl.gluster_integration:
           help: "3.8.3"
           type: String
       enabled: true
-      value: clusters/$Tendrl_context.cluster_id/Tendrl_context/
+      value: /clusters/$Tendrl_context.cluster_id/Tendrl_context/
     Volume:
       atoms:
         create:
@@ -282,6 +284,6 @@ namespace.tendrl.gluster_integration:
           help: "Failed no of files for rebalance"
           type: Integer
       enabled: true
-      value: clusters/$Tendrl_context.cluster_id/Volumes/$Volume.vol_id/
+      value: /clusters/$Tendrl_context.cluster_id/Volumes/$Volume.vol_id/
 tendrl_schema_version: 0.3
 """

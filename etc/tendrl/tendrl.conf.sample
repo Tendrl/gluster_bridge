@@ -11,7 +11,7 @@ log_cfg_path = /etc/tendrl/common_logging.yaml
 log_level = DEBUG
 
 
-[gluster_integration]
+[gluster-integration]
 # Path to log file
 log_level = DEBUG
 log_cfg_path = /etc/tendrl/logging.yaml

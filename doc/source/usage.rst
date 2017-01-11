@@ -1,7 +1,8 @@
 ========
 Usage
-========
+=====
 
-To use gluster_integration in a project::
+To use gluster-integration in a project::
 
-    import gluster_integration
+    import tendrl.gluster_integration
+

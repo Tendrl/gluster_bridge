@@ -1,5 +1,5 @@
 Style Commandments
-=======================
+==================
 
 - Tendrl's coding style is inspired by one of the largest python projects, OpenStack
   http://docs.openstack.org/developer/hacking/   (excluding the license and trademark sections)

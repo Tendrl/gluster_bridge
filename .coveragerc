@@ -1,6 +1,6 @@
 [run]
 branch = True
-source = tendrl.gluster_integration
+source = gluster_integration
 omit = tendrl/gluster_integration/tests/*
 
 [report]

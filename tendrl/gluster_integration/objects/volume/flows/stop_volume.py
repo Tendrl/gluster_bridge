@@ -1,6 +1,6 @@
 from tendrl.commons.flows.base_flow import BaseFlow
 
 
-class CreateVolume(BaseFlow):
+class StopVolume(BaseFlow):
     def run(self):
-        super(CreateVolume, self).run()
+        super(StopVolume, self).run()

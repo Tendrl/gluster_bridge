@@ -1,5 +1,5 @@
-from tendrl.common.etcdobj.etcdobj import EtcdObj
-from tendrl.common.etcdobj import fields
+from tendrl.commons.etcdobj.etcdobj import EtcdObj
+from tendrl.commons.etcdobj import fields
 
 
 class SyncObject(EtcdObj):

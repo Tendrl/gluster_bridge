@@ -5,7 +5,7 @@ BuildArch: noarch
 Summary: Module for Gluster Integration
 Source0: %{name}-%{version}.tar.gz
 License: LGPLv2+
-URL: https://github.com/Tendrl/gluster_integration
+URL: https://github.com/Tendrl/gluster-integration
 
 BuildRequires: systemd
 BuildRequires: python2-devel
@@ -40,11 +40,11 @@ rm -rf html/.{doctrees,buildinfo}
 
 %install
 %{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
-install -m  0755 --directory $RPM_BUILD_ROOT%{_var}/log/tendrl/gluster_integration
-install -m  0755  --directory $RPM_BUILD_ROOT%{_sysconfdir}/tendrl/gluster_integration
+install -m  0755 --directory $RPM_BUILD_ROOT%{_var}/log/tendrl/gluster-integration
+install -m  0755  --directory $RPM_BUILD_ROOT%{_sysconfdir}/tendrl/gluster-integration
 install -Dm 0644 tendrl-glusterd.service $RPM_BUILD_ROOT%{_unitdir}/tendrl-glusterd.service
-install -Dm 0644 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT%{_datadir}/tendrl/gluster_integration/tendrl.conf.sample
-install -Dm 0644 etc/logging.yaml.timedrotation.sample $RPM_BUILD_ROOT%{_sysconfdir}/tendrl/gluster_integration_logging.yaml
+install -Dm 0644 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT%{_datadir}/tendrl/gluster-integration/tendrl.conf.sample
+install -Dm 0644 etc/logging.yaml.timedrotation.sample $RPM_BUILD_ROOT%{_sysconfdir}/tendrl/gluster-integration_logging.yaml
 
 %post
 %systemd_post tendrl-glusterd.service
@@ -59,13 +59,13 @@ install -Dm 0644 etc/logging.yaml.timedrotation.sample $RPM_BUILD_ROOT%{_sysconf
 py.test -v tendrl/gluster_integration/tests || :
 
 %files -f INSTALLED_FILES
-%dir %{_var}/log/tendrl/gluster_integration
-%dir %{_sysconfdir}/tendrl/gluster_integration
+%dir %{_var}/log/tendrl/gluster-integration
+%dir %{_sysconfdir}/tendrl/gluster-integration
 %doc README.rst
 %license LICENSE
-%{_datarootdir}/tendrl/gluster_integration/tendrl.conf.sample
+%{_datarootdir}/tendrl/gluster-integration/tendrl.conf.sample
 %{_unitdir}/tendrl-glusterd.service
-%{_sysconfdir}/tendrl/gluster_integration_logging.yaml
+%{_sysconfdir}/tendrl/gluster-integration_logging.yaml
 
 
 %changelog

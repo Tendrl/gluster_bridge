@@ -43,7 +43,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'gluster_integration Release Notes'
+project = u'gluster-integration Release Notes'
 copyright = u'2016, Tendrl Project'
 
 # The version info for the project you're documenting, acts as replacement for

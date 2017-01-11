@@ -1,6 +1,6 @@
 ============================================
- gluster_integration Release Notes
-============================================
+ gluster-integration Release Notes
+=================================
 
 .. toctree::
    :maxdepth: 1

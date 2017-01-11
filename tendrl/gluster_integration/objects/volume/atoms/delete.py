@@ -1,7 +1,9 @@
 import subprocess
 
+from tendrl.commons.atoms.base_atom import BaseAtom
 
-class Delete(object):
+
+class Delete(BaseAtom):
     def run(self, parameters):
         cluster_id = parameters['Tendrl_context.cluster_id']
         vol_id = parameters['Volume.vol_id']

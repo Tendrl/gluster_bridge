@@ -28,20 +28,51 @@ class Test_manager(TestGluster_integration):
 
     def test_manager_with_volume(self):
         body = """[Global]\nop-version:40000 \
-        \n[Volumes]\nvolume1.id=1\nvolume1.type=abc" \
-        \nvolume1.name=brick1\nvolume1.status=active\nvolume1.brickcount=1"""
+        \n[Volumes]\nvolume1.id=1\nvolume1.type=abc \
+        \nvolume1.name=brick1\nvolume1.status=active\nvolume1.brickcount=1 \
+        \nvolume1.transport_type=tcp\nvolume1.snap_count=0 \
+        \nvolume1.stripe_count=1\nvolume1.replica_count=1 \
+        \nvolume1.subvol_count=1\nvolume1.arbiter_count=0 \
+        \nvolume1.disperse_count=0\nvolume1.redundancy_count=0 \
+        \nvolume1.quorum_status='not_applicable' \
+        \nvolume1.snapd_svc.online_status=Offline \
+        \nvolume1.snapd_svc.inited=True \
+        \nvolume1.rebalance.id=00000000-0000-0000-0000-000000000000 \
+        \nvolume1.rebalance.status=not_started \
+        \nvolume1.rebalance.failures=0\nvolume1.rebalance.skipped=0 \
+        \nvolume1.rebalance.lookedup=0\nvolume1.rebalance.files=0 \
+        \nvolume1.rebalance.data=0Bytes"""
         self.Initialize(body)
         self.managerobj._discovery_thread._run()
         self.Manager.Volume.assert_called_with(
-            brick_count='1', cluster_id=self.clusterid,
-            name='brick1', status='active',
-            vol_id='1', vol_type='abc"'
-            )
+            arbiter_count='0', brick_count='1',
+            cluster_id='e859cb15-2851-43d1-896c-1d9e845c0721',
+            disperse_count='0', name='brick1',
+            quorum_status="'not_applicable'", rebal_data='0Bytes',
+            rebal_failures='0', rebal_files='0',
+            rebal_id='00000000-0000-0000-0000-000000000000',
+            rebal_lookedup='0', rebal_skipped='0', rebal_status='not_started',
+            redundancy_count='0', replica_count='1', snap_count='0',
+            snapd_inited='True', snapd_status='Offline', status='active',
+            stripe_count='1', subvol_count='1', transport_type='tcp',
+            vol_id='1', vol_type='abc')
 
     def test_manager_with_brick(self):
         body = """[Global]\nop-version:40000 \
-        \n[Volumes]\nvolume1.id=1\nvolume1.type=abc" \
+        \n[Volumes]\nvolume1.id=1\nvolume1.type=abc \
         \nvolume1.name=brick1\nvolume1.status=active\nvolume1.brickcount=1 \
+        \nvolume1.transport_type=tcp\nvolume1.snap_count=0 \
+        \nvolume1.stripe_count=1\nvolume1.replica_count=1 \
+        \nvolume1.subvol_count=1\nvolume1.arbiter_count=0 \
+        \nvolume1.disperse_count=0\nvolume1.redundancy_count=0 \
+        \nvolume1.quorum_status='not_applicable' \
+        \nvolume1.snapd_svc.online_status=Offline \
+        \nvolume1.snapd_svc.inited=True \
+        \nvolume1.rebalance.id=00000000-0000-0000-0000-000000000000 \
+        \nvolume1.rebalance.status=not_started \
+        \nvolume1.rebalance.failures=0\nvolume1.rebalance.skipped=0 \
+        \nvolume1.rebalance.lookedup=0\nvolume1.rebalance.files=0 \
+        \nvolume1.rebalance.data=0Bytes \
         \nvolume1.brick1.path=/tmp\nvolume1.brick1.hostname=abc \
         \nvolume1.brick1.port=80\nvolume1.brick1.status=active \
         \nvolume1.brick1.filesystem_type=FAT12 \
@@ -73,30 +104,6 @@ class Test_manager(TestGluster_integration):
         self.Initialize(body)
         self.managerobj._discovery_thread._run()
         assert not self.Manager.Brick.called
-
-    def test_stop(self):
-        self.managerobj.stop()
-        self.managerobj._user_request_thread.stop.assert_called()
-
-    def test_recover(self):
-        self.managerobj._recover()
-        self.Manager.LOG.debug.assert_called()
-
-    def test_start(self):
-        self.managerobj.start()
-        self.managerobj._user_request_thread.start.assert_called()
-        self.managerobj.persister.start.assert_called()
-
-    def test_join(self):
-        self.Manager.gevent = MagicMock()
-        self.managerobj._discovery_thread = MagicMock()
-        self.managerobj.join()
-        self.managerobj._user_request_thread.join.assert_called()
-        self.managerobj.persister.join.assert_called()
-
-    def test_dump_stacks(self):
-        self.Manager.dump_stacks()
-        self.Manager.LOG.errorassert_called()
 
     def test_main(self):
         self.Manager.gevent = MagicMock()

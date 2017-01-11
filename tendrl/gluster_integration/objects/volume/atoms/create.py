@@ -1,7 +1,9 @@
 import subprocess
 
+from tendrl.commons.atoms.base_atom import BaseAtom
 
-class Create(object):
+
+class Create(BaseAtom):
     def run(self, parameters):
         cmd = ['gluster', 'volume', 'create', parameters.get('Volume.volname')]
         if parameters.get('Volume.stripe_count') is not None:

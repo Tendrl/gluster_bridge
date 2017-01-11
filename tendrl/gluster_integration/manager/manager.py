@@ -1,51 +1,45 @@
-import gc
-import greenlet
+import gevent.event
 import json
 import logging
+import re
 import signal
 import subprocess
 import sys
 import time
-import traceback
 
-import gevent.event
-import gevent.greenlet
+from tendrl.commons.config import TendrlConfig
+from tendrl.commons.log import setup_logging
+from tendrl.commons.manager.manager import Manager
+from tendrl.commons.manager.manager import SyncStateThread
 
-from tendrl.common import log
-
-from tendrl.gluster_integration.manager.rpc import EtcdThread
-from tendrl.gluster_integration.manager.tendrl_definitions_gluster import data as \
-    def_data
+from tendrl.gluster_integration import ini2json
+from tendrl.gluster_integration.manager.tendrl_definitions_gluster \
+    import data as def_data
 from tendrl.gluster_integration.manager import utils
-
-from tendrl.gluster_integration.persistence.persister import Persister
+from tendrl.gluster_integration.persistence.persister \
+    import GlusterIntegrationEtcdPersister
 from tendrl.gluster_integration.persistence.servers import Brick
 from tendrl.gluster_integration.persistence.servers import Peer
 from tendrl.gluster_integration.persistence.servers import Volume
+from tendrl.gluster_integration.persistence.servers import VolumeOptions
 
-from tendrl.gluster_integration import ini2json
-
-from tendrl.gluster_integration.config import TendrlConfig
 from tendrl.gluster_integration.persistence.tendrl_context import TendrlContext
 from tendrl.gluster_integration.persistence.tendrl_definitions import \
     TendrlDefinitions
 
-config = TendrlConfig()
+config = TendrlConfig("gluster-integration", "/etc/tendrl/tendrl.conf")
 
 LOG = logging.getLogger(__name__)
 
 
-class TopLevelEvents(gevent.greenlet.Greenlet):
+class GlusterIntegrationSyncStateThread(SyncStateThread):
 
     def __init__(self, manager, cluster_id):
-        super(TopLevelEvents, self).__init__()
+        super(GlusterIntegrationSyncStateThread, self).__init__(manager)
 
         self._manager = manager
         self._complete = gevent.event.Event()
         self.cluster_id = cluster_id
-
-    def stop(self):
-        self._complete.set()
 
     def _run(self):
         LOG.info("%s running" % self.__class__.__name__)
@@ -73,47 +67,26 @@ class TopLevelEvents(gevent.greenlet.Greenlet):
         LOG.info("%s complete" % self.__class__.__name__)
 
 
-class Manager(object):
-    """Manage a collection of ClusterMonitors.
-
-    Subscribe to ceph/cluster events, and create a ClusterMonitor
-
-    for any FSID we haven't seen before.
-
-    """
-
+class GlusterIntegrationManager(Manager):
     def __init__(self, cluster_id):
         self._complete = gevent.event.Event()
-
-        self._user_request_thread = EtcdThread(self)
-        self._discovery_thread = TopLevelEvents(self, cluster_id)
-        self.persister = Persister()
+        super(
+            GlusterIntegrationManager,
+            self
+        ).__init__(
+            "sds",
+            cluster_id,
+            None,
+            config,
+            GlusterIntegrationSyncStateThread(self, cluster_id),
+            GlusterIntegrationEtcdPersister(config),
+            "clusters/%s/definitions/data" % cluster_id
+        )
         self.register_to_cluster(cluster_id)
-
-    def stop(self):
-        LOG.info("%s stopping" % self.__class__.__name__)
-        self._user_request_thread.stop()
-        self._discovery_thread.stop()
-
-    def _recover(self):
-        LOG.debug("Recovered server")
-        pass
-
-    def start(self):
-        LOG.info("%s starting" % self.__class__.__name__)
-        self._user_request_thread.start()
-        self._discovery_thread.start()
-        self.persister.start()
-
-    def join(self):
-        LOG.info("%s joining" % self.__class__.__name__)
-        self._user_request_thread.join()
-        self._discovery_thread.join()
-        self.persister.join()
 
     def on_pull(self, raw_data, cluster_id):
         LOG.info("on_pull")
-        self.persister.update_sync_object(
+        self.persister_thread.update_sync_object(
             str(time.time()),
             cluster_id,
             json.dumps(raw_data)
@@ -124,7 +97,7 @@ class Manager(object):
             peers = raw_data['Peers']
             while True:
                 try:
-                    self.persister.update_peer(
+                    self.persister_thread.update_peer(
                         Peer(
                             updated=str(time.time()),
                             cluster_id=cluster_id,
@@ -146,23 +119,87 @@ class Manager(object):
             volumes = raw_data['Volumes']
             while True:
                 try:
-                    self.persister.update_volume(
+                    self.persister_thread.update_volume(
                         Volume(
                             cluster_id=cluster_id,
-                            vol_id=volumes['volume%s.id' % index],
-                            vol_type=volumes['volume%s.type' % index],
-                            name=volumes['volume%s.name' % index],
-                            status=volumes['volume%s.status' % index],
-                            brick_count=volumes['volume%s.brickcount' % index])
+                            vol_id=volumes[
+                                'volume%s.id' % index
+                            ],
+                            vol_type=volumes[
+                                'volume%s.type' % index
+                            ],
+                            name=volumes[
+                                'volume%s.name' % index
+                            ],
+                            transport_type=volumes[
+                                'volume%s.transport_type' % index
+                            ],
+                            status=volumes[
+                                'volume%s.status' % index
+                            ],
+                            brick_count=volumes[
+                                'volume%s.brickcount' % index
+                            ],
+                            snap_count=volumes[
+                                'volume%s.snap_count' % index
+                            ],
+                            stripe_count=volumes[
+                                'volume%s.stripe_count' % index
+                            ],
+                            replica_count=volumes[
+                                'volume%s.replica_count' % index
+                            ],
+                            subvol_count=volumes[
+                                'volume%s.subvol_count' % index
+                            ],
+                            arbiter_count=volumes[
+                                'volume%s.arbiter_count' % index
+                            ],
+                            disperse_count=volumes[
+                                'volume%s.disperse_count' % index
+                            ],
+                            redundancy_count=volumes[
+                                'volume%s.redundancy_count' % index
+                            ],
+                            quorum_status=volumes[
+                                'volume%s.quorum_status' % index
+                            ],
+                            snapd_status=volumes[
+                                'volume%s.snapd_svc.online_status' % index
+                            ],
+                            snapd_inited=volumes[
+                                'volume%s.snapd_svc.inited' % index
+                            ],
+                            rebal_id=volumes[
+                                'volume%s.rebalance.id' % index
+                            ],
+                            rebal_status=volumes[
+                                'volume%s.rebalance.status' % index
+                            ],
+                            rebal_failures=volumes[
+                                'volume%s.rebalance.failures' % index
+                            ],
+                            rebal_skipped=volumes[
+                                'volume%s.rebalance.skipped' % index
+                            ],
+                            rebal_lookedup=volumes[
+                                'volume%s.rebalance.lookedup' % index
+                            ],
+                            rebal_files=volumes[
+                                'volume%s.rebalance.files' % index
+                            ],
+                            rebal_data=volumes[
+                                'volume%s.rebalance.data' % index
+                            ],
+                        )
                     )
                     LOG.info("on_pull, Updating Volume %s" %
                              volumes['volume%s.id' % index])
-
                     b_index = 1
                     # populate brick data for this volume
                     while True:
                         try:
-                            self.persister.update_brick(
+                            self.persister_thread.update_brick(
                                 Brick(
                                     cluster_id=cluster_id,
                                     vol_id=volumes['volume%s.id' % index],
@@ -200,9 +237,30 @@ class Manager(object):
                     index += 1
                 except KeyError:
                     break
+            # poplate the volume options
+            reg_ex = re.compile("^volume[0-9]+.options+")
+            options = {}
+            for key in volumes.keys():
+                if reg_ex.match(key):
+                    options[key] = volumes[key]
+            for key in options.keys():
+                volname = key.split('.')[0]
+                vol_id = volumes['%s.id' % volname]
+                dict = {}
+                for k, v in options.items():
+                    if k.startswith('%s.options' % volname):
+                        dict['.'.join(k.split(".")[2:])] = v
+                        options.pop(k, None)
+                self.persister.update_volume_options(
+                    VolumeOptions(
+                        cluster_id=cluster_id,
+                        vol_id=vol_id,
+                        Options=dict
+                    )
+                )
 
     def register_to_cluster(self, cluster_id):
-        self.persister.update_tendrl_context(
+        self.persister_thread.update_tendrl_context(
             TendrlContext(
                 updated=str(time.time()),
                 cluster_id=cluster_id,
@@ -211,7 +269,7 @@ class Manager(object):
             )
         )
 
-        self.persister.update_tendrl_definitions(
+        self.persister_thread.update_tendrl_definitions(
             TendrlDefinitions(
                 updated=str(time.time()),
                 data=def_data,
@@ -220,22 +278,10 @@ class Manager(object):
         )
 
 
-def dump_stacks():
-    """This is for use in debugging, especially using manhole
-
-    """
-    for ob in gc.get_objects():
-        if not isinstance(ob, greenlet.greenlet):
-            continue
-        if not ob:
-            continue
-        LOG.error(''.join(traceback.format_stack(ob.gr_frame)))
-
-
 def main():
-    log.setup_logging(
-        config.get('gluster_integration', 'log_cfg_path'),
-        config.get('gluster_integration', 'log_level')
+    setup_logging(
+        config.get('gluster-integration', 'log_cfg_path'),
+        config.get('gluster-integration', 'log_level')
     )
 
     if sys.argv:
@@ -244,7 +290,7 @@ def main():
                 cluster_id = sys.argv[2]
                 utils.set_tendrl_context(cluster_id)
 
-    m = Manager(utils.get_tendrl_context())
+    m = GlusterIntegrationManager(utils.get_tendrl_context())
     m.start()
 
     complete = gevent.event.Event()
@@ -258,3 +304,7 @@ def main():
 
     while not complete.is_set():
         complete.wait(timeout=1)
+
+
+if __name__ == "__main__":
+    main()

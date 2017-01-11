@@ -52,6 +52,14 @@ class Test_Volume(object):
         assert self.volume.render() == [
             {
                 'dir': False,
+                'name': 'arbiter_count',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'arbiter_count',
+                'value': None
+            },
+            {
+                'dir': False,
                 'name': 'brick_count',
                 'key': '/clusters/12345678-1234-5678-1234-567812345678/'
                        'Volumes/12345678-1234-5678-1234-567812345678/'
@@ -76,6 +84,14 @@ class Test_Volume(object):
             },
             {
                 'dir': False,
+                'name': 'disperse_count',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'disperse_count',
+                'value': None
+            },
+            {
+                'dir': False,
                 'name': 'name',
                 'key': '/clusters/12345678-1234-5678-1234-567812345678/'
                        'Volumes/12345678-1234-5678-1234-567812345678/'
@@ -84,11 +100,140 @@ class Test_Volume(object):
             },
             {
                 'dir': False,
+                'name': 'quorum_status',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'quorum_status',
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'rebal_data',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'rebal_data',
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'rebal_failures',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'rebal_failures',
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'rebal_files',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'rebal_files',
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'rebal_id',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'rebal_id',
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'rebal_lookedup',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'rebal_lookedup',
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'rebal_skipped',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'rebal_skipped',
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'rebal_status',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'rebal_status',
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'redundancy_count',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'redundancy_count',
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'replica_count',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'replica_count',
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'snap_count',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'snap_count',
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'snapd_inited',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'snapd_inited',
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'snapd_status',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'snapd_status',
+                'value': None
+            },
+            {
+                'dir': False,
                 'name': 'status',
                 'key': '/clusters/12345678-1234-5678-1234-567812345678/'
                        'Volumes/12345678-1234-5678-1234-567812345678/'
                        'status',
-                'value': None},
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'stripe_count',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'stripe_count',
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'subvol_count',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'subvol_count',
+                'value': None
+            },
+            {
+                'dir': False,
+                'name': 'transport_type',
+                'key': '/clusters/12345678-1234-5678-1234-567812345678/'
+                       'Volumes/12345678-1234-5678-1234-567812345678/'
+                       'transport_type',
+                'value': None
+            },
             {
                 'dir': False,
                 'name': 'vol_id',
@@ -104,7 +249,8 @@ class Test_Volume(object):
                        'Volumes/12345678-1234-5678-1234-567812345678/'
                        'vol_type',
                 'value': None
-            }]
+            }
+        ]
 
 
 class Test_Brick(object):

@@ -20,7 +20,7 @@ Requires: python-dateutil
 Requires: python-gevent
 Requires: python-greenlet
 Requires: pytz
-Requires: tendrl-common
+Requires: tendrl-commons
 Requires: systemd
 
 %description

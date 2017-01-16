@@ -75,7 +75,6 @@ class GlusterIntegrationManager(Manager):
         ).__init__(
             "sds",
             cluster_id,
-            None,
             config,
             GlusterIntegrationSyncStateThread(self, cluster_id),
             GlusterIntegrationEtcdPersister(config),
@@ -250,7 +249,7 @@ class GlusterIntegrationManager(Manager):
                     if k.startswith('%s.options' % volname):
                         dict['.'.join(k.split(".")[2:])] = v
                         options.pop(k, None)
-                self.persister.update_volume_options(
+                self.persister_thread.update_volume_options(
                     VolumeOptions(
                         cluster_id=cluster_id,
                         vol_id=vol_id,

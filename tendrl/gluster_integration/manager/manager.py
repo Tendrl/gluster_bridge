@@ -75,7 +75,6 @@ class GlusterIntegrationManager(Manager):
         ).__init__(
             "sds",
             cluster_id,
-            None,
             config,
             GlusterIntegrationSyncStateThread(self, cluster_id),
             GlusterIntegrationEtcdPersister(config),

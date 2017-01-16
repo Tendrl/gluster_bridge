@@ -26,6 +26,6 @@ class Delete(BaseAtom):
             ]
         )
         etcd_client = parameters['etcd_client']
-        vol_key = "clusters/%s/Volumes/%s/deleted" % (cluster_id, vol_id)
-        etcd_client.write(vol_key, "True")
+        vol_key = "clusters/%s/Volumes/%s" % (cluster_id, vol_id)
+        etcd_client.delete(vol_key, recursive=True)
         return True

@@ -6,6 +6,9 @@ namespace.tendrl.gluster_integration:
       atoms:
         - tendrl.gluster_integration.objects.Volume.atoms.create
       help: "Create Volume with bricks"
+      preferred_tags:
+        - "tendrl/integration/gluster"
+        - "gluster/server"
       enabled: true
       inputs:
         mandatory:
@@ -148,6 +151,9 @@ namespace.tendrl.gluster_integration:
           atoms:
             - tendrl.gluster_integration.objects.Volume.atoms.delete
           help: "Delete Volume"
+          preferred_tags:
+            - "tendrl/integration/gluster"
+            - "gluster/server"
           enabled: true
           inputs:
             mandatory:
@@ -165,6 +171,9 @@ namespace.tendrl.gluster_integration:
           atoms:
             - tendrl.gluster_integration.objects.Volume.atoms.start
           help: "Start Volume"
+          preferred_tags:
+            - "tendrl/integration/gluster"
+            - "gluster/server"
           enabled: true
           inputs:
             mandatory:
@@ -181,6 +190,9 @@ namespace.tendrl.gluster_integration:
           atoms:
             - tendrl.gluster_integration.objects.Volume.atoms.stop
           help: "Stop Volume"
+          preferred_tags:
+            - "tendrl/integration/gluster"
+            - "gluster/server"
           enabled: true
           inputs:
             mandatory:

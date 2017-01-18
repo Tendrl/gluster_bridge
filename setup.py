@@ -19,6 +19,7 @@ def extract_requirements(filename):
 
 install_requires = extract_requirements('requirements.txt')
 
+
 def read_module_contents():
     with open('tendrl/gluster_integration/__init__.py') as app_init:
         return app_init.read()

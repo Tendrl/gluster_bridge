@@ -1,5 +1,5 @@
 Name: tendrl-gluster-integration
-Version: 0.0.1
+Version: 1.1
 Release: 1%{?dist}
 BuildArch: noarch
 Summary: Module for Gluster Integration
@@ -20,7 +20,7 @@ Requires: python-dateutil
 Requires: python-gevent
 Requires: python-greenlet
 Requires: pytz
-Requires: tendrl-common
+Requires: tendrl-commons
 Requires: systemd
 
 %description

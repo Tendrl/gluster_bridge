@@ -6,7 +6,8 @@ import signal
 import subprocess
 import time
 
-from tendrl.commons.config import TendrlConfig
+from tendrl.commons.config import load_config
+from tendrl.commons.etcdobj import etcdobj
 from tendrl.commons.log import setup_logging
 from tendrl.commons.manager.manager import Manager
 from tendrl.commons.manager.manager import SyncStateThread
@@ -26,7 +27,10 @@ from tendrl.gluster_integration.persistence.tendrl_context import TendrlContext
 from tendrl.gluster_integration.persistence.tendrl_definitions import \
     TendrlDefinitions
 
-config = TendrlConfig("gluster-integration", "/etc/tendrl/tendrl.conf")
+config = load_config(
+    "gluster-integration",
+    "/etc/tendrl/gluster-integration/gluster-integration.conf.yaml"
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -69,16 +73,20 @@ class GlusterIntegrationSyncStateThread(SyncStateThread):
 class GlusterIntegrationManager(Manager):
     def __init__(self, cluster_id):
         self._complete = gevent.event.Event()
+        etcd_kwargs = {
+            'port': config['etcd_port'],
+            'host': config["etcd_connection"]
+        }
+        self.etcd_orm = etcdobj.Server(etcd_kwargs=etcd_kwargs)
         super(
             GlusterIntegrationManager,
             self
         ).__init__(
             "sds",
             cluster_id,
-            None,
             config,
             GlusterIntegrationSyncStateThread(self, cluster_id),
-            GlusterIntegrationEtcdPersister(config),
+            GlusterIntegrationEtcdPersister(self.etcd_orm),
             "clusters/%s/definitions/data" % cluster_id
         )
         self.register_to_cluster(cluster_id)
@@ -250,7 +258,7 @@ class GlusterIntegrationManager(Manager):
                     if k.startswith('%s.options' % volname):
                         dict['.'.join(k.split(".")[2:])] = v
                         options.pop(k, None)
-                self.persister.update_volume_options(
+                self.persister_thread.update_volume_options(
                     VolumeOptions(
                         cluster_id=cluster_id,
                         vol_id=vol_id,
@@ -279,8 +287,7 @@ class GlusterIntegrationManager(Manager):
 
 def main():
     setup_logging(
-        config.get('gluster-integration', 'log_cfg_path'),
-        config.get('gluster-integration', 'log_level')
+        config['log_cfg_path']
     )
 
     cluster_id = utils.get_tendrl_context()

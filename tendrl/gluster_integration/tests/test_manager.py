@@ -106,6 +106,10 @@ class Test_manager(TestGluster_integration):
 
     def test_main(self, monkeypatch):
         self.Manager.gevent = MagicMock()
+        self.Manager.utils = MagicMock()
+        self.Manager.utils.get_tendrl_context = MagicMock(
+            return_value='clusterid1'
+        )
         self.Manager.main()
         self.Manager.gevent.signal.assert_called()
 

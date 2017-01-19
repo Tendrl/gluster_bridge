@@ -43,8 +43,9 @@ rm -rf html/.{doctrees,buildinfo}
 install -m  0755 --directory $RPM_BUILD_ROOT%{_var}/log/tendrl/gluster-integration
 install -m  0755  --directory $RPM_BUILD_ROOT%{_sysconfdir}/tendrl/gluster-integration
 install -Dm 0644 tendrl-glusterd.service $RPM_BUILD_ROOT%{_unitdir}/tendrl-glusterd.service
-install -Dm 0644 etc/tendrl/tendrl.conf.sample $RPM_BUILD_ROOT%{_datadir}/tendrl/gluster-integration/tendrl.conf.sample
-install -Dm 0644 etc/logging.yaml.timedrotation.sample $RPM_BUILD_ROOT%{_sysconfdir}/tendrl/gluster-integration_logging.yaml
+install -Dm 0644 etc/tendrl/gluster-integration/gluster-integration.conf.yaml.sample $RPM_BUILD_ROOT%{_datadir}/tendrl/gluster-integration/gluster-integration.conf.yaml
+install -Dm 0644 etc/tendrl/gluster-integration/logging.yaml.timedrotation.sample $RPM_BUILD_ROOT%{_sysconfdir}/tendrl/gluster-integration_logging.yaml
+install -Dm 644 etc/tendrl/gluster-integration/*.sample $RPM_BUILD_ROOT%{_datadir}/tendrl/node-agent/
 
 %post
 %systemd_post tendrl-glusterd.service
@@ -63,7 +64,7 @@ py.test -v tendrl/gluster_integration/tests || :
 %dir %{_sysconfdir}/tendrl/gluster-integration
 %doc README.rst
 %license LICENSE
-%{_datarootdir}/tendrl/gluster-integration/tendrl.conf.sample
+%{_datarootdir}/tendrl/gluster-integration/gluster-integration.yaml
 %{_unitdir}/tendrl-glusterd.service
 %{_sysconfdir}/tendrl/gluster-integration_logging.yaml
 

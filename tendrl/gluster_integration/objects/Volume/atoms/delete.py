@@ -4,15 +4,15 @@ from tendrl.commons.atoms.base_atom import BaseAtom
 
 
 class Delete(BaseAtom):
-    def run(self, parameters):
-        cluster_id = parameters['Tendrl_context.cluster_id']
-        vol_id = parameters['Volume.vol_id']
+    def run(self):
+        cluster_id = self.parameters['Tendrl_context.cluster_id']
+        vol_id = self.parameters['Volume.vol_id']
         subprocess.call(
             [
                 'gluster',
                 'volume',
                 'stop',
-                parameters.get('Volume.volname'),
+                self.parameters.get('Volume.volname'),
                 '--mode=script'
             ]
         )
@@ -21,11 +21,11 @@ class Delete(BaseAtom):
                 'gluster',
                 'volume',
                 'delete',
-                parameters.get('Volume.volname'),
+                self.parameters.get('Volume.volname'),
                 '--mode=script'
             ]
         )
-        etcd_client = parameters['etcd_client']
+        etcd_client = self.parameters["etcd_orm"].client
         vol_key = "clusters/%s/Volumes/%s/deleted" % (cluster_id, vol_id)
         etcd_client.write(vol_key, "True")
         return True

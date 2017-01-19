@@ -4,13 +4,13 @@ from tendrl.commons.atoms.base_atom import BaseAtom
 
 
 class Start(BaseAtom):
-    def run(self, parameters):
+    def run(self):
         subprocess.call(
             [
                 'gluster',
                 'volume',
                 'start',
-                parameters.get('Volume.volname'),
+                self.parameters.get('Volume.volname'),
                 '--mode=script'
             ]
         )

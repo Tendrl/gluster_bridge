@@ -1,13 +1,12 @@
-import logging
-
 import gevent.event
 import signal
+
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 from tendrl.commons import manager as common_manager
 from tendrl.gluster_integration import sds_sync
 from tendrl.gluster_integration import central_store
-
-LOG = logging.getLogger(__name__)
 
 
 class GlusterIntegrationManager(common_manager.Manager):
@@ -38,7 +37,13 @@ def main():
     complete = gevent.event.Event()
 
     def shutdown():
-        LOG.info("Signal handler: stopping")
+        Event(
+            Message(
+                Message.priorities.INFO,
+                Message.publishers.GLUSTER_INTEGRATION,
+                {"message": "Signal handler: stopping"}
+            )
+        )
         complete.set()
 
     gevent.signal(signal.SIGTERM, shutdown)

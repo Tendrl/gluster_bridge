@@ -1,12 +1,12 @@
 import json
-import logging
 import os
 import subprocess
 
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
+
 from tendrl.commons.etcdobj import EtcdObj
 from tendrl.gluster_integration import objects
-
-LOG = logging.getLogger(__name__)
 
 
 class TendrlContext(objects.GlusterIntegrationBaseObject):
@@ -25,10 +25,16 @@ class TendrlContext(objects.GlusterIntegrationBaseObject):
         tendrl_context_path = "/etc/tendrl/gluster-integration/integration_id"
         with open(tendrl_context_path, 'wb+') as f:
             f.write(self.integration_id)
-            LOG.info("SET_LOCAL: "
-                     "tendrl_ns.gluster_integration.objects.TendrlContext.integration_id"
-                     "==%s" %
-                     self.integration_id)
+            Event(
+                Message(
+                    Message.priorities.INFO,
+                    Message.publishers.GLUSTER_INTEGRATION,
+                    {"message": "SET_LOCAL: tendrl_ns.gluster_integration."
+                                "objects.TendrlContext.integration_id==%s" %
+                                self.integration_id
+                     }
+                )
+            )
 
     def _get_local_integration_id(self):
         try:
@@ -37,10 +43,17 @@ class TendrlContext(objects.GlusterIntegrationBaseObject):
                 with open(tendrl_context_path) as f:
                     integration_id = f.read()
                     if integration_id:
-                        LOG.info(
-                            "GET_LOCAL: "
-                            "tendrl_ns.gluster_integration.objects.TendrlContext"
-                            ".integration_id==%s" % integration_id)
+                        Event(
+                            Message(
+                                Message.priorities.INFO,
+                                Message.publishers.GLUSTER_INTEGRATION,
+                                {"message": "GET_LOCAL: tendrl_ns."
+                                            "gluster_integration.objects."
+                                            "TendrlContext.integration_id==%s"
+                                            %integration_id
+                                 }
+                            )
+                        )
                         return integration_id
         except AttributeError:
             return None
@@ -55,7 +68,13 @@ class TendrlContext(objects.GlusterIntegrationBaseObject):
         )
         out, err = cmd.communicate()
         if err and 'command not found' in err:
-            LOG.info("gluster not installed on host")
+            Event(
+                Message(
+                    Message.priorities.INFO,
+                    Message.publishers.GLUSTER_INTEGRATION,
+                    {"message": "gluster not installed on host"}
+                )
+            )
             return None
         lines = out.split('\n')
         version = lines[0].split()[1]

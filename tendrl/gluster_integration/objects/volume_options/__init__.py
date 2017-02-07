@@ -1,9 +1,5 @@
-import logging
-
 from tendrl.commons.etcdobj import EtcdObj
 from tendrl.gluster_integration import objects
-
-LOG = logging.getLogger(__name__)
 
 
 class VolumeOptions(objects.GlusterIntegrationBaseObject):

@@ -26,12 +26,13 @@ class TendrlContext(objects.GlusterIntegrationBaseObject):
             f.write(self.integration_id)
             Event(
                 Message(
-                    Message.priorities.INFO,
-                    Message.publishers.GLUSTER_INTEGRATION,
-                    {"message": "SET_LOCAL: tendrl_ns.gluster_integration."
-                                "objects.TendrlContext.integration_id==%s" %
-                                self.integration_id
-                     }
+                    priority="info",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": "SET_LOCAL: "
+                                        "tendrl_ns.gluster_integration."
+                                        "objects.TendrlContext.integration_id="
+                                        "=%s" % self.integration_id
+                             }
                 )
             )
 
@@ -44,13 +45,14 @@ class TendrlContext(objects.GlusterIntegrationBaseObject):
                     if integration_id:
                         Event(
                             Message(
-                                Message.priorities.INFO,
-                                Message.publishers.GLUSTER_INTEGRATION,
-                                {"message": "GET_LOCAL: tendrl_ns."
-                                            "gluster_integration.objects."
-                                            "TendrlContext.integration_id==%s"
-                                            %integration_id
-                                 }
+                                priority="info",
+                                publisher=tendrl_ns.publisher_id,
+                                payload={"message": "GET_LOCAL: tendrl_ns."
+                                                    "gluster_integration."
+                                                    "objects.TendrlContext."
+                                                    "integration_id==%s"
+                                                    % integration_id
+                                         }
                             )
                         )
                         return integration_id
@@ -69,9 +71,9 @@ class TendrlContext(objects.GlusterIntegrationBaseObject):
         if err and 'command not found' in err:
             Event(
                 Message(
-                    Message.priorities.INFO,
-                    Message.publishers.GLUSTER_INTEGRATION,
-                    {"message": "gluster not installed on host"}
+                    priority="info",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": "gluster not installed on host"}
                 )
             )
             return None

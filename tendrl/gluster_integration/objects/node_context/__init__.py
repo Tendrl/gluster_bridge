@@ -37,11 +37,12 @@ class NodeContext(objects.GlusterIntegrationBaseObject):
             f.write(node_id)
             Event(
                 Message(
-                    Message.priorities.INFO,
-                    Message.publishers.GLUSTER_INTEGRATION,
-                    {"message": "SET_LOCAL: tendrl_ns.node_agent.objects."
-                                "NodeContext.node_id==%s" % node_id
-                     }
+                    priority="info",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": "SET_LOCAL: "
+                                        "tendrl_ns.node_agent.objects."
+                                        "NodeContext.node_id==%s" % node_id
+                             }
                 )
             )
         return node_id
@@ -55,12 +56,13 @@ class NodeContext(objects.GlusterIntegrationBaseObject):
                     if node_id:
                         Event(
                             Message(
-                                Message.priorities.INFO,
-                                Message.publishers.GLUSTER_INTEGRATION,
-                                {"message": "GET_LOCAL: tendrl_ns.node_agent."
-                                            "objects.NodeContext.node_id==%s"
-                                            % node_id
-                                 }
+                                priority="info",
+                                publisher=tendrl_ns.publisher_id,
+                                payload={"message": "GET_LOCAL: "
+                                                    "tendrl_ns.node_agent."
+                                                    "objects.NodeContext."
+                                                    "node_id==%s" % node_id
+                                         }
                             )
                         )
                         return node_id

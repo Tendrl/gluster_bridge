@@ -22,6 +22,7 @@ class GlusterIntegrationManager(common_manager.Manager):
 
 
 def main():
+    tendrl_ns.publisher_id = "gluster_integration"
     tendrl_ns.central_store_thread = central_store.GlusterIntegrationEtcdCentralStore()
     tendrl_ns.state_sync_thread = sds_sync.GlusterIntegrationSdsSyncStateThread()
 
@@ -39,9 +40,9 @@ def main():
     def shutdown():
         Event(
             Message(
-                Message.priorities.INFO,
-                Message.publishers.GLUSTER_INTEGRATION,
-                {"message": "Signal handler: stopping"}
+                priority="info",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": "Signal handler: stopping"}
             )
         )
         complete.set()

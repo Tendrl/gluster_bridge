@@ -25,9 +25,9 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
     def _run(self):
         Event(
             Message(
-                Message.priorities.INFO,
-                Message.publishers.GLUSTER_INTEGRATION,
-                {"message": "%s running" % self.__class__.__name__}
+                priority="info",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": "%s running" % self.__class__.__name__}
             )
         )
 
@@ -71,7 +71,8 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                     volumes = raw_data['Volumes']
                     while True:
                         try:
-                            tendrl_ns.volume = tendrl_ns.gluster_integration.objects.Volume(
+                            tendrl_ns.volume = \
+                                tendrl_ns.gluster_integration.objects.Volume(
                                 vol_id=volumes[
                                     'volume%s.id' % index
                                 ],
@@ -241,17 +242,17 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
             except Exception as ex:
                 Event(
                     Message(
-                        Message.priorities.ERROR,
-                        Message.publishers.GLUSTER_INTEGRATION,
-                        {"message": ex}
+                        priority="error",
+                        publisher=tendrl_ns.publisher_id,
+                        payload={"message": ex}
                     )
                 )
 
         Event(
             Message(
-                Message.priorities.INFO,
-                Message.publishers.GLUSTER_INTEGRATION,
-                {"message": "%s complete" % self.__class__.__name__}
+                priority="info",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": "%s complete" % self.__class__.__name__}
             )
         )
 

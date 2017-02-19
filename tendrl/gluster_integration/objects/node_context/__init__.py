@@ -1,7 +1,9 @@
-import logging
 import os
 import socket
 import uuid
+
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
 
 from tendrl.commons.etcdobj import EtcdObj
 from tendrl.commons.utils import cmd_utils
@@ -9,11 +11,7 @@ from tendrl.commons.utils import cmd_utils
 from tendrl.gluster_integration import objects
 
 
-LOG = logging.getLogger(__name__)
-
-
 class NodeContext(objects.GlusterIntegrationBaseObject):
-
     def __init__(self, machine_id=None, node_id=None, fqdn=None,
                  tags=None, status=None, *args, **kwargs):
         super(NodeContext, self).__init__(*args, **kwargs)
@@ -37,9 +35,16 @@ class NodeContext(objects.GlusterIntegrationBaseObject):
         local_node_context = "/etc/tendrl/node-agent/NodeContext"
         with open(local_node_context, 'wb+') as f:
             f.write(node_id)
-            LOG.info("SET_LOCAL: "
-                     "tendrl_ns.node_agent.objects.NodeContext.node_id==%s" %
-                     node_id)
+            Event(
+                Message(
+                    priority="info",
+                    publisher=tendrl_ns.publisher_id,
+                    payload={"message": "SET_LOCAL: "
+                                        "tendrl_ns.node_agent.objects."
+                                        "NodeContext.node_id==%s" % node_id
+                             }
+                )
+            )
         return node_id
 
     def _get_node_id(self):
@@ -49,9 +54,17 @@ class NodeContext(objects.GlusterIntegrationBaseObject):
                 with open(local_node_context) as f:
                     node_id = f.read()
                     if node_id:
-                        LOG.info(
-                            "GET_LOCAL: tendrl_ns.node_agent.objects.NodeContext"
-                            ".node_id==%s" % node_id)
+                        Event(
+                            Message(
+                                priority="info",
+                                publisher=tendrl_ns.publisher_id,
+                                payload={"message": "GET_LOCAL: "
+                                                    "tendrl_ns.node_agent."
+                                                    "objects.NodeContext."
+                                                    "node_id==%s" % node_id
+                                         }
+                            )
+                        )
                         return node_id
         except AttributeError:
             return None

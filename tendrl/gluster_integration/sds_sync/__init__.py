@@ -1,15 +1,15 @@
 import json
-import logging
 import re
 
 import etcd
 import gevent
 import subprocess
 
+from tendrl.commons.event import Event
+from tendrl.commons.message import Message
+
 from tendrl.commons import sds_sync
 from tendrl.gluster_integration import ini2json
-
-LOG = logging.getLogger(__name__)
 
 
 class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
@@ -19,7 +19,13 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
         self._complete = gevent.event.Event()
 
     def _run(self):
-        LOG.info("%s running" % self.__class__.__name__)
+        Event(
+            Message(
+                priority="info",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": "%s running" % self.__class__.__name__}
+            )
+        )
 
         while not self._complete.is_set():
             try:
@@ -61,7 +67,8 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                     volumes = raw_data['Volumes']
                     while True:
                         try:
-                            tendrl_ns.volume = tendrl_ns.gluster_integration.objects.Volume(
+                            tendrl_ns.volume = \
+                                tendrl_ns.gluster_integration.objects.Volume(
                                 vol_id=volumes[
                                     'volume%s.id' % index
                                 ],
@@ -187,7 +194,19 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                             )
                         tendrl_ns.vol_options.save()
             except Exception as ex:
-                LOG.error(ex)
+                Event(
+                    Message(
+                        priority="error",
+                        publisher=tendrl_ns.publisher_id,
+                        payload={"message": ex}
+                    )
+                )
 
-        LOG.info("%s complete" % self.__class__.__name__)
+        Event(
+            Message(
+                priority="info",
+                publisher=tendrl_ns.publisher_id,
+                payload={"message": "%s complete" % self.__class__.__name__}
+            )
+        )
 

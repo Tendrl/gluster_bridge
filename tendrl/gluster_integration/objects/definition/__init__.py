@@ -29,18 +29,20 @@ class Definition(objects.BaseObject):
         raw_obj = self._get_parsed_defs()[raw_ns]['objects'][obj_name]
         for atom_name, atom in raw_obj.get('atoms', {}).iteritems():
             atom_mod = atom['run'].split(".atoms.")[-1].split(".")[0]
+            atom_cls_name = atom['run'].split(".atoms.")[-1].split(".")[1]
             atom_fqdn = "%s.objects.%s.atoms.%s" % (namespace,
                                                     obj_name.lower(),
                                                     atom_mod)
-            atom_cls = getattr(importlib.import_module(atom_fqdn), atom_name)
+            atom_cls = getattr(importlib.import_module(atom_fqdn), atom_cls_name)
             tendrl_ns.add_atom(obj_name, atom_name, atom_cls)
 
         for flow_name, flow in raw_obj.get('flows', {}).iteritems():
             flow_mod = flow['run'].split(".flows.")[-1].split(".")[0]
+            flow_cls_name = flow['run'].split(".flows.")[-1].split(".")[0]
             flow_fqdn = "%s.objects.%s.flows.%s" % (namespace,
                                                     obj_name.lower(),
                                                     flow_mod)
-            flow_cls = getattr(importlib.import_module(flow_fqdn), flow_name)
+            flow_cls = getattr(importlib.import_module(flow_fqdn), flow_cls_name)
             tendrl_ns.add_obj_flow(obj_name, flow_name, flow_cls)
 
         return ns.Namespace(attrs=raw_obj['attrs'],

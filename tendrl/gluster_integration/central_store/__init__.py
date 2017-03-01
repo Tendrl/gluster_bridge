@@ -44,3 +44,6 @@ class GlusterIntegrationEtcdCentralStore(central_store.EtcdCentralStore):
 
     def save_utilization(self, utilization):
         tendrl_ns.etcd_orm.save(utilization)
+
+    def save_job(self, job):
+        tendrl_ns.etcd_orm.save(job)

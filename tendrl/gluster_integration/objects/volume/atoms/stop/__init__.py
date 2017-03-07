@@ -20,7 +20,7 @@ class Stop(objects.GlusterIntegrationBaseAtom):
                     "message": "Stopping the volume %s" %
                     self.parameters['Volume.volname']
                 },
-                request_id=self.parameters["request_id"],
+                job_id=self.parameters["job_id"],
                 flow_id=self.parameters["flow_id"],
                 cluster_id=tendrl_ns.tendrl_context.integration_id,
             )
@@ -43,7 +43,7 @@ class Stop(objects.GlusterIntegrationBaseAtom):
                     "message": "Successfully stopped the volume %s" %
                     self.parameters['Volume.volname']
                 },
-                request_id=self.parameters["request_id"],
+                job_id=self.parameters["job_id"],
                 flow_id=self.parameters["flow_id"],
                 cluster_id=tendrl_ns.tendrl_context.integration_id,
             )

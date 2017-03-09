@@ -1,6 +1,4 @@
 etcd_port: 2379
 etcd_connection: 0.0.0.0
-tendrl_exe_file_prefix: $HOME/.tendrl/util_runner_
-log_cfg_path: /etc/tendrl/gluster-integration/gluster-integration_logging.yaml
-log_level: DEBUG
+tendrl_ansible_exec_file: $HOME/.tendrl/util_runner_
 logging_socket_path: /var/run/tendrl/message.sock

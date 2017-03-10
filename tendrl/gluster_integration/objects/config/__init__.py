@@ -2,9 +2,9 @@ from tendrl.commons.etcdobj import EtcdObj
 from tendrl.commons import config as cmn_config
 
 
-from tendrl.gluster_integration import objects
+from tendrl.commons import objects
 
-class Config(objects.GlusterIntegrationBaseObject):
+class Config(objects.BaseObject):
     def __init__(self, config=None, *args, **kwargs):
         super(Config, self).__init__(*args, **kwargs)
 

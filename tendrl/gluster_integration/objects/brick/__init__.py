@@ -1,12 +1,12 @@
 import logging
 
 from tendrl.commons.etcdobj import EtcdObj
-from tendrl.gluster_integration import objects
+from tendrl.commons import objects
 
 LOG = logging.getLogger(__name__)
 
 
-class Brick(objects.GlusterIntegrationBaseObject):
+class Brick(objects.BaseObject):
     def __init__(
         self,
         vol_id=None,
@@ -40,7 +40,7 @@ class _Brick(EtcdObj):
 
     def render(self):
         self.__name__ = self.__name__ % (
-            tendrl_ns.tendrl_context.integration_id,
+            NS.tendrl_context.integration_id,
             self.vol_id,
             self.path.replace("/", "_")
         )

@@ -1,8 +1,8 @@
 from tendrl.commons.etcdobj import EtcdObj
-from tendrl.gluster_integration import objects
+from tendrl.commons import objects
 
 
-class GlobalDetails(objects.GlusterIntegrationBaseObject):
+class GlobalDetails(objects.BaseObject):
     def __init__(self, status=None, *args, **kwargs):
         super(GlobalDetails, self).__init__(*args, **kwargs)
 
@@ -17,5 +17,5 @@ class _GlobalDetails(EtcdObj):
 
     def render(self):
         self.__name__ = self.__name__ %\
-            tendrl_ns.tendrl_context.integration_id
+            NS.tendrl_context.integration_id
         return super(_GlobalDetails, self).render()

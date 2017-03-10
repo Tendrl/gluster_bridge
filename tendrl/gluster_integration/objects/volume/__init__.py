@@ -1,12 +1,12 @@
 import logging
 
 from tendrl.commons.etcdobj import EtcdObj
-from tendrl.gluster_integration import objects
+from tendrl.commons import objects
 
 LOG = logging.getLogger(__name__)
 
 
-class Volume(objects.GlusterIntegrationBaseObject):
+class Volume(objects.BaseObject):
     def __init__(
         self,
         vol_id=None,
@@ -78,5 +78,5 @@ class _Volume(EtcdObj):
     _tendrl_cls = Volume
 
     def render(self):
-        self.__name__ = self.__name__ % (tendrl_ns.tendrl_context.integration_id, self.vol_id)
+        self.__name__ = self.__name__ % (NS.tendrl_context.integration_id, self.vol_id)
         return super(_Volume, self).render()

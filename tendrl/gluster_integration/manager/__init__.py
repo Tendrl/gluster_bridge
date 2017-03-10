@@ -3,6 +3,8 @@ import logging
 import gevent.event
 import signal
 
+from tendrl import gluster_integration
+from tendrl.commons import TendrlNS
 from tendrl.commons import manager as common_manager
 from tendrl.gluster_integration import sds_sync
 from tendrl.gluster_integration import central_store
@@ -17,20 +19,25 @@ class GlusterIntegrationManager(common_manager.Manager):
             GlusterIntegrationManager,
             self
         ).__init__(
-            tendrl_ns.state_sync_thread,
-            tendrl_ns.central_store_thread
+            NS.state_sync_thread,
+            NS.central_store_thread
         )
 
 
 def main():
-    tendrl_ns.central_store_thread = central_store.GlusterIntegrationEtcdCentralStore()
-    tendrl_ns.state_sync_thread = sds_sync.GlusterIntegrationSdsSyncStateThread()
+    gluster_integration.GlusterIntegrationNS()
+    TendrlNS()
 
-    tendrl_ns.node_context.save()
-    tendrl_ns.tendrl_context.save()
-    tendrl_ns.definitions.save()
-    tendrl_ns.config.save()
-    tendrl_ns.publisher_id = "gluster_integration"
+    NS.type = "sds"
+
+    NS.central_store_thread = central_store.GlusterIntegrationEtcdCentralStore()
+    NS.state_sync_thread = sds_sync.GlusterIntegrationSdsSyncStateThread()
+
+    NS.node_context.save()
+    NS.tendrl_context.save()
+    NS.gluster_integration.definitions.save()
+    NS.gluster_integration.config.save()
+    NS.publisher_id = "gluster_integration"
 
     m = GlusterIntegrationManager()
     m.start()

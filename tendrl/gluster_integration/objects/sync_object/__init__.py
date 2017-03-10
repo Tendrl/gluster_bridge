@@ -1,12 +1,12 @@
 import logging
 
 from tendrl.commons.etcdobj import EtcdObj
-from tendrl.gluster_integration import objects
+from tendrl.commons import objects
 
 LOG = logging.getLogger(__name__)
 
 
-class SyncObject(objects.GlusterIntegrationBaseObject):
+class SyncObject(objects.BaseObject):
     def __init__(
         self,
         data=None,
@@ -27,5 +27,5 @@ class _SyncObject(EtcdObj):
     _tendrl_cls = SyncObject
 
     def render(self):
-        self.__name__ = self.__name__ % (tendrl_ns.tendrl_context.integration_id)
+        self.__name__ = self.__name__ % (NS.tendrl_context.integration_id)
         return super(_SyncObject, self).render()

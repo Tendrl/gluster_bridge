@@ -2,11 +2,11 @@ import etcd
 
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
-from tendrl.gluster_integration import objects
+from tendrl.commons import objects
 from tendrl.gluster_integration.objects.volume import Volume
 
 
-class VolumeStopped(objects.GlusterIntegrationBaseAtom):
+class VolumeStopped(objects.BaseAtom):
     obj = Volume
     def __init__(self, *args, **kwargs):
         super(VolumeStopped, self).__init__(*args, **kwargs)
@@ -15,14 +15,14 @@ class VolumeStopped(objects.GlusterIntegrationBaseAtom):
         Event(
             Message(
                 priority="info",
-                publisher=tendrl_ns.publisher_id,
+                publisher=NS.publisher_id,
                 payload={
                     "message": "Checking if volume %s stopped" %
                     self.parameters['Volume.volname']
                 },
-                request_id=self.parameters["request_id"],
+                job_id=self.parameters["job_id"],
                 flow_id=self.parameters["flow_id"],
-                cluster_id=tendrl_ns.tendrl_context.integration_id,
+                cluster_id=NS.tendrl_context.integration_id,
             )
         )
         try:
@@ -33,14 +33,14 @@ class VolumeStopped(objects.GlusterIntegrationBaseAtom):
             Event(
                 Message(
                     priority="info",
-                    publisher=tendrl_ns.publisher_id,
+                    publisher=NS.publisher_id,
                     payload={
                         "message": "Volume %s does not exist" %
                         self.parameters['Volume.volname']
                     },
-                    request_id=self.parameters["request_id"],
+                    job_id=self.parameters["job_id"],
                     flow_id=self.parameters["flow_id"],
-                    cluster_id=tendrl_ns.tendrl_context.integration_id,
+                    cluster_id=NS.tendrl_context.integration_id,
                 )
             )
             return False
@@ -49,14 +49,14 @@ class VolumeStopped(objects.GlusterIntegrationBaseAtom):
             Event(
                 Message(
                     priority="info",
-                    publisher=tendrl_ns.publisher_id,
+                    publisher=NS.publisher_id,
                     payload={
                         "message": "Volume %s is stopped" %
                         self.parameters['Volume.volname']
                     },
-                    request_id=self.parameters["request_id"],
+                    job_id=self.parameters["job_id"],
                     flow_id=self.parameters["flow_id"],
-                    cluster_id=tendrl_ns.tendrl_context.integration_id,
+                    cluster_id=NS.tendrl_context.integration_id,
                 )
             )
             return True
@@ -64,14 +64,14 @@ class VolumeStopped(objects.GlusterIntegrationBaseAtom):
             Event(
                 Message(
                     priority="info",
-                    publisher=tendrl_ns.publisher_id,
+                    publisher=NS.publisher_id,
                     payload={
                         "message": "Volume %s is already started" %
                         self.parameters['Volume.volname']
                     },
-                    request_id=self.parameters["request_id"],
+                    job_id=self.parameters["job_id"],
                     flow_id=self.parameters["flow_id"],
-                    cluster_id=tendrl_ns.tendrl_context.integration_id,
+                    cluster_id=NS.tendrl_context.integration_id,
                 )
             )
             return False

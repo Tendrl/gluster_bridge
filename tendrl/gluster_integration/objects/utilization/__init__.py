@@ -1,8 +1,8 @@
 from tendrl.commons.etcdobj import EtcdObj
-from tendrl.gluster_integration import objects
+from tendrl.commons import objects
 
 
-class Utilization(objects.GlusterIntegrationBaseObject):
+class Utilization(objects.BaseObject):
     def __init__(self, raw_capacity=None, usable_capacity=None,
                  used_capacity=None, pcnt_used=None, *args, **kwargs):
         super(Utilization, self).__init__(*args, **kwargs)
@@ -22,5 +22,5 @@ class _Utilization(EtcdObj):
     _tendrl_cls = Utilization
 
     def render(self):
-        self.__name__ = self.__name__ %tendrl_ns.tendrl_context.integration_id
+        self.__name__ = self.__name__ %NS.tendrl_context.integration_id
         return super(_Utilization, self).render()

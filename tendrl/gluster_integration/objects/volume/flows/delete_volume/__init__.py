@@ -1,10 +1,10 @@
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
-from tendrl.gluster_integration import flows
+from tendrl.commons import flows
 from tendrl.gluster_integration.objects.volume import Volume
 
 
-class DeleteVolume(flows.GlusterIntegrationBaseFlow):
+class DeleteVolume(flows.BaseFlow):
     obj = Volume
     def __init__(self, *args, **kwargs):
         super(DeleteVolume, self).__init__(*args, **kwargs)
@@ -13,14 +13,14 @@ class DeleteVolume(flows.GlusterIntegrationBaseFlow):
         Event(
             Message(
                 priority="info",
-                publisher=tendrl_ns.publisher_id,
+                publisher=NS.publisher_id,
                 payload={
                     "message": "Starting deletion flow for volume %s" %
                     self.parameters['Volume.volname']
                 },
-                request_id=self.request_id,
-                flow_id=self.uuid,
-                cluster_id=tendrl_ns.tendrl_context.integration_id,
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                cluster_id=NS.tendrl_context.integration_id,
             )
         )
 

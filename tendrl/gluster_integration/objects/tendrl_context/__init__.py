@@ -4,12 +4,12 @@ import os
 import subprocess
 
 from tendrl.commons.etcdobj import EtcdObj
-from tendrl.gluster_integration import objects
+from tendrl.commons import objects
 
 LOG = logging.getLogger(__name__)
 
 
-class TendrlContext(objects.GlusterIntegrationBaseObject):
+class TendrlContext(objects.BaseObject):
     def __init__(self, integration_id=None, *args, **kwargs):
         super(TendrlContext, self).__init__(*args, **kwargs)
 
@@ -26,7 +26,7 @@ class TendrlContext(objects.GlusterIntegrationBaseObject):
         with open(tendrl_context_path, 'wb+') as f:
             f.write(self.integration_id)
             LOG.info("SET_LOCAL: "
-                     "tendrl_ns.gluster_integration.objects.TendrlContext.integration_id"
+                     "NS.gluster_integration.objects.TendrlContext.integration_id"
                      "==%s" %
                      self.integration_id)
 
@@ -39,7 +39,7 @@ class TendrlContext(objects.GlusterIntegrationBaseObject):
                     if integration_id:
                         LOG.info(
                             "GET_LOCAL: "
-                            "tendrl_ns.gluster_integration.objects.TendrlContext"
+                            "NS.gluster_integration.objects.TendrlContext"
                             ".integration_id==%s" % integration_id)
                         return integration_id
         except AttributeError:

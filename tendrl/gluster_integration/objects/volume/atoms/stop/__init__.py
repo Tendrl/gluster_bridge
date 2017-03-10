@@ -2,11 +2,11 @@ import subprocess
 
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
-from tendrl.gluster_integration import objects
+from tendrl.commons import objects
 from tendrl.gluster_integration.objects.volume import Volume
 
 
-class Stop(objects.GlusterIntegrationBaseAtom):
+class Stop(objects.BaseAtom):
     obj = Volume
     def __init__(self, *args, **kwargs):
         super(Stop, self).__init__(*args, **kwargs)
@@ -15,14 +15,14 @@ class Stop(objects.GlusterIntegrationBaseAtom):
         Event(
             Message(
                 priority="info",
-                publisher=tendrl_ns.publisher_id,
+                publisher=NS.publisher_id,
                 payload={
                     "message": "Stopping the volume %s" %
                     self.parameters['Volume.volname']
                 },
-                request_id=self.parameters["request_id"],
+                job_id=self.parameters["job_id"],
                 flow_id=self.parameters["flow_id"],
-                cluster_id=tendrl_ns.tendrl_context.integration_id,
+                cluster_id=NS.tendrl_context.integration_id,
             )
         )
 
@@ -38,14 +38,14 @@ class Stop(objects.GlusterIntegrationBaseAtom):
         Event(
             Message(
                 priority="info",
-                publisher=tendrl_ns.publisher_id,
+                publisher=NS.publisher_id,
                 payload={
                     "message": "Successfully stopped the volume %s" %
                     self.parameters['Volume.volname']
                 },
-                request_id=self.parameters["request_id"],
+                job_id=self.parameters["job_id"],
                 flow_id=self.parameters["flow_id"],
-                cluster_id=tendrl_ns.tendrl_context.integration_id,
+                cluster_id=NS.tendrl_context.integration_id,
             )
         )
 

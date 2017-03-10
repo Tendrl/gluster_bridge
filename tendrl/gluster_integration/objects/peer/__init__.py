@@ -1,12 +1,12 @@
 import logging
 
 from tendrl.commons.etcdobj import EtcdObj
-from tendrl.gluster_integration import objects
+from tendrl.commons import objects
 
 LOG = logging.getLogger(__name__)
 
 
-class Peer(objects.GlusterIntegrationBaseObject):
+class Peer(objects.BaseObject):
     def __init__(
         self,
         state=None,
@@ -31,5 +31,5 @@ class _Peer(EtcdObj):
     _tendrl_cls = Peer
 
     def render(self):
-        self.__name__ = self.__name__ % (tendrl_ns.tendrl_context.integration_id, self.peer_uuid)
+        self.__name__ = self.__name__ % (NS.tendrl_context.integration_id, self.peer_uuid)
         return super(_Peer, self).render()

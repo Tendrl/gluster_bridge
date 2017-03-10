@@ -40,8 +40,9 @@ enviroment which we have created during installation of *integration common*.
 
     $ cp etc/tendrl/gluster-integration/gluster-integration.conf.yaml.sample /etc/tendrl/gluster-integration/gluster-integration.conf.yaml
 
-4. Configure the etcd ip /etc/tendrl/gluster-integration/gluster-integration.conf.yaml by changing the following line ::
-    etcd_connection: < Specify etcd server ip here >
+4. Configure the etcd ip in (/etc/tendrl/gluster-integration/gluster-integration.conf.yaml) by changing the following line ::
+
+    etcd_connection: <Specify etcd server ip here>
 
 5. Run::
 

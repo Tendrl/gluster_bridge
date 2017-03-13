@@ -280,6 +280,28 @@ namespace.tendrl.gluster_integration:
           run: tendrl.gluster_integration.objects.Volume.atoms.volume_stopped.VolumeStopped
           type: Check
           uuid: 242f6190-9b37-11e6-950d-a24fc0d9656c
+        RebalanceNotRunning:
+          enabled: true
+          inputs:
+            mandatory:
+              - Volume.volname
+              - Volume.vol_id
+          name: rebalancenotrunning
+          run: tendrl.gluster_integration.objects.Volume.atoms.rebalance_not_running.RebalanceNotRunning
+          type: Check
+          uuid: 242f6190-9b37-11e6-950d-a24fc0d96588
+        StartRebalance:
+          enabled: true
+          inputs:
+            mandatory:
+              - Volume.volname
+              - Volume.vol_id
+            optional:
+              - Volume.fix_layout
+          name: start_rebalance
+          run: tendrl.gluster_integration.objects.Volume.atoms.start_rebalance.StartRebalance
+          type: Start
+          uuid: 242f6190-9b37-11e6-950d-a24fc0d96599
       flows:
         DeleteVolume:
           atoms:
@@ -329,6 +351,25 @@ namespace.tendrl.gluster_integration:
           run: tendrl.gluster_integration.objects.Volume.flows.stop_volume.StopVolume
           type: Stop
           uuid: 1951e821-7aa9-4a91-8183-e73bc8275b5e
+          version: 1
+        StartVolumeRebalance:
+          atoms:
+            - tendrl.gluster_integration.objects.Volume.atoms.start_rebalance.StartRebalance
+          help: "Start Volume Rebalance"
+          enabled: true
+          inputs:
+            mandatory:
+              - Volume.volname
+              - Volume.vol_id
+            optional:
+              - Volume.fix_layout
+          pre_run:
+            - tendrl.gluster_integration.objects.Volume.atoms.volume_exists.VolumeExists
+            - tendrl.gluster_integration.objects.Volume.atoms.volume_started.VolumeStarted
+            - tendrl.gluster_integration.objects.Volume.atoms.rebalance_not_running.RebalanceNotRunning
+          run: tendrl.gluster_integration.objects.Volume.flows.start_volume_rebalance.StartVolumeRebalance
+          type: Start
+          uuid: 1951e821-7aa9-4a91-8183-e73bc8275b7d
           version: 1
       attrs:
         arbiter_count:

@@ -23,9 +23,13 @@ from tendrl.gluster_integration.objects.volume_options import VolumeOptions
 from tendrl.gluster_integration.objects.volume.atoms.create import Create
 from tendrl.gluster_integration.objects.volume.atoms.delete import Delete
 from tendrl.gluster_integration.objects.volume.atoms.start import Start
+from tendrl.gluster_integration.objects.volume.atoms.start_rebalance \
+    import StartRebalance
 from tendrl.gluster_integration.objects.volume.atoms.stop import Stop
 from tendrl.gluster_integration.objects.volume.atoms.named_volume_not_exists \
     import NamedVolumeNotExists
+from tendrl.gluster_integration.objects.volume.atoms.rebalance_not_running \
+    import RebalanceNotRunning
 from tendrl.gluster_integration.objects.volume.atoms.volume_exists \
     import VolumeExists
 from tendrl.gluster_integration.objects.volume.atoms.volume_not_exists \
@@ -40,6 +44,8 @@ from tendrl.gluster_integration.objects.volume.flows.delete_volume \
     import DeleteVolume
 from tendrl.gluster_integration.objects.volume.flows.start_volume \
     import StartVolume
+from tendrl.gluster_integration.objects.volume.flows.start_volume_rebalance \
+    import StartVolumeRebalance
 from tendrl.gluster_integration.objects.volume.flows.stop_volume \
     import StopVolume
 

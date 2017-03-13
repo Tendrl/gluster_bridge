@@ -18,7 +18,7 @@ class NamedVolumeNotExists(objects.GlusterIntegrationBaseAtom):
                     "message": "Checking if volume %s doesnt exist" %
                     self.parameters['Volume.volname']
                 },
-                request_id=self.parameters["request_id"],
+                job_id=self.parameters["job_id"],
                 flow_id=self.parameters["flow_id"],
                 cluster_id=tendrl_ns.tendrl_context.integration_id,
             )
@@ -40,7 +40,7 @@ class NamedVolumeNotExists(objects.GlusterIntegrationBaseAtom):
                             "message": "Volume %s already exists" %
                             self.parameters['Volume.volname']
                         },
-                        request_id=self.parameters["request_id"],
+                        job_id=self.parameters["job_id"],
                         flow_id=self.parameters["flow_id"],
                         cluster_id=tendrl_ns.tendrl_context.integration_id,
                     )

@@ -20,7 +20,7 @@ class VolumeStarted(objects.GlusterIntegrationBaseAtom):
                     "message": "Checking if volume %s started" %
                     self.parameters['Volume.volname']
                 },
-                request_id=self.parameters["request_id"],
+                job_id=self.parameters["job_id"],
                 flow_id=self.parameters["flow_id"],
                 cluster_id=tendrl_ns.tendrl_context.integration_id,
             )
@@ -38,7 +38,7 @@ class VolumeStarted(objects.GlusterIntegrationBaseAtom):
                         "message": "Volume %s does not exist" %
                         self.parameters['Volume.volname']
                     },
-                    request_id=self.parameters["request_id"],
+                    job_id=self.parameters["job_id"],
                     flow_id=self.parameters["flow_id"],
                     cluster_id=tendrl_ns.tendrl_context.integration_id,
                 )
@@ -53,7 +53,7 @@ class VolumeStarted(objects.GlusterIntegrationBaseAtom):
                         "message": "Volume %s is started" %
                         self.parameters['Volume.volname']
                     },
-                    request_id=self.parameters["request_id"],
+                    job_id=self.parameters["job_id"],
                     flow_id=self.parameters["flow_id"],
                     cluster_id=tendrl_ns.tendrl_context.integration_id,
                 )
@@ -68,7 +68,7 @@ class VolumeStarted(objects.GlusterIntegrationBaseAtom):
                         "message": "Volume %s is already stopped" %
                         self.parameters['Volume.volname']
                     },
-                    request_id=self.parameters["request_id"],
+                    job_id=self.parameters["job_id"],
                     flow_id=self.parameters["flow_id"],
                     cluster_id=tendrl_ns.tendrl_context.integration_id,
                 )

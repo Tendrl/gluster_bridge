@@ -2,6 +2,7 @@ include LICENSE
 include AUTHORS
 include ChangeLog
 include tendrl-gluster-integration.service
+include gluster-integration.el6.service
 include version.py
 exclude .gitignore
 exclude .gitreview

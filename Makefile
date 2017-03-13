@@ -23,9 +23,11 @@ dist:
 
 srpm: dist
 	fedpkg --dist epel7 srpm
+	fedpkg --dist epel6 srpm
 
 rpm: dist
 	mock -r epel-7-x86_64 rebuild $(NAME)-$(VERSION)-$(RELEASE).el7.src.rpm --resultdir=. --define "dist .el7"
+	mock -r epel-6-x86_64 rebuild $(NAME)-$(VERSION)-$(RELEASE).el6.src.rpm --resultdir=. --define "dist .el6"
 
 gitversion:
 	# Set version and release to the latest values from Git

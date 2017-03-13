@@ -224,12 +224,42 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                         pcnt_used=(out_dict['used_capacity'] * 100 / out_dict['usable_capacity'])
                     ).save()
                     for item in out_dict['volume_summary']:
-                        tendrl_ns.gluster_integration.objects.Volume(
-                            name=item['volume_name'],
-                            usable_capacity=item['usable_capacity'],
-                            used_capacity=item['used_capacity'],
-                            pcnt_used=(item['used_capacity'] * 100 / item['usable_capacity'])
-                        ).save()
+                        volumes = tendrl_ns.etcd_orm.client.read(
+                            "clusters/%s/Volumes" % tendrl_ns.tendrl_context.integration_id
+                        )
+                        for child in volumes._children:
+                            volume = tendrl_ns.gluster_integration.objects.Volume(
+                                vol_id=child['key'].split('/')[-1]
+                            ).load()
+                            if volume.name == item['volume_name']:
+                                tendrl_ns.gluster_integration.objects.Volume(
+                                    vol_id=child['key'].split('/')[-1],
+                                    usable_capacity=str(item['usable_capacity']),
+                                    used_capacity=str(item['used_capacity']),
+                                    pcnt_used=str(item['used_capacity'] * 100 / item['usable_capacity']),
+                                    vol_type=volume.vol_type,
+                                    name=volume.name,
+                                    transport_type=volume.transport_type,
+                                    status=volume.status,
+                                    brick_count=volume.brick_count,
+                                    snap_count=volume.snap_count,
+                                    stripe_count=volume.stripe_count,
+                                    replica_count=volume.replica_count,
+                                    subvol_count=volume.subvol_count,
+                                    arbiter_count=volume.arbiter_count,
+                                    disperse_count=volume.disperse_count,
+                                    redundancy_count=volume.redundancy_count,
+                                    quorum_status=volume.quorum_status,
+                                    snapd_status=volume.snapd_status,
+                                    snapd_inited=volume.snapd_inited,
+                                    rebal_id=volume.rebal_id,
+                                    rebal_status=volume.rebal_status,
+                                    rebal_failures=volume.rebal_failures,
+                                    rebal_skipped=volume.rebal_skipped,
+                                    rebal_lookedup=volume.rebal_lookedup,
+                                    rebal_files=volume.rebal_files,
+                                    rebal_data=volume.rebal_data
+                                ).save()
 
             except Exception as ex:
                 LOG.error(ex)

@@ -79,7 +79,7 @@ namespace.tendrl.gluster_integration:
 
     Peer:
       enabled: true
-      objects:
+      attrs:
         hostname:
           help: "Gluster Peer hostname"
           type: String

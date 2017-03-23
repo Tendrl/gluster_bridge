@@ -101,7 +101,6 @@ setup(
     license="LGPL-2.1+",
     zip_safe=False,
     install_requires=[
-        "gstatus",
         "tendrl-commons",
         ],
     entry_points={

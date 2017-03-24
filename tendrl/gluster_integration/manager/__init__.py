@@ -46,6 +46,13 @@ def main():
         NS.tendrl_context.cluster_name = "gluster-%s" % _detected_cluster.detected_cluster_id
         NS.tendrl_context.sds_name = _detected_cluster.sds_pkg_name
         NS.tendrl_context.sds_version = _detected_cluster.sds_pkg_version
+        NS.tendrl.objects.ClusterTendrlContext(
+            integration_id=NS.tendrl_context.integration_id,
+            cluster_id=NS.tendrl_context.cluster_id,
+            cluster_name=NS.tendrl_context.cluster_name,
+            sds_name=NS.tendrl_context.sds_name,
+            sds_version=NS.tendrl_context.sds_version
+        ).save()
     except etcd.EtcdKeyNotFound:
         LOG.error(
             "Node %s is not part of any sds cluster" %

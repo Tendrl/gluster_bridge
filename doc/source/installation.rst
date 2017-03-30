@@ -22,15 +22,8 @@ Development version from the source
     $ mkvirtualenv common
     $ pip install .
 
-2. Create common logging config file::
+2. Install gluster-integration itself::
 
-    $ cp etc/samples/logging.yaml.timedrotation.sample /etc/tendrl/common_logging.yaml
-
-Note that there are other sample config files for logging shipped with the product
-and could be utilized for logging differently. For example there are config files
-bundeled for syslog and journald logging as well. These could be used similarly as above.
-
-3. Install gluster-integration itself::
     $ git clone https://github.com/Tendrl/gluster-integration.git
     $ cd gluster-integration
     $ workon gluster-integration
@@ -43,25 +36,16 @@ enviroment which we have created during installation of *integration common*.
 .. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.io/en/latest/
 .. _`python virtual enviroment`: https://virtualenv.pypa.io/en/stable/
 
-4. Create config file::
+3. Create config files::
 
-    $ cp etc/tendrl/tendrl.conf.sample /etc/tendrl/tendrl.conf
-    $ cp etc/logging.yaml.timedrotation.sample /etc/tendrl/gluster-integration_logging.yaml
+    $ cp etc/tendrl/gluster-integration/gluster-integration.conf.yaml.sample /etc/tendrl/gluster-integration/gluster-integration.conf.yaml
+    $ cp etc/tendrl/gluster-integration/logging.yaml.timedrotation.sample etc/tendrl/gluster-integration/gluster-integration_logging.yaml
 
-5. Edit ``/etc/tendrl/tendrl.conf`` as below
 
-    Set the value of ``log_cfg_path`` under section ``common``
+4. Configure the etcd ip in (/etc/tendrl/gluster-integration/gluster-integration.conf.yaml) by changing the following line ::
 
-    ``log_cfg_path = /etc/tendrl/common_logging.yaml``
+    etcd_connection: <Specify etcd server ip here>
 
-    Set the value of ``log_cfg_path`` under section ``gluster-integration``
+5. Run::
 
-    ``log_cfg_path = /etc/tendrl/gluster-integration_logging.yaml``
-
-6. Create log dir::
-
-    $ mkdir /var/log/tendrl/common
-    $ mkdir /var/log/tendrl/gluster-integration
-
-7. Run::
     $ tendrl-gluster-integration

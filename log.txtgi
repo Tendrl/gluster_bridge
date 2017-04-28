@@ -1,0 +1,594 @@
+GLOB sdist-make: /home/srijita/gluster-integration/setup.py
+pep8 installed: appdirs==1.4.3,configparser==3.5.0,enum34==1.1.6,flake8==3.3.0,hacking==0.13.0,mccabe==0.6.1,packaging==16.8,pbr==2.0.0,pep8==1.5.7,pycodestyle==2.3.1,pyflakes==1.5.0,pyparsing==2.2.0,six==1.10.0
+pep8 runtests: PYTHONHASHSEED='2760981628'
+pep8 runtests: commands[0] | flake8 tendrl
+tendrl/gluster_integration/tests/test_persister.py:5:1: E402 module level import not at top of file
+from tendrl.gluster_integration.persistence import persister
+^
+tendrl/gluster_integration/tests/test_persister.py:8:1: E402 module level import not at top of file
+from tendrl.gluster_integration.persistence import servers
+^
+tendrl/gluster_integration/tests/test_gluster_integration.py:22:1: E402 module level import not at top of file
+from tendrl.gluster_integration.manager import manager
+^
+tendrl/gluster_integration/sds_sync/__init__.py:6:1: F401 'etcd' imported but unused
+import etcd
+^
+tendrl/gluster_integration/sds_sync/__init__.py:12:1: H306: imports not in alphabetical order (tendrl.gluster_integration.ini2json, gstatus.libgluster.cluster.cluster)
+from gstatus.libgluster.cluster import Cluster
+^
+tendrl/gluster_integration/sds_sync/__init__.py:12:1: F401 'gstatus.libgluster.cluster.Cluster' imported but unused
+from gstatus.libgluster.cluster import Cluster
+^
+tendrl/gluster_integration/sds_sync/__init__.py:13:1: F401 'gstatus.libutils.utils as status_utils' imported but unused
+from gstatus.libutils import utils as status_utils
+^
+tendrl/gluster_integration/sds_sync/__init__.py:25:9: H904: String interpolation should be delayed to be handled by the logging code, rather than being done at the point of the logging call. Use ',' instead of '%'.
+        LOG.info("%s running" % self.__class__.__name__)
+        ^
+tendrl/gluster_integration/sds_sync/__init__.py:43:17: F821 undefined name 'NS'
+                NS.sync_object = NS.gluster.objects.\
+                ^
+tendrl/gluster_integration/sds_sync/__init__.py:43:34: F821 undefined name 'NS'
+                NS.sync_object = NS.gluster.objects.\
+                                 ^
+tendrl/gluster_integration/sds_sync/__init__.py:45:17: F821 undefined name 'NS'
+                NS.sync_object.save()
+                ^
+tendrl/gluster_integration/sds_sync/__init__.py:52:29: F821 undefined name 'NS'
+                            NS.peer = NS.gluster.\
+                            ^
+tendrl/gluster_integration/sds_sync/__init__.py:52:39: F821 undefined name 'NS'
+                            NS.peer = NS.gluster.\
+                                      ^
+tendrl/gluster_integration/sds_sync/__init__.py:55:80: E501 line too long (86 > 79 characters)
+                                    hostname=peers['peer%s.primary_hostname' % index],
+                                                                               ^
+tendrl/gluster_integration/sds_sync/__init__.py:58:29: F821 undefined name 'NS'
+                            NS.peer.save()
+                            ^
+tendrl/gluster_integration/sds_sync/__init__.py:67:29: F821 undefined name 'NS'
+                            NS.volume = NS.gluster.objects.Volume(
+                            ^
+tendrl/gluster_integration/sds_sync/__init__.py:67:41: F821 undefined name 'NS'
+                            NS.volume = NS.gluster.objects.Volume(
+                                        ^
+tendrl/gluster_integration/sds_sync/__init__.py:103:34: E121 continuation line under-indented for hanging indent
+                                 ],
+                                 ^
+tendrl/gluster_integration/sds_sync/__init__.py:138:29: F821 undefined name 'NS'
+                            NS.volume.save()
+                            ^
+tendrl/gluster_integration/sds_sync/__init__.py:142:37: F821 undefined name 'NS'
+                                    NS.brick = NS.gluster\
+                                    ^
+tendrl/gluster_integration/sds_sync/__init__.py:142:48: F821 undefined name 'NS'
+                                    NS.brick = NS.gluster\
+                                               ^
+tendrl/gluster_integration/sds_sync/__init__.py:144:80: E501 line too long (82 > 79 characters)
+                                            vol_id=volumes['volume%s.id' % index],
+                                                                               ^
+tendrl/gluster_integration/sds_sync/__init__.py:155:50: E126 continuation line over-indented for hanging indent
+                                                 'volume%s.brick%s.status' % (
+                                                 ^
+tendrl/gluster_integration/sds_sync/__init__.py:156:53: E121 continuation line under-indented for hanging indent
+                                                    index, b_index)),
+                                                    ^
+tendrl/gluster_integration/sds_sync/__init__.py:158:80: E501 line too long (86 > 79 characters)
+                                                'volume%s.brick%s.filesystem_type' % (
+                                                                               ^
+tendrl/gluster_integration/sds_sync/__init__.py:161:80: E501 line too long (84 > 79 characters)
+                                                'volume%s.brick%s.mount_options' % (
+                                                                               ^
+tendrl/gluster_integration/sds_sync/__init__.py:164:37: F821 undefined name 'NS'
+                                    NS.brick.save()
+                                    ^
+tendrl/gluster_integration/sds_sync/__init__.py:186:25: F821 undefined name 'NS'
+                        NS.vol_options = NS.gluster.objects.\
+                        ^
+tendrl/gluster_integration/sds_sync/__init__.py:186:42: F821 undefined name 'NS'
+                        NS.vol_options = NS.gluster.objects.\
+                                         ^
+tendrl/gluster_integration/sds_sync/__init__.py:191:25: F821 undefined name 'NS'
+                        NS.vol_options.save()
+                        ^
+tendrl/gluster_integration/sds_sync/__init__.py:213:80: E501 line too long (81 > 79 characters)
+                    # usable_capacity": 52181536768, "used_capacity": 2117836800,
+                                                                               ^
+tendrl/gluster_integration/sds_sync/__init__.py:217:21: F821 undefined name 'NS'
+                    NS.gluster.objects.GlobalDetails(
+                    ^
+tendrl/gluster_integration/sds_sync/__init__.py:220:21: F821 undefined name 'NS'
+                    NS.gluster.objects.Utilization(
+                    ^
+tendrl/gluster_integration/sds_sync/__init__.py:224:80: E501 line too long (97 > 79 characters)
+                        pcnt_used=(out_dict['used_capacity'] * 100 / out_dict['usable_capacity'])
+                                                                               ^
+tendrl/gluster_integration/sds_sync/__init__.py:227:35: F821 undefined name 'NS'
+                        volumes = NS.etcd_orm.client.read(
+                                  ^
+tendrl/gluster_integration/sds_sync/__init__.py:228:53: F821 undefined name 'NS'
+                            "clusters/%s/Volumes" % NS.tendrl_context.integration_id
+                                                    ^
+tendrl/gluster_integration/sds_sync/__init__.py:228:80: E501 line too long (84 > 79 characters)
+                            "clusters/%s/Volumes" % NS.tendrl_context.integration_id
+                                                                               ^
+tendrl/gluster_integration/sds_sync/__init__.py:231:38: F821 undefined name 'NS'
+                            volume = NS.gluster.objects.Volume(
+                                     ^
+tendrl/gluster_integration/sds_sync/__init__.py:235:33: F821 undefined name 'NS'
+                                NS.gluster.objects.Volume(
+                                ^
+tendrl/gluster_integration/sds_sync/__init__.py:237:80: E501 line too long (81 > 79 characters)
+                                    usable_capacity=str(item['usable_capacity']),
+                                                                               ^
+tendrl/gluster_integration/sds_sync/__init__.py:239:80: E501 line too long (105 > 79 characters)
+                                    pcnt_used=str(item['used_capacity'] * 100 / item['usable_capacity']),
+                                                                               ^
+tendrl/gluster_integration/sds_sync/__init__.py:267:9: H904: String interpolation should be delayed to be handled by the logging code, rather than being done at the point of the logging call. Use ',' instead of '%'.
+        LOG.info("%s complete" % self.__class__.__name__)
+        ^
+tendrl/gluster_integration/sds_sync/__init__.py:268:1: W391 blank line at end of file
+
+^
+tendrl/gluster_integration/manager/__init__.py:8:1: H306: imports not in alphabetical order (tendrl.gluster_integration, tendrl.commons.tendrlns)
+from tendrl.commons import TendrlNS
+^
+tendrl/gluster_integration/manager/__init__.py:9:1: H306: imports not in alphabetical order (tendrl.commons.tendrlns, tendrl.commons.manager)
+from tendrl.commons import manager as common_manager
+^
+tendrl/gluster_integration/manager/__init__.py:11:1: H306: imports not in alphabetical order (tendrl.gluster_integration.sds_sync, tendrl.gluster_integration.central_store)
+from tendrl.gluster_integration import central_store
+^
+tendrl/gluster_integration/manager/__init__.py:23:13: F821 undefined name 'NS'
+            NS.state_sync_thread,
+            ^
+tendrl/gluster_integration/manager/__init__.py:24:13: F821 undefined name 'NS'
+            NS.central_store_thread
+            ^
+tendrl/gluster_integration/manager/__init__.py:32:5: F821 undefined name 'NS'
+    NS.type = "sds"
+    ^
+tendrl/gluster_integration/manager/__init__.py:34:5: F821 undefined name 'NS'
+    NS.central_store_thread = central_store.GlusterIntegrationEtcdCentralStore()
+    ^
+tendrl/gluster_integration/manager/__init__.py:34:80: E501 line too long (80 > 79 characters)
+    NS.central_store_thread = central_store.GlusterIntegrationEtcdCentralStore()
+                                                                               ^
+tendrl/gluster_integration/manager/__init__.py:35:5: F821 undefined name 'NS'
+    NS.state_sync_thread = sds_sync.GlusterIntegrationSdsSyncStateThread()
+    ^
+tendrl/gluster_integration/manager/__init__.py:37:5: F821 undefined name 'NS'
+    NS.node_context.save()
+    ^
+tendrl/gluster_integration/manager/__init__.py:39:9: F821 undefined name 'NS'
+        NS.tendrl_context = NS.tendrl_context.load()
+        ^
+tendrl/gluster_integration/manager/__init__.py:39:29: F821 undefined name 'NS'
+        NS.tendrl_context = NS.tendrl_context.load()
+                            ^
+tendrl/gluster_integration/manager/__init__.py:40:9: H904: String interpolation should be delayed to be handled by the logging code, rather than being done at the point of the logging call. Use ',' instead of '%'.
+        LOG.info(
+        ^
+tendrl/gluster_integration/manager/__init__.py:42:13: F821 undefined name 'NS'
+            NS.tendrl_context.integration_id
+            ^
+tendrl/gluster_integration/manager/__init__.py:45:9: H904: String interpolation should be delayed to be handled by the logging code, rather than being done at the point of the logging call. Use ',' instead of '%'.
+        LOG.error(
+        ^
+tendrl/gluster_integration/manager/__init__.py:47:13: F821 undefined name 'NS'
+            NS.node_context.node_id
+            ^
+tendrl/gluster_integration/manager/__init__.py:53:13: F821 undefined name 'NS'
+            NS.node_context.node_id
+            ^
+tendrl/gluster_integration/manager/__init__.py:55:1: W293 blank line contains whitespace
+    
+^
+tendrl/gluster_integration/manager/__init__.py:56:5: F821 undefined name 'NS'
+    NS.tendrl_context.save()
+    ^
+tendrl/gluster_integration/manager/__init__.py:57:5: F821 undefined name 'NS'
+    NS.gluster.definitions.save()
+    ^
+tendrl/gluster_integration/manager/__init__.py:58:5: F821 undefined name 'NS'
+    NS.gluster.config.save()
+    ^
+tendrl/gluster_integration/manager/__init__.py:59:5: F821 undefined name 'NS'
+    NS.publisher_id = "gluster_integration"
+    ^
+tendrl/gluster_integration/central_store/__init__.py:9:9: F821 undefined name 'NS'
+        NS.etcd_orm.save(sync_object)
+        ^
+tendrl/gluster_integration/central_store/__init__.py:12:9: F821 undefined name 'NS'
+        NS.etcd_orm.save(details)
+        ^
+tendrl/gluster_integration/central_store/__init__.py:15:9: F821 undefined name 'NS'
+        NS.etcd_orm.save(config)
+        ^
+tendrl/gluster_integration/central_store/__init__.py:18:9: F821 undefined name 'NS'
+        NS.etcd_orm.save(definition)
+        ^
+tendrl/gluster_integration/central_store/__init__.py:21:9: F821 undefined name 'NS'
+        NS.etcd_orm.save(peer)
+        ^
+tendrl/gluster_integration/central_store/__init__.py:24:9: F821 undefined name 'NS'
+        NS.etcd_orm.save(vol)
+        ^
+tendrl/gluster_integration/central_store/__init__.py:27:9: F821 undefined name 'NS'
+        NS.etcd_orm.save(brick)
+        ^
+tendrl/gluster_integration/central_store/__init__.py:30:9: F821 undefined name 'NS'
+        NS.etcd_orm.save(vol_options)
+        ^
+tendrl/gluster_integration/central_store/__init__.py:34:13: F821 undefined name 'NS'
+            NS.etcd_orm.save(event)
+            ^
+tendrl/gluster_integration/central_store/__init__.py:37:9: F821 undefined name 'NS'
+        NS.etcd_orm.save(definition)
+        ^
+tendrl/gluster_integration/central_store/__init__.py:40:9: F821 undefined name 'NS'
+        NS.etcd_orm.save(tendrl_context)
+        ^
+tendrl/gluster_integration/central_store/__init__.py:43:9: F821 undefined name 'NS'
+        NS.etcd_orm.save(node_context)
+        ^
+tendrl/gluster_integration/central_store/__init__.py:46:9: F821 undefined name 'NS'
+        NS.etcd_orm.save(utilization)
+        ^
+tendrl/gluster_integration/flows/create_volume/__init__.py:2:1: H306: imports not in alphabetical order (tendrl.commons.flows, tendrl.commons.event.event)
+from tendrl.commons.event import Event
+^
+tendrl/gluster_integration/flows/create_volume/__init__.py:11:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/flows/create_volume/__init__.py:18:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/base_object.py:1:1: W391 blank line at end of file
+
+^
+tendrl/gluster_integration/objects/base_object.py:1:1: H104: File contains nothing but comments
+
+^
+tendrl/gluster_integration/objects/global_details/__init__.py:20:13: F821 undefined name 'NS'
+            NS.tendrl_context.integration_id
+            ^
+tendrl/gluster_integration/objects/volume_options/__init__.py:24:1: H405: multi line docstring summary not separated with an empty line
+    """A table of the Volume options, lazily updated
+    """
+^
+tendrl/gluster_integration/objects/volume_options/__init__.py:25:1: H405: multi line docstring summary not separated with an empty line
+    """
+^
+tendrl/gluster_integration/objects/volume_options/__init__.py:31:13: F821 undefined name 'NS'
+            NS.tendrl_context.integration_id,
+            ^
+tendrl/gluster_integration/objects/volume/__init__.py:75:1: H405: multi line docstring summary not separated with an empty line
+    """A table of the Peer, lazily updated
+    """
+^
+tendrl/gluster_integration/objects/volume/__init__.py:76:1: H405: multi line docstring summary not separated with an empty line
+    """
+^
+tendrl/gluster_integration/objects/volume/__init__.py:81:42: F821 undefined name 'NS'
+        self.__name__ = self.__name__ % (NS.tendrl_context.integration_id, self.vol_id)
+                                         ^
+tendrl/gluster_integration/objects/volume/__init__.py:81:80: E501 line too long (87 > 79 characters)
+        self.__name__ = self.__name__ % (NS.tendrl_context.integration_id, self.vol_id)
+                                                                               ^
+tendrl/gluster_integration/objects/volume/flows/start_volume/__init__.py:3:1: H306: imports not in alphabetical order (tendrl.commons.message.message, tendrl.commons.flows)
+from tendrl.commons import flows
+^
+tendrl/gluster_integration/objects/volume/flows/start_volume/__init__.py:9:5: E301 expected 1 blank line, found 0
+    def __init__(self, *args, **kwargs):
+    ^
+tendrl/gluster_integration/objects/volume/flows/start_volume/__init__.py:16:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/flows/start_volume/__init__.py:23:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/flows/stop_volume/__init__.py:3:1: H306: imports not in alphabetical order (tendrl.commons.message.message, tendrl.commons.flows)
+from tendrl.commons import flows
+^
+tendrl/gluster_integration/objects/volume/flows/stop_volume/__init__.py:9:5: E301 expected 1 blank line, found 0
+    def __init__(self, *args, **kwargs):
+    ^
+tendrl/gluster_integration/objects/volume/flows/stop_volume/__init__.py:16:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/flows/stop_volume/__init__.py:23:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/flows/delete_volume/__init__.py:3:1: H306: imports not in alphabetical order (tendrl.commons.message.message, tendrl.commons.flows)
+from tendrl.commons import flows
+^
+tendrl/gluster_integration/objects/volume/flows/delete_volume/__init__.py:9:5: E301 expected 1 blank line, found 0
+    def __init__(self, *args, **kwargs):
+    ^
+tendrl/gluster_integration/objects/volume/flows/delete_volume/__init__.py:16:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/flows/delete_volume/__init__.py:23:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/delete/__init__.py:11:5: E301 expected 1 blank line, found 0
+    def __init__(self, *args, **kwargs):
+    ^
+tendrl/gluster_integration/objects/volume/atoms/delete/__init__.py:15:9: F841 local variable 'vol_id' is assigned to but never used
+        vol_id = self.parameters['Volume.vol_id']
+        ^
+tendrl/gluster_integration/objects/volume/atoms/delete/__init__.py:19:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/delete/__init__.py:26:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/delete/__init__.py:42:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/delete/__init__.py:49:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/delete/__init__.py:62:9: F821 undefined name 'NS'
+        NS.etcd_orm.client.delete(
+        ^
+tendrl/gluster_integration/objects/volume/atoms/delete/__init__.py:64:17: F821 undefined name 'NS'
+                NS.tendrl_context.integration_id,
+                ^
+tendrl/gluster_integration/objects/volume/atoms/delete/__init__.py:72:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/delete/__init__.py:79:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/volume_exists/__init__.py:11:5: E301 expected 1 blank line, found 0
+    def __init__(self, *args, **kwargs):
+    ^
+tendrl/gluster_integration/objects/volume/atoms/volume_exists/__init__.py:18:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/volume_exists/__init__.py:25:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/volume_exists/__init__.py:29:13: F841 local variable 'fetched_volume' is assigned to but never used
+            fetched_volume = Volume(
+            ^
+tendrl/gluster_integration/objects/volume/atoms/volume_exists/__init__.py:36:31: F821 undefined name 'NS'
+                    publisher=NS.publisher_id,
+                              ^
+tendrl/gluster_integration/objects/volume/atoms/volume_exists/__init__.py:43:32: F821 undefined name 'NS'
+                    cluster_id=NS.tendrl_context.integration_id,
+                               ^
+tendrl/gluster_integration/objects/volume/atoms/start/__init__.py:11:5: E301 expected 1 blank line, found 0
+    def __init__(self, *args, **kwargs):
+    ^
+tendrl/gluster_integration/objects/volume/atoms/start/__init__.py:18:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/start/__init__.py:25:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/start/__init__.py:40:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/start/__init__.py:47:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/create/__init__.py:11:5: E301 expected 1 blank line, found 0
+    def __init__(self, *args, **kwargs):
+    ^
+tendrl/gluster_integration/objects/volume/atoms/create/__init__.py:48:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/create/__init__.py:55:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/create/__init__.py:63:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/create/__init__.py:70:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/create/__init__.py:85:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/create/__init__.py:92:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/stop/__init__.py:11:5: E301 expected 1 blank line, found 0
+    def __init__(self, *args, **kwargs):
+    ^
+tendrl/gluster_integration/objects/volume/atoms/stop/__init__.py:18:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/stop/__init__.py:25:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/stop/__init__.py:41:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/stop/__init__.py:48:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/named_volume_not_exists/__init__.py:11:5: E301 expected 1 blank line, found 0
+    def __init__(self, *args, **kwargs):
+    ^
+tendrl/gluster_integration/objects/volume/atoms/named_volume_not_exists/__init__.py:18:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/named_volume_not_exists/__init__.py:25:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/named_volume_not_exists/__init__.py:29:23: F821 undefined name 'NS'
+            volumes = NS.etcd_orm.client.read(
+                      ^
+tendrl/gluster_integration/objects/volume/atoms/named_volume_not_exists/__init__.py:30:41: F821 undefined name 'NS'
+                "clusters/%s/Volumes" % NS.tendrl_context.integration_id
+                                        ^
+tendrl/gluster_integration/objects/volume/atoms/named_volume_not_exists/__init__.py:45:35: F821 undefined name 'NS'
+                        publisher=NS.publisher_id,
+                                  ^
+tendrl/gluster_integration/objects/volume/atoms/named_volume_not_exists/__init__.py:52:36: F821 undefined name 'NS'
+                        cluster_id=NS.tendrl_context.integration_id,
+                                   ^
+tendrl/gluster_integration/objects/volume/atoms/volume_stopped/__init__.py:11:5: E301 expected 1 blank line, found 0
+    def __init__(self, *args, **kwargs):
+    ^
+tendrl/gluster_integration/objects/volume/atoms/volume_stopped/__init__.py:18:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/volume_stopped/__init__.py:25:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/volume_stopped/__init__.py:36:31: F821 undefined name 'NS'
+                    publisher=NS.publisher_id,
+                              ^
+tendrl/gluster_integration/objects/volume/atoms/volume_stopped/__init__.py:43:32: F821 undefined name 'NS'
+                    cluster_id=NS.tendrl_context.integration_id,
+                               ^
+tendrl/gluster_integration/objects/volume/atoms/volume_stopped/__init__.py:52:31: F821 undefined name 'NS'
+                    publisher=NS.publisher_id,
+                              ^
+tendrl/gluster_integration/objects/volume/atoms/volume_stopped/__init__.py:59:32: F821 undefined name 'NS'
+                    cluster_id=NS.tendrl_context.integration_id,
+                               ^
+tendrl/gluster_integration/objects/volume/atoms/volume_stopped/__init__.py:67:31: F821 undefined name 'NS'
+                    publisher=NS.publisher_id,
+                              ^
+tendrl/gluster_integration/objects/volume/atoms/volume_stopped/__init__.py:74:32: F821 undefined name 'NS'
+                    cluster_id=NS.tendrl_context.integration_id,
+                               ^
+tendrl/gluster_integration/objects/volume/atoms/volume_not_exists/__init__.py:11:5: E301 expected 1 blank line, found 0
+    def __init__(self, *args, **kwargs):
+    ^
+tendrl/gluster_integration/objects/volume/atoms/volume_not_exists/__init__.py:18:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/volume_not_exists/__init__.py:25:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/volume_not_exists/__init__.py:29:13: F841 local variable 'fetched_volume' is assigned to but never used
+            fetched_volume = Volume(
+            ^
+tendrl/gluster_integration/objects/volume/atoms/volume_not_exists/__init__.py:36:31: F821 undefined name 'NS'
+                    publisher=NS.publisher_id,
+                              ^
+tendrl/gluster_integration/objects/volume/atoms/volume_not_exists/__init__.py:43:32: F821 undefined name 'NS'
+                    cluster_id=NS.tendrl_context.integration_id,
+                               ^
+tendrl/gluster_integration/objects/volume/atoms/volume_started/__init__.py:11:5: E301 expected 1 blank line, found 0
+    def __init__(self, *args, **kwargs):
+    ^
+tendrl/gluster_integration/objects/volume/atoms/volume_started/__init__.py:18:27: F821 undefined name 'NS'
+                publisher=NS.publisher_id,
+                          ^
+tendrl/gluster_integration/objects/volume/atoms/volume_started/__init__.py:25:28: F821 undefined name 'NS'
+                cluster_id=NS.tendrl_context.integration_id,
+                           ^
+tendrl/gluster_integration/objects/volume/atoms/volume_started/__init__.py:36:31: F821 undefined name 'NS'
+                    publisher=NS.publisher_id,
+                              ^
+tendrl/gluster_integration/objects/volume/atoms/volume_started/__init__.py:43:32: F821 undefined name 'NS'
+                    cluster_id=NS.tendrl_context.integration_id,
+                               ^
+tendrl/gluster_integration/objects/volume/atoms/volume_started/__init__.py:52:31: F821 undefined name 'NS'
+                    publisher=NS.publisher_id,
+                              ^
+tendrl/gluster_integration/objects/volume/atoms/volume_started/__init__.py:59:32: F821 undefined name 'NS'
+                    cluster_id=NS.tendrl_context.integration_id,
+                               ^
+tendrl/gluster_integration/objects/volume/atoms/volume_started/__init__.py:67:31: F821 undefined name 'NS'
+                    publisher=NS.publisher_id,
+                              ^
+tendrl/gluster_integration/objects/volume/atoms/volume_started/__init__.py:74:32: F821 undefined name 'NS'
+                    cluster_id=NS.tendrl_context.integration_id,
+                               ^
+tendrl/gluster_integration/objects/brick/__init__.py:36:1: H405: multi line docstring summary not separated with an empty line
+    """A table of the Volume, lazily updated
+    """
+^
+tendrl/gluster_integration/objects/brick/__init__.py:37:1: H405: multi line docstring summary not separated with an empty line
+    """
+^
+tendrl/gluster_integration/objects/brick/__init__.py:43:13: F821 undefined name 'NS'
+            NS.tendrl_context.integration_id,
+            ^
+tendrl/gluster_integration/objects/definition/__init__.py:4:1: H306: imports not in alphabetical order (ruamel.yaml, importlib)
+import importlib
+^
+tendrl/gluster_integration/objects/definition/__init__.py:4:1: F401 'importlib' imported but unused
+import importlib
+^
+tendrl/gluster_integration/objects/definition/__init__.py:5:1: F401 'os' imported but unused
+import os
+^
+tendrl/gluster_integration/objects/definition/__init__.py:9:1: H306: imports not in alphabetical order (tendrl.commons.objects, tendrl.commons.etcdobj)
+from tendrl.commons import etcdobj
+^
+tendrl/gluster_integration/objects/definition/__init__.py:32:1: E302 expected 2 blank lines, found 1
+class _DefinitionEtcd(etcdobj.EtcdObj):
+^
+tendrl/gluster_integration/objects/definition/__init__.py:33:1: H405: multi line docstring summary not separated with an empty line
+    """A table of the Definitions, lazily updated
+    """
+^
+tendrl/gluster_integration/objects/definition/__init__.py:34:1: H405: multi line docstring summary not separated with an empty line
+    """
+^
+tendrl/gluster_integration/objects/definition/__init__.py:39:41: F821 undefined name 'NS'
+        self.__name__ = self.__name__ % NS.tendrl_context.integration_id
+                                        ^
+tendrl/gluster_integration/objects/sync_object/__init__.py:24:1: H405: multi line docstring summary not separated with an empty line
+    """A table of the _SyncObject, lazily updated
+    """
+^
+tendrl/gluster_integration/objects/sync_object/__init__.py:25:1: H405: multi line docstring summary not separated with an empty line
+    """
+^
+tendrl/gluster_integration/objects/sync_object/__init__.py:30:42: F821 undefined name 'NS'
+        self.__name__ = self.__name__ % (NS.tendrl_context.integration_id)
+                                         ^
+tendrl/gluster_integration/objects/utilization/__init__.py:19:1: H405: multi line docstring summary not separated with an empty line
+    """A table of the Utilization, lazily updated
+    """
+^
+tendrl/gluster_integration/objects/utilization/__init__.py:20:1: H405: multi line docstring summary not separated with an empty line
+    """
+^
+tendrl/gluster_integration/objects/utilization/__init__.py:25:40: E225 missing whitespace around operator
+        self.__name__ = self.__name__ %NS.tendrl_context.integration_id
+                                       ^
+tendrl/gluster_integration/objects/utilization/__init__.py:25:40: F821 undefined name 'NS'
+        self.__name__ = self.__name__ %NS.tendrl_context.integration_id
+                                       ^
+tendrl/gluster_integration/objects/peer/__init__.py:28:1: H405: multi line docstring summary not separated with an empty line
+    """A table of the Peer, lazily updated
+    """
+^
+tendrl/gluster_integration/objects/peer/__init__.py:29:1: H405: multi line docstring summary not separated with an empty line
+    """
+^
+tendrl/gluster_integration/objects/peer/__init__.py:34:42: F821 undefined name 'NS'
+        self.__name__ = self.__name__ % (NS.tendrl_context.integration_id, self.peer_uuid)
+                                         ^
+tendrl/gluster_integration/objects/peer/__init__.py:34:80: E501 line too long (90 > 79 characters)
+        self.__name__ = self.__name__ % (NS.tendrl_context.integration_id, self.peer_uuid)
+                                                                               ^
+tendrl/gluster_integration/objects/config/__init__.py:2:1: H306: imports not in alphabetical order (tendrl.commons.etcdobj.etcdobj, tendrl.commons.config)
+from tendrl.commons import config as cmn_config
+^
+tendrl/gluster_integration/objects/config/__init__.py:7:1: E302 expected 2 blank lines, found 1
+class Config(objects.BaseObject):
+^
+tendrl/gluster_integration/objects/config/__init__.py:20:1: H405: multi line docstring summary not separated with an empty line
+    """Config etcd object, lazily updated
+    """
+^
+tendrl/gluster_integration/objects/config/__init__.py:21:1: H405: multi line docstring summary not separated with an empty line
+    """
+^
+ERROR: InvocationError: '/home/srijita/gluster-integration/.tox/pep8/bin/flake8 tendrl'
+___________________________________ summary ____________________________________
+ERROR:   pep8: commands failed

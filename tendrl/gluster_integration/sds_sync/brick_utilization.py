@@ -48,20 +48,26 @@ def _get_stats(mount_point):
             'used_percent_inode': used_percent_inode}
 
 
-def get_lvs():
+def get_lvs(socket_path=None, publisher=None, node_id=None):
     _lvm_cmd = ("lvm vgs --unquoted --noheading --nameprefixes "
                  "--separator $ --nosuffix --units m -o lv_uuid,"
                  "lv_name,data_percent,pool_lv,lv_attr,lv_size,"
                  "lv_path,lv_metadata_size,metadata_percent,vg_name")
     cmd = cmd_utils.Command(_lvm_cmd, True)
-    out, err, rc = cmd.run()
+    out, err, rc = cmd.run(
+        publisher=publisher,
+        node_id=node_id,
+        socket_path=socket_path
+    )
     if rc != 0:
         Event(
             Message(
                 priority="error",
-                publisher=NS.publisher_id,
-                payload={"message": str(err)}
-            )
+                publisher=publisher,
+                payload={"message": str(err)},
+                node_id=node_id
+            ),
+            socket_path=socket_path
         )
         return None
     out = out.split('\n')
@@ -79,7 +85,12 @@ def get_lvs():
     return d
 
 
-def get_mount_stats(mount_path):
+def get_mount_stats(
+    mount_path,
+    socket_path=None,
+    publisher=None,
+    node_id=None
+):
     def _get_mounts(mount_path=[]):
         mount_list = map(_get_mount_point, mount_path)
         mount_points = _parse_proc_mounts()
@@ -121,7 +132,7 @@ def get_mount_stats(mount_path):
         return out
 
     mount_points = _get_mounts(mount_path)
-    lvs = get_lvs()
+    lvs = get_lvs(socket_path, publisher, node_id)
     mount_detail = {}
     for mount, info in mount_points.iteritems():
         mount_detail[mount] = _get_stats(mount)
@@ -132,7 +143,7 @@ def get_mount_stats(mount_path):
     return mount_detail
 
 
-def brick_utilization(path):
+def brick_utilization(path, socket_path=None, publisher=None, node_id=None):
     """{
          'used_percent': 0.6338674168297445,
          'used': 0.0316314697265625,
@@ -154,4 +165,9 @@ def brick_utilization(path):
     }"""
     # Below logic will find mount_path from path
     mount_path = [path.split(":")[1]]
-    return get_mount_stats(mount_path).values()[0]
+    return get_mount_stats(
+        mount_path,
+        socket_path,
+        publisher,
+        node_id
+    ).values()[0]

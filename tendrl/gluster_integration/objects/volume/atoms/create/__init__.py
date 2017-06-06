@@ -95,27 +95,17 @@ class Create(objects.BaseAtom):
                     host = NS._int.client.read(key).value
                     brick_path = host + ":" + brick_path
                     NS._int.wclient.delete(
-                        ("clusters/%s/nodes/%s/GlusterBricks/free/%s") % (
+                        ("clusters/%s/Bricks/free/%s") % (
                             NS.tendrl_context.integration_id,
-                            node_id,
                             brick_path.replace("/","_")
                         )
                     )
                     NS._int.wclient.write(
-                        ("clusters/%s/nodes/%s/GlusterBricks/used/%s") % (
+                        ("clusters/%s/Bricks/used/%s") % (
                             NS.tendrl_context.integration_id,
-                            node_id,
                             brick_path.replace("/","_")
                         ),
                         ""
-                    )
-                    NS._int.wclient.write(
-                        ("clusters/%s/nodes/%s/GlusterBricks/all/%s/volume_name") % (
-                            NS.tendrl_context.integration_id,
-                            node_id,
-                            brick_path.replace("/","_")
-                        ),
-                        self.parameters['Volume.volname']
                     )
         else:
             Event(

@@ -232,7 +232,7 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                             except etcd.EtcdKeyNotFound as ex:
                                 Event(
                                     ExceptionMessage(
-                                        priority="error",
+                                        priority="debug",
                                         publisher=NS.publisher_id,
                                         payload={"message": "Could not find any ipv4 networks for node %s" % NS.node_context.node_id,
                                                  "exception": ex
@@ -504,7 +504,7 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                     ExceptionMessage(
                         priority="error",
                         publisher=NS.publisher_id,
-                        payload={"message": "error",
+                        payload={"message": "gluster sds state sync error",
                                  "exception": ex
                                  }
                     )
@@ -514,7 +514,7 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
 
         Event(
             Message(
-                priority="info",
+                priority="debug",
                 publisher=NS.publisher_id,
                 payload={"message": "%s complete" % self.__class__.__name__}
             )

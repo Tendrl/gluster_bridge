@@ -55,7 +55,7 @@ class GdeployPlugin(ProvisionerBasePlugin):
         if rc == 0:
             Event(
                 Message(
-                    priority="info",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "gluster volume %s created successfully" %
@@ -67,7 +67,7 @@ class GdeployPlugin(ProvisionerBasePlugin):
         else:
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "gluster volume creation failed for %s."
@@ -106,7 +106,7 @@ class GdeployPlugin(ProvisionerBasePlugin):
         else:
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Volume deletion failed for volume "
@@ -147,7 +147,7 @@ class GdeployPlugin(ProvisionerBasePlugin):
         else:
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Volume start failed for volume "
@@ -185,7 +185,7 @@ class GdeployPlugin(ProvisionerBasePlugin):
         else:
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Volume stop failed for volume "
@@ -227,7 +227,7 @@ class GdeployPlugin(ProvisionerBasePlugin):
         else:
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Rebalance %s failed for volume "
@@ -273,7 +273,7 @@ class GdeployPlugin(ProvisionerBasePlugin):
         else:
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Volume expansion failed for volume "
@@ -321,7 +321,7 @@ class GdeployPlugin(ProvisionerBasePlugin):
         else:
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Volume shrink failed for volume "
@@ -355,7 +355,7 @@ class GdeployPlugin(ProvisionerBasePlugin):
         else:
             Event(
                 Message(
-                    priority="error",
+                    priority="debug",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Bricks Provisioning Failed. Error %s" % (

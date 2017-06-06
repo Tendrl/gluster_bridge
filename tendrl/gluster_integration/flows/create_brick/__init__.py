@@ -12,7 +12,7 @@ class CreateBrick(flows.BaseFlow):
                 payload={
                     "message": "Starting Brick creation flow"
                 },
-                job_id=self.parameters['job_id'],
+                job_id=self.job_id,
                 flow_id=self.parameters['flow_id'],
                 cluster_id=NS.tendrl_context.integration_id,
             )

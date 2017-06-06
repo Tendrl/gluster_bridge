@@ -58,7 +58,7 @@ def get_lvs():
     if rc != 0:
         Event(
             Message(
-                priority="error",
+                priority="debug",
                 publisher=NS.publisher_id,
                 payload={"message": str(err)}
             )

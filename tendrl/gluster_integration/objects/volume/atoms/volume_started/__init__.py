@@ -29,10 +29,10 @@ class VolumeStarted(objects.BaseAtom):
             fetched_volume = Volume(
                 vol_id=self.parameters['Volume.vol_id']
             ).load()
-        except etcd.EtcdKetNotFound:
+        except etcd.EtcdKeyNotFound:
             Event(
                 Message(
-                    priority="info",
+                    priority="error",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Volume %s does not exist" %
@@ -63,7 +63,7 @@ class VolumeStarted(objects.BaseAtom):
         else:
             Event(
                 Message(
-                    priority="info",
+                    priority="warning",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Volume %s is already stopped" %

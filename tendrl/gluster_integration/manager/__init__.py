@@ -37,7 +37,7 @@ def main():
         NS.tendrl_context = NS.tendrl_context.load()
         Event(
             Message(
-                priority="info",
+                priority="debug",
                 publisher=NS.publisher_id,
                 payload={"message": "Integration %s is part of sds cluster"
                                     % NS.tendrl_context.integration_id
@@ -47,7 +47,7 @@ def main():
     except etcd.EtcdKeyNotFound:
         Event(
             Message(
-                priority="error",
+                priority="debug",
                 publisher=NS.publisher_id,
                 payload={"message": "Node %s is not part of any sds cluster" %
                                     NS.node_context.node_id
@@ -76,7 +76,7 @@ def main():
     def shutdown():
         Event(
             Message(
-                priority="info",
+                priority="debug",
                 publisher=NS.publisher_id,
                 payload={"message": "Signal handler: stopping"}
             )

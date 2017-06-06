@@ -13,7 +13,7 @@ class CreateVolume(flows.BaseFlow):
                     "message": "Starting creation flow for volume %s" %
                     self.parameters['Volume.volname']
                 },
-                job_id=self.parameters['job_id'],
+                job_id=self.job_id,
                 flow_id=self.parameters['flow_id'],
                 cluster_id=NS.tendrl_context.integration_id,
             )

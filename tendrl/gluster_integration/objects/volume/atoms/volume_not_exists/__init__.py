@@ -35,7 +35,7 @@ class VolumeNotExists(objects.BaseAtom):
         except etcd.EtcdKeyNotFound:
             Event(
                 Message(
-                    priority="info",
+                    priority="warning",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Volume %s doesnt exist" %

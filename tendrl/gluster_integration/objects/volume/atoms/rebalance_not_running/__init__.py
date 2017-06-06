@@ -58,7 +58,7 @@ class RebalanceNotRunning(objects.BaseAtom):
         except etcd.EtcdKeyNotFound as ex:
             Event(
                 Message(
-                    priority="info",
+                    priority="error",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Volume %s not found" %

@@ -8,7 +8,6 @@ from tendrl.gluster_integration.objects.volume import Volume
 
 
 class Delete(objects.BaseAtom):
-    obj = Volume
     def __init__(self, *args, **kwargs):
         super(Delete, self).__init__(*args, **kwargs)
 

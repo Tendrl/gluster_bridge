@@ -32,7 +32,7 @@ class VolumeStopped(objects.BaseAtom):
         except etcd.EtcdKeyNotFound:
             Event(
                 Message(
-                    priority="info",
+                    priority="error",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Volume %s does not exist" %
@@ -63,7 +63,7 @@ class VolumeStopped(objects.BaseAtom):
         else:
             Event(
                 Message(
-                    priority="info",
+                    priority="warning",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Volume %s is already started" %

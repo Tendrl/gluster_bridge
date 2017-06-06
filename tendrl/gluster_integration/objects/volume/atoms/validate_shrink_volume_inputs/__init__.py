@@ -21,10 +21,10 @@ class ValidateShrinkVolumeInputs(objects.BaseAtom):
                 ),
             )
             bricks = result.leaves
-        except etcd.EtcdKetNotFound:
+        except etcd.EtcdKeyNotFound:
             Event(
                 Message(
-                    priority="info",
+                    priority="error",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Volume %s does not have Bricks directory" %
@@ -102,10 +102,10 @@ class ValidateShrinkVolumeInputs(objects.BaseAtom):
             fetched_volume = Volume(
                 vol_id=self.parameters['Volume.vol_id']
             ).load()
-        except etcd.EtcdKetNotFound:
+        except etcd.EtcdKeyNotFound:
             Event(
                 Message(
-                    priority="info",
+                    priority="error",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Volume %s does not exist" %
@@ -168,7 +168,7 @@ class ValidateShrinkVolumeInputs(objects.BaseAtom):
         if msg:
             Event(
                 Message(
-                    priority="info",
+                    priority="error",
                     publisher=NS.publisher_id,
                     payload={
                         "message": msg

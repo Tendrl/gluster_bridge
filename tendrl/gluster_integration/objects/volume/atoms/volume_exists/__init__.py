@@ -1,4 +1,3 @@
-import etcd
 
 from tendrl.commons.event import Event
 from tendrl.commons.message import Message
@@ -7,7 +6,6 @@ from tendrl.gluster_integration.objects.volume import Volume
 
 
 class VolumeExists(objects.BaseAtom):
-    obj = Volume
     def __init__(self, *args, **kwargs):
         super(VolumeExists, self).__init__(*args, **kwargs)
 
@@ -25,14 +23,12 @@ class VolumeExists(objects.BaseAtom):
                 cluster_id=NS.tendrl_context.integration_id,
             )
         )
-        try:
-            fetched_volume = Volume(
-                vol_id=self.parameters['Volume.vol_id']
-            ).load()
-        except etcd.EtcdKeyNotFound:
+        if Volume(vol_id=self.parameters['Volume.vol_id']).exists():
+            return True
+        else:
             Event(
                 Message(
-                    priority="warning",
+                    priority="error",
                     publisher=NS.publisher_id,
                     payload={
                         "message": "Volume %s doesnt exist" %
@@ -44,5 +40,3 @@ class VolumeExists(objects.BaseAtom):
                 )
             )
             return False
-
-        return True

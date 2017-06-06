@@ -41,7 +41,7 @@ class NamedVolumeNotExists(objects.BaseAtom):
                 self.parameters['Volume.volname']:
                 Event(
                     Message(
-                        priority="info",
+                        priority="warning",
                         publisher=NS.publisher_id,
                         payload={
                             "message": "Volume %s already exists" %

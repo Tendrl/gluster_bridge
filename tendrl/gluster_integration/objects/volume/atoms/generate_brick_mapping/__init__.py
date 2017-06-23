@@ -38,7 +38,7 @@ class GenerateBrickMapping(objects.BaseAtom):
             '/clusters/%s/Bricks/free/' % NS.tendrl_context.integration_id
         )
         for brick in bricks.leaves:
-            brick = brick.key.split("/")[-1]'
+            brick = brick.key.split("/")[-1]
             _brick_host = brick.split(":")[0]
             if _brick_host in nodes:
                 if len(nodes[_brick_host]) < brick_count:

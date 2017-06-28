@@ -5,6 +5,7 @@ class RebalanceDetails(objects.BaseObject):
     def __init__(
         self,
         vol_id=None,
+        node_id=None,
         rebal_data=None,
         rebal_skipped=None,
         rebal_id=None,
@@ -18,6 +19,7 @@ class RebalanceDetails(objects.BaseObject):
         super(RebalanceDetails, self).__init__(*args, **kwargs)
 
         self.vol_id = vol_id
+        self.node_id = node_id
         self.rebal_data=rebal_data
         self.rebal_skipped=rebal_skipped
         self.rebal_id=rebal_id
@@ -30,6 +32,6 @@ class RebalanceDetails(objects.BaseObject):
     def render(self):
         self.value = self.value.format(NS.tendrl_context.integration_id,
                                        self.vol_id,
-                                       NS.node_context.node_id
+                                       self.node_id or NS.node_context.node_id
         )
         return super(RebalanceDetails, self).render()

@@ -96,20 +96,46 @@ class Shrink(objects.BaseAtom):
                             lock.acquire(lock_ttl=60)
                     except etcd.EtcdLockExpired:
                         continue
+                subvolumes = NS._int.client.read(
+                    "clusters/%s/Volumes/%s/Bricks" % (
+                        NS.tendrl_context.integration_id,
+                        self.parameters['Volume.vol_id']
+                    ),
+                )
+                brick_details = {}
+                for subvolume in subvolumes.leaves:
+                    subvolume_id = subvolume.key.split("/")[-1]
+                    bricks = NS._int.client.read(
+                        subvolume.key
+                    )
+                    for brick in bricks.leaves:
+                        brick_details[brick.key.split("/")[-1]] = subvolume_id
                 for sub_vol in self.parameters.get('Volume.bricks'):
                     for b in sub_vol:
                         brick_name = b.keys()[0] + ":" + b.values()[0].replace("/", "_")
-                        try:
-                            NS._int.wclient.delete(
+                        if brick_name in brick_details:
+                            subvolume = brick_details[brick_name]
+                            try:
+                                NS._int.wclient.delete(
+                                    "clusters/%s/Volumes/%s/Bricks/%s/%s" % (
+                                        NS.tendrl_context.integration_id,
+                                        self.parameters['Volume.vol_id'],
+                                        subvolume,
+                                        brick_name
+                                    ),
+                                    recursive=True
+                                )
+                                # If sub_vol is empty then it will delete
+                                NS._int.wclient.delete(
                                 "clusters/%s/Volumes/%s/Bricks/%s" % (
-                                    NS.tendrl_context.integration_id,
-                                    self.parameters['Volume.vol_id'],
-                                    brick_name
-                                ),
-                                recursive=True
-                            )            
-                        except etcd.EtcdKeyNotFound:
-                            continue
+                                        NS.tendrl_context.integration_id,
+                                        self.parameters['Volume.vol_id'],
+                                        subvolume
+                                    ),
+                                    dir = True
+                                )
+                            except (etcd.EtcdKeyNotFound, etcd.EtcdDirNotEmpty):
+                                continue
             except Exception:
                 raise
             finally:

@@ -94,9 +94,9 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
             except etcd.EtcdKeyNotFound as ex:
                 Event(
                     Message(
-                        "error",
+                        priority="error",
                         publisher=NS.publisher_id,
-                        {'message': "Failed to sync cluster network details"}
+                        payload={"message": "Failed to sync cluster network details"}
                     )
                 )
                 raise ex
@@ -106,11 +106,11 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                 gevent.sleep(
                     int(NS.config.data.get("sync_interval", 10))
                 )
-            try:
-                NS._int.wclient.write("clusters/%s/sync_status" % NS.tendrl_context.integration_id,
-                                      "in_progress", prevExist=False)
-            except (etcd.EtcdAlreadyExist, etcd.EtcdCompareFailed) as ex:
-                pass
+                try:
+                    NS._int.wclient.write("clusters/%s/sync_status" % NS.tendrl_context.integration_id,
+                                          "in_progress", prevExist=False)
+                except (etcd.EtcdAlreadyExist, etcd.EtcdCompareFailed) as ex:
+                    pass
 
                 subprocess.call(
                     [
@@ -554,11 +554,12 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                         used_capacity=0,
                         pcnt_used=0
                     ).save()
-            _cluster = NS.tendrl.objects.Cluster(integration_id=NS.tendrl_context.integration_id)
-            if _cluster.exists():
-                _cluster.sync_status = "done"
-                _cluster.last_sync = str(tendrl_now())
-                _cluster.save().
+                    
+                _cluster = NS.tendrl.objects.Cluster(integration_id=NS.tendrl_context.integration_id)
+                if _cluster.exists():
+                    _cluster.sync_status = "done"
+                    _cluster.last_sync = str(tendrl_now())
+                    _cluster.save()
 
             except Exception as ex:
                 Event(
@@ -570,6 +571,7 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                                  }
                     )
                 )
+                raise ex
 
         Event(
             Message(

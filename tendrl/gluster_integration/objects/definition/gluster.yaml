@@ -20,6 +20,7 @@ namespace.gluster:
           - Volume.tuned_profile
       pre_run:
         - gluster.objects.Volume.atoms.NamedVolumeNotExists
+        - gluster.objects.Volume.atoms.BricksLocked
       post_run:
         - gluster.objects.Volume.atoms.CheckVolumeAvailable
       run: gluster.flows.CreateVolume
@@ -504,6 +505,16 @@ namespace.gluster:
           run: gluster.objects.Volume.atoms.CheckVolumeAvailable
           type: Start
           uuid: 242f6190-9b37-11e6-950d-a24fc0d96765
+        BricksLocked:
+          enabled: true
+          help: check if bricks are locked
+          inputs:
+            mandatory:
+              - Volume.bricks
+          name: bricks_locked
+          run: gluster.objects.Volume.atoms.BricksLocked
+          type: Check
+          uuid: 242f6190-9b37-11e6-950d-a24fc0d96769
       flows:
         DeleteVolume:
           tags:
@@ -542,6 +553,7 @@ namespace.gluster:
           pre_run:
             - gluster.objects.Volume.atoms.VolumeExists
             - gluster.objects.Volume.atoms.ValidateExpandVolumeInputs
+            - gluster.objects.Volume.atoms.BricksLocked
           run: gluster.objects.Volume.flows.ExpandVolume
           type: Create
           uuid: 23f95de7-e4ac-4c0b-9db2-88b3bd542eb9

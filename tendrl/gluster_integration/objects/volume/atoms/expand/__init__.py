@@ -2,6 +2,9 @@ from tendrl.commons.event import Event
 from tendrl.commons.message import Message
 from tendrl.commons import objects
 from tendrl.gluster_integration.objects.volume import Volume
+from tendrl.gluster_integration.objects.volume import Volume
+from tendrl.gluster_integration.objects.volume.atoms import \
+    brick_lock_utils
 
 
 class Expand(objects.BaseAtom):
@@ -36,6 +39,34 @@ class Expand(objects.BaseAtom):
             args.update({
                 "force": self.parameters.get('Volume.force')
             })
+
+        # mark the bricks locked by the task_id so that they cannot be
+        # picked by other create volume tasks
+        Event(
+            Message(
+                priority="info",
+                publisher=NS.publisher_id,
+                payload={
+                    "message": "Locking the bricks"
+                },
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                cluster_id=NS.tendrl_context.integration_id,
+            )
+        )
+        brick_paths = brick_lock_utils.format_brick_paths(
+            self.parameters.get("Volume.bricks")
+        )
+        lock_info = dict(
+            node_id=NS.node_context.node_id,
+            fqdn=NS.node_context.fqdn,
+            tags=NS.node_context.tags,
+            volume=vol.name,
+            type=NS.type,
+            job_id=self.parameters["job_id"],
+            flow=self.__class__.__name__
+        )
+        brick_lock_utils.lock_bricks(brick_paths, lock_info)
 
         Event(
             Message(
@@ -83,4 +114,19 @@ class Expand(objects.BaseAtom):
                     cluster_id=NS.tendrl_context.integration_id,
                 )
             )
+            # Unlock the bricks so that they can be used later
+            Event(
+                Message(
+                    priority="info",
+                    publisher=NS.publisher_id,
+                    payload={
+                        "message": "Un-locking the bricks"
+                    },
+                    job_id=self.parameters["job_id"],
+                    flow_id=self.parameters["flow_id"],
+                    cluster_id=NS.tendrl_context.integration_id,
+                )
+            )
+            brick_lock_utils(brick_paths)
+
             return False

@@ -14,13 +14,12 @@ class ValidateShrinkVolumeInputs(objects.BaseAtom):
 
     def _getBrickList(self, brick_count, sub_vol_len, volume_id):
         try:
-            result = NS._int.client.read(
+            subvolumes = NS._int.client.read(
                 "clusters/%s/Volumes/%s/Bricks" % (
                     NS.tendrl_context.integration_id,
                     volume_id
                 ),
             )
-            bricks = result.leaves
         except etcd.EtcdKeyNotFound:
             Event(
                 Message(
@@ -37,20 +36,14 @@ class ValidateShrinkVolumeInputs(objects.BaseAtom):
             )
             return []
 
-        b_list = ["" for el in range(brick_count)]
-
-        for el in bricks:
-            result = NS._int.client.read(
-                el.key + "/" + "sequence_number"
-            )
-            b_list[int(result.value)-1]=el.key.split("/")[-1]
-
         brick_list = []
-        for i in range(brick_count/sub_vol_len):
+        for subvolume in subvolumes.leaves:
             sub_vol = []
-            for b in b_list[i*sub_vol_len:(i+1)*sub_vol_len]:
-                sub_vol.append(b)
+            bricks = NS._int.client.read(subvolume.key)
+            for brick in bricks.leaves:
+                sub_vol.append(brick.key.split("/")[-1])
             brick_list.append(sub_vol)
+
         return brick_list
 
     def _check_input_bricks(self, diff, input_bricks, brick_list):
@@ -125,7 +118,6 @@ class ValidateShrinkVolumeInputs(objects.BaseAtom):
             sub_vol_len = replica_count
         elif disperse_count > 1:
             sub_vol_len = disperse_count
-
         brick_list = self._getBrickList(
             brick_count, sub_vol_len,
             self.parameters['Volume.vol_id']
@@ -134,7 +126,6 @@ class ValidateShrinkVolumeInputs(objects.BaseAtom):
             return False
         
         msg = ""
-        
         # Check if its a replicated volume
         if replica_count > 1:
             # check if job is trying to change replica count

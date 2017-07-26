@@ -262,7 +262,7 @@ namespace.gluster:
           type: String
         utilization:
           help: Brick utilization
-          type: Dict        
+          type: json
       enabled: true
       value: clusters/$TendrlContext.integration_id/Bricks/all/$Brick.brick_name
       list:  clusters/$TendrlContext.integration_id/Bricks/all
@@ -715,6 +715,9 @@ namespace.gluster:
           type: String
         status:
           help: "Status of the volume"
+          type: String
+        state:
+          help: state of the volume
           type: String
         snap_count:
           help: "Count of the snapshots"

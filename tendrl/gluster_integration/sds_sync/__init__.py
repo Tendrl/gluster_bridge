@@ -55,6 +55,194 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
             )
         )
 
+    def _sync_cluster_utilization_details(self, volumes):
+        cluster_raw_capacity = 0
+        cluster_used_capacity = 0
+        cluster_usable_capacity = 0
+        for volume in volumes:
+            subvol_count = 0
+            bricks = []
+            raw_capacity = 0
+            raw_used = 0
+            up_bricks = 0
+            subvols = []
+            while True:
+                try:
+                    subvol = NS._int.client.read(
+                        "clusters/%s/Volumes/%s/Bricks/subvolume%s" % (
+                            NS.tendrl_context.integration_id,
+                            volume.vol_id,
+                            subvol_count
+                        )
+                    )
+                    subvol_bricks = []
+                    for entry in subvol.leaves:
+                        brick_name = entry.key.split("/")[-1]
+                        fetched_brick = NS.gluster.objects.Brick(
+                            name=brick_name
+                        ).load()
+                        raw_capacity += fetched_brick.utilization['total']
+                        cluster_raw_capacity += fetched_brick.utilization['total']
+                        raw_used += fetched_brick.utilization['used']
+                        cluster_used_capacity += fetched_brick.utilization['used']
+                        bricks.append(fetched_brick)
+                        subvol_bricks.append(fetched_brick)
+                        if fetched_brick.status != "Started":
+                            up_bricks += 1
+                    subvols.append(subvol_bricks)
+                    subvol_count += 1
+                except etcd.EtcdKeyNotFound:
+                    break
+            vol_usable_capacity = 0
+            vol_used_capacity = 0
+            vol_pcnt_used = 0
+            if up_bricks == len(bricks):
+                if int(volume.disperse_count) == 0:
+                    # This is distribute or replicate volume
+                    vol_usable_capacity = raw_capacity / int(volume.replica_count)
+                    vol_used_capacity = raw_used / int(volume.replica_count)
+                else:
+                    # this is a disperse volume, with all bricks online
+                    # assumption : all bricks are the same size
+                    disperse_yield = \
+                        float(
+                            int(volume.disperse_count) - int(volume.redundancy_count)
+                        ) / int(volume.disperse_count)
+                    vol_usable_capacity = raw_capacity * disperse_yield
+                    vol_used_capacity = raw_used * disperse_yield
+            else:
+                if int(volume.replica_count) > 1 or int(volume.disperse_count) > 0:
+                    for subvol in subvols:
+                        for brick in subvol:
+                            if brick.status == "Started":
+                                vol_usable_capacity += brick.utilization['total']
+                                vol_used_capacity += brick.utilization['used']
+                            # For replicate volume use only one replica
+                            if int(volume.replica_count) > 1:
+                                break
+                else:
+                    vol_usable_capacity = raw_capacity
+                    vol_used_capacity = raw_used
+            if vol_usable_capacity > 0:
+                vol_pcnt_used = (vol_used_capacity / float(vol_usable_capacity)) * 100
+            volume.usable_capacity = vol_usable_capacity
+            volume.used_capacity = vol_used_capacity
+            volume.pcnt_used = str(vol_pcnt_used)
+            volume.save()
+            cluster_usable_capacity += volume.usable_capacity
+        cluster_pcnt_used = 0
+        if cluster_usable_capacity > 0:
+            cluster_pcnt_used = (cluster_used_capacity / float(cluster_usable_capacity)) * 100
+
+        NS.gluster.objects.Utilization(
+            raw_capacity=cluster_raw_capacity,
+            used_capacity=cluster_used_capacity,
+            usable_capacity=cluster_usable_capacity,
+            pcnt_used=str(cluster_pcnt_used)
+        ).save()
+
+    def _sync_cluster_status(self, volumes):
+        status = 'healthy'
+
+        # Calculate status based on volumes status
+        if len(volumes) > 0:
+            volume_states = self._derive_volume_states(volumes)
+            for vol_id, state in volume_states.iteritems():
+                if 'down' in state or 'partial' in state:
+                    status = 'unhealthy'
+
+        # Change status basd on node status
+        cmd = cmd_utils.Command(
+            'gluster pool list', True
+        )
+        out, err, rc = cmd.run()
+        if not err:
+            out_lines = out.split('\n')
+            connected = True
+            for index in range(1, len(out_lines) - 1):
+                node_status_det = out_lines[index].split('\t')
+                if len(node_status_det) > 2:
+                    if node_status_det[2].strip() != 'Connected':
+                        connected = connected and False
+            if connected:
+                status = 'healthy'
+            else:
+                status = 'unhealthy'
+
+        # Persist the cluster status
+        NS.gluster.objects.GlobalDetails(
+            status=status
+        ).save()
+
+    def _derive_volume_states(self, volumes):
+        out_dict = {}
+        for volume in volumes:
+            subvol_count = 0
+            bricks = []
+            subvol_states = []
+            while True:
+                try:
+                    subvol = NS._int.client.read(
+                        "clusters/%s/Volumes/%s/Bricks/subvolume%s" % (
+                            NS.tendrl_context.integration_id,
+                            volume.vol_id,
+                            subvol_count
+                        )
+                    )
+                    state = 0
+                    for entry in subvol.leaves:
+                        brick_name = entry.key.split("/")[-1]
+                        fetched_brick = NS.gluster.objects.Brick(
+                            name=brick_name
+                        ).load()
+                        bricks.append(fetched_brick)
+                        if fetched_brick.status != "Started":
+                            state += 1
+                    subvol_states.append(state)
+                    subvol_count += 1
+                except etcd.EtcdKeyNotFound:
+                    break
+
+            total_bricks = len(bricks)
+            up_bricks = 0
+            for brick in bricks:
+                if brick.status == "Started":
+                    up_bricks += 1
+            if total_bricks == 0:
+                # No brick details updated for the volume yet
+                out_dict[volume.vol_id] = 'unknown'
+            elif up_bricks == 0:
+                out_dict[volume.vol_id] = 'down'
+            else:
+                out_dict[volume.vol_id] = 'up'
+                if int(volume.replica_count) > 1 or int(volume.disperse_count) > 0:
+                    worst_subvol = max(subvol_states)
+                    if worst_subvol > 0:
+                        subvol_prob = max(
+                            int(volume.replica_count),
+                            int(volume.redundancy_count) + 1
+                        )
+                        if worst_subvol == subvol_prob:
+                            # if this volume contains only one subvolume,
+                            # and the bricks down > redundancy level
+                            # then the volume state needs to show down
+                            if subvol_count == 1:
+                                out_dict[volume.vol_id] = 'down'
+                            else:
+                                out_dict[volume.vol_id] = '(partial)'
+                        else:
+                            out_dict[volume.vol_id] = '(degraded)'
+                else:
+                    # This volume is not 'protected', so any brick
+                    # disruption leads straight to a 'partial'
+                    # availability state
+                    if up_bricks != total_bricks:
+                        out_dict[volume.vol_id] = '(partial)'
+            # Save the volume status
+            volume.state = out_dict[volume.vol_id]
+            volume.save()
+        return out_dict
+
     def _run(self):
         # To detect out of band deletes
         # refresh gluster object inventory at config['sync_interval']
@@ -126,7 +314,8 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                         'odir',
                         '/var/run',
                         'file',
-                        'glusterd-state'
+                        'glusterd-state',
+                        'detail'
                     ]
                 )
                 raw_data = ini2json.ini_to_dict('/var/run/glusterd-state')
@@ -155,325 +344,14 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                 if "Volumes" in raw_data:
                     index = 1
                     volumes = raw_data['Volumes']
-                    node_context = NS.node_context.load()
-                    tag_list = list(node_context.tags)
                     while True:
-                        try:
-                            # Raise alerts for volume state change.
-                            cluster_provisioner = "provisi" + \
-                                                  "oner/%s" % \
-                                                  NS.tendrl_context.\
-                                                  integration_id
-                            if cluster_provisioner in tag_list:
-                                try:
-                                    stored_volume_status = NS._int.client.read(
-                                        "clusters/%s/Volumes/%s/status" % (
-                                            NS.tendrl_context.integration_id,
-                                            volumes['volume%s.id' % index]
-                                        )
-                                    ).value
-                                    current_status = volumes[
-                                        'volume%s.status' % index
-                                    ]
-                                    if current_status != stored_volume_status:
-                                        msg = "Status of volume: %s " + \
-                                              "changed from %s to %s" % (
-                                                  volumes[
-                                                      'volume%s.name' % index
-                                                  ],
-                                                  stored_volume_status,
-                                                  current_status
-                                              )
-                                        instance = "volume_%s" % volumes[
-                                            'volume%s.name' % index
-                                        ]
-                                        self._emit_event(
-                                            "volume_status",
-                                            current_status,
-                                            msg,
-                                            instance
-                                        )
-
-                                except etcd.EtcdKeyNotFound:
-                                    pass
-
-                            rebalance_status = ""
-                            if volumes[
-                                    'volume%s.type' % index
-                            ].startswith("Distribute"):
-                                status = rebal_stat.get_rebalance_status(
-                                    volumes[
-                                        'volume%s.name' % index
-                                    ]
-                                )
-                                if status:
-                                    rebalance_status = status.replace(" ", "_")
-                                else:
-                                    rebalance_status = "not_started"
-
-                            volume = NS.gluster.objects.Volume(
-                                vol_id=volumes[
-                                    'volume%s.id' % index
-                                ],
-                                vol_type=volumes[
-                                    'volume%s.type' % index
-                                ],
-                                name=volumes[
-                                    'volume%s.name' % index
-                                ],
-                                transport_type=volumes[
-                                    'volume%s.transport_type' % index
-                                ],
-                                status=volumes[
-                                    'volume%s.status' % index
-                                ],
-                                brick_count=volumes[
-                                    'volume%s.brickcount' % index
-                                ],
-                                snap_count=volumes[
-                                    'volume%s.snap_count' % index
-                                ],
-                                stripe_count=volumes[
-                                    'volume%s.stripe_count' % index
-                                ],
-                                replica_count=volumes[
-                                    'volume%s.replica_count' % index
-                                ],
-                                subvol_count=volumes[
-                                    'volume%s.subvol_count' % index
-                                ],
-                                arbiter_count=volumes[
-                                    'volume%s.arbiter_count' % index
-                                ],
-                                disperse_count=volumes[
-                                    'volume%s.disperse_count' % index
-                                ],
-                                redundancy_count=volumes[
-                                    'volume%s.redundancy_count' % index
-                                ],
-                                quorum_status=volumes[
-                                    'volume%s.quorum_status' % index
-                                ],
-                                snapd_status=volumes[
-                                    'volume%s.snapd_svc.online_status' % index
-                                ],
-                                snapd_inited=volumes[
-                                    'volume%s.snapd_svc.inited' % index
-                                ],
-                                rebal_status=rebalance_status,
-                            )
-                            volume.save(ttl=SYNC_TTL)
-                            rebal_det = NS.gluster.objects.RebalanceDetails(
-                                vol_id=volumes[
-                                    'volume%s.id' % index
-                                ],
-                                rebal_id=volumes[
-                                    'volume%s.rebalance.id' % index
-                                ],
-                                rebal_status=volumes[
-                                    'volume%s.rebalance.status' % index
-                                ],
-                                rebal_failures=volumes[
-                                    'volume%s.rebalance.failures' % index
-                                ],
-                                rebal_skipped=volumes[
-                                    'volume%s.rebalance.skipped' % index
-                                ],
-                                rebal_lookedup=volumes[
-                                    'volume%s.rebalance.lookedup' % index
-                                ],
-                                rebal_files=volumes[
-                                    'volume%s.rebalance.files' % index
-                                ],
-                                rebal_data=volumes[
-                                    'volume%s.rebalance.data' % index
-                                ],
-                            )
-                            rebal_det.save(ttl=SYNC_TTL)
-                            b_index = 1
-                            # ipv4 address of current node
-                            try:
-                                network_ip = []
-                                networks = NS._int.client.read(
-                                    "nodes/%s/Networks" % NS.node_context.
-                                    node_id
-                                )
-                                for interface in networks.leaves:
-                                    key = interface.key.split("/")[-1]
-                                    network = NS.tendrl.objects.NodeNetwork(
-                                        interface=key).load()
-                                    network_ip.extend(network.ipv4)
-                            except etcd.EtcdKeyNotFound as ex:
-                                Event(
-                                    ExceptionMessage(
-                                        priority="debug",
-                                        publisher=NS.publisher_id,
-                                        payload={
-                                            "message": "Could not find "
-                                            "any ipv4 networks for node"
-                                            " %s" % NS.node_context.node_id,
-                                            "exception": ex
-                                        }
-                                    )
-                                )
-                            while True:
-                                try:
-                                    # Update brick node wise
-                                    hostname = volumes[
-                                        'volume%s.brick%s.hostname' % (
-                                            index, b_index)
-                                    ]
-                                    if (NS.node_context.fqdn != hostname) and (
-                                        hostname not in network_ip):
-                                        b_index += 1
-                                        continue
-                                    sub_vol_size = (int(
-                                        volumes[
-                                            'volume%s.brickcount' % index
-                                        ]
-                                    )) / int(
-                                        volumes[
-                                            'volume%s.subvol_count' % index
-                                        ]
-                                    )
-                                    brick_name = NS.node_context.fqdn
-                                    brick_name += ":"
-                                    brick_name += volumes[
-                                        'volume%s.brick%s'
-                                        '.path' % (
-                                            index,
-                                            b_index
-                                        )
-                                    ].split(":")[-1].replace("/", "_")
-
-                                    # Raise alerts if the brick path changes
-                                    try:
-                                        sbs = NS._int.client.read(
-                                            "clusters/%s/Bricks/all/"
-                                            "%s/status" % (
-                                                NS.tendrl_context.
-                                                integration_id,
-                                                brick_name
-                                            )
-                                        ).value
-                                        current_status = volumes.get(
-                                            'volume%s.brick%s.status' % (
-                                                index,
-                                                b_index
-                                            )
-                                        )
-                                        if current_status != sbs:
-                                            msg = "Status of brick: %s " + \
-                                                  "under volume %s chan" + \
-                                                  "ged from %s to %s" % (
-                                                      volumes[
-                                                          'volume%s.brick%s'
-                                                          '.path' % (
-                                                              index,
-                                                              b_index
-                                                          )
-                                                      ],
-                                                      volumes[
-                                                          'volume%s.'
-                                                          'name' % index
-                                                      ],
-                                                      sbs,
-                                                      current_status
-                                                  )
-                                            instance = "volume_%s|brick_%s" % (
-                                                volumes[
-                                                    'volume%s.name' % index
-                                                ],
-                                                volumes[
-                                                    'volume%s.brick%s.path' % (
-                                                        index, b_index
-                                                    )
-                                                ]
-                                            )
-                                            self._emit_event(
-                                                "brick_status",
-                                                current_status,
-                                                msg,
-                                                instance
-                                            )
-
-                                    except etcd.EtcdKeyNotFound:
-                                        pass
-
-                                    brk_pth = "clusters/%s/Volumes/%s" + \
-                                              "/Bricks/subvolume%s/%s"
-
-                                    vol_brick_path = brk_pth % (
-                                        NS.tendrl_context.integration_id,
-                                        volumes[
-                                            'volume%s'
-                                            '.id' % index
-                                        ],
-                                        str(
-                                            (b_index - 1) / sub_vol_size
-                                        ),
-                                        brick_name
-                                    )
-
-                                    NS._int.wclient.write(
-                                        vol_brick_path,
-                                        ""
-                                    )
-
-                                    brick = NS.gluster\
-                                        .objects.Brick(
-                                            brick_name,
-                                            vol_id=volumes[
-                                                'volume%s.id' % index
-                                            ],
-                                            sequence_number=b_index,
-                                            path=volumes[
-                                                'volume%s.brick%s.path' % (
-                                                    index, b_index)],
-                                            hostname=volumes.get(
-                                                'volume%s.brick%s.hostname' % (
-                                                    index, b_index)),
-                                            port=volumes.get(
-                                                'volume%s.brick%s.port' % (
-                                                    index, b_index)),
-                                            used=True,
-                                            status=volumes.get(
-                                                'volume%s.brick%s.status' % (
-                                                    index, b_index
-                                                )
-                                            ),
-                                            filesystem_type=volumes.get(
-                                                'volume%s.brick%s.'
-                                                'filesystem_type' % (
-                                                    index, b_index
-                                                )
-                                            ),
-                                            mount_opts=volumes.get(
-                                                'volume%s.brick%s'
-                                                '.mount_options' % (
-                                                    index, b_index
-                                                )
-                                            ),
-                                            utilization=brick_utilization.
-                                            brick_utilization(
-                                                volumes[
-                                                    'volume%s.brick%s'
-                                                    '.path' % (
-                                                        index,
-                                                        b_index
-                                                    )
-                                                ]
-                                            )
-                                        )
-                                    brick.save(ttl=SYNC_TTL)
-
-                                    b_index += 1
-                                except KeyError:
-                                    break
-                            index += 1
-                        except KeyError:
+                        g = gevent.spawn(sync_volumes, volumes, index)
+                        g.join()
+                        if not g.successful() and \
+                            g.exception.__class__.__name__ == 'KeyError':
                             break
-                    # poplate the volume options
+                        index += 1
+                    # populate the volume options
                     reg_ex = re.compile("^volume[0-9]+.options+")
                     options = {}
                     for key in volumes.keys():
@@ -494,151 +372,10 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                             )
                         vol_options.save()
 
-                # Sync the cluster status details
-                args = ["gstatus", "-o", "json"]
-                p = subprocess.Popen(
-                    args,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    stdin=open(os.devnull, "r")
-                )
-                stdout, stderr = p.communicate()
-                if stderr == "" and p.returncode == 0:
-                    # The format of the output from gstatus is as below
-
-                    # "2017-02-23 18:13:01.944183 {"brick_count": 2,
-                    # bricks_active": 2, "glfs_version": "3.9.0",
-                    # node_count": 2, "nodes_active": 2, "over_commit": "No",
-                    # product_name": "Community", "raw_capacity": 52181536768,
-                    # sh_active": 0, "sh_enabled": 0, "snapshot_count": 0,
-                    # status": "healthy", "usable_capacity": 52181536768,
-                    # used_capacity": 2117836800, "volume_count": 1,
-                    # volume_summary": [{"snapshot_count": 0, "state": "up",
-                    # usable_capacity":52181536768,"used_capacity":2117836800,
-                    # volume_name": "vol1"}]}\n"
-
-                    out_dict = json.loads(stdout[stdout.index('{'): -1])
-                    NS.gluster.objects.Utilization(
-                        raw_capacity=out_dict['raw_capacity'],
-                        usable_capacity=out_dict['usable_capacity'],
-                        used_capacity=out_dict['used_capacity'],
-                        pcnt_used=(
-                            out_dict[
-                                'used_capacity'
-                            ] * 100 / out_dict['usable_capacity']
-                        )
-                    ).save()
-                    volume_up_degraded = 0
-                    for item in out_dict['volume_summary']:
-                        if not item:
-                            continue
-                        if "up(degraded)" in item['state']:
-                            volume_up_degraded = volume_up_degraded + 1
-                        volumes = NS._int.client.read(
-                            "clusters/%s/Volumes" % NS.tendrl_context.
-                            integration_id
-                        )
-                        for child in volumes._children:
-                            volume = NS.gluster.objects.Volume(
-                                vol_id=child['key'].split('/')[-1]
-                            ).load()
-                            if volume.name == item['volume_name']:
-                                NS.gluster.objects.Volume(
-                                    vol_id=child['key'].split('/')[-1],
-                                    usable_capacity=str(
-                                        item['usable_capacity']
-                                    ),
-                                    used_capacity=str(item['used_capacity']),
-                                    pcnt_used=str(
-                                        item['used_capacity'] * 100 / item[
-                                            'usable_capacity']
-                                    ),
-                                    vol_type=volume.vol_type,
-                                    name=volume.name,
-                                    transport_type=volume.transport_type,
-                                    status=volume.status,
-                                    brick_count=volume.brick_count,
-                                    snap_count=volume.snap_count,
-                                    stripe_count=volume.stripe_count,
-                                    replica_count=volume.replica_count,
-                                    subvol_count=volume.subvol_count,
-                                    arbiter_count=volume.arbiter_count,
-                                    disperse_count=volume.disperse_count,
-                                    redundancy_count=volume.redundancy_count,
-                                    quorum_status=volume.quorum_status,
-                                    snapd_status=volume.snapd_status,
-                                    snapd_inited=volume.snapd_inited,
-                                    rebal_status=volume.rebal_status,
-                                ).save()
-                    connection_count = None
-                    connection_active = None
-                    # gstatus result:
-                    # Product: Community      Capacity:  25.00 GiB(raw bricks)
-                    # Status: HEALTHY         3.00 GiB(raw used)
-                    # Glusterfs: 3.9.0        87.00 GiB(usable from volumes)
-                    # OverCommit: Yes         Snapshots:   0
-                    # Nodes       :  2/  2    Volumes:   4 Up
-                    # Self Heal   :  0/  0    0 Up(Degraded)
-                    # Bricks      :  7/  7    0 Up(Partial)
-                    # Connections :  1/   2   0 Down
-
-                    # grep result:
-                    # Connections :  0/   0        1 Down
-                    cmd = cmd_utils.Command(
-                        'gstatus -s | grep Connections', True
-                    )
-                    out, err, rc = cmd.run()
-                    if not err:
-                        if "Connection" in out:
-                            out = (re.split(r'\s{5,}', out)[0])
-                            out = out.split(":")[1].replace(" ", "").split("/")
-                            connection_active = int(out[0])
-                            connection_count = int(out[1])
-                    NS.gluster.objects.GlobalDetails(
-                        status=out_dict['status'],
-                        volume_up_degraded=volume_up_degraded,
-                        connection_active=connection_active,
-                        connection_count=connection_count
-                    ).save()
-
-                else:
-                    # If gstatus does not return any status details in absence
-                    # of volumes, default set the status and utilization
-                    # details A sample output from gstatus if no volumes
-                    # in cluster is as below
-                    #
-                    # >gstatus -o json
-                    # This cluster doesn't have any volumes/daemons running.
-                    # The output below shows the current nodes attached to
-                    # this host.
-                    #
-                    # UUID				   Hostname  State
-                    # 6a48d2f7-3859-4542-86e0-0a8146588f31 {FQDN-1}  Connected
-                    # 7380e303-83b6-4728-918f-e99029bc1bce {FQDN-2}  Connected
-                    # 751ecb42-da85-4c3d-834d-9824d1ce7fd3 {FQDN-3}  Connected
-                    # 388b708c-a86c-4a16-9a6f-f0d53ea79a51 localhost Connected
-
-                    out_lines = stdout.split('\n')
-                    connected = True
-                    for index in range(4, len(out_lines) - 2):
-                        node_status_det = out_lines[index].split('\t')
-                        if len(node_status_det) > 2:
-                            if node_status_det[2].strip() != 'Connected':
-                                connected = connected and False
-                    if connected:
-                        NS.gluster.objects.GlobalDetails(
-                            status='healthy'
-                        ).save()
-                    else:
-                        NS.gluster.objects.GlobalDetails(
-                            status='unhealthy'
-                        ).save()
-                    NS.gluster.objects.Utilization(
-                        raw_capacity=0,
-                        usable_capacity=0,
-                        used_capacity=0,
-                        pcnt_used=0
-                    ).save()
+                # Sync cluster global details
+                volumes = NS.gluster.objects.Volume().load_all()
+                self._sync_cluster_status(volumes)
+                self._sync_cluster_utilization_details(volumes)
 
                 _cluster = NS.tendrl.objects.Cluster(
                     integration_id=NS.tendrl_context.integration_id
@@ -668,3 +405,214 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                 payload={"message": "%s complete" % self.__class__.__name__}
             )
         )
+
+def sync_volumes(volumes, index):
+    SYNC_TTL = int(NS.config.data.get("sync_interval", 10)) + 250
+    node_context = NS.node_context.load()
+    tag_list = list(node_context.tags)
+    # Raise alerts for volume state change.
+    cluster_provisioner = "provisioner/%s" % NS.tendrl_context.integration_id
+    if cluster_provisioner in tag_list:
+        try:
+            stored_volume_status = NS._int.client.read(
+                "clusters/%s/Volumes/%s/status" % (
+                    NS.tendrl_context.integration_id,
+                    volumes['volume%s.id' % index]
+                )
+            ).value
+            current_status = volumes['volume%s.status' % index]
+            if stored_volume_status != "" and \
+                current_status != stored_volume_status:
+                msg = "Status of volume: %s " + \
+                      "changed from %s to %s" % (
+                          volumes['volume%s.name' % index],
+                          stored_volume_status,
+                          current_status
+                      )
+                instance = "volume_%s" % volumes[
+                    'volume%s.name' % index
+                ]
+                self._emit_event(
+                    "volume_status",
+                    current_status,
+                    msg,
+                    instance
+                )
+        except etcd.EtcdKeyNotFound:
+            pass
+
+    rebalance_status = ""
+    if volumes['volume%s.type' % index].startswith("Distribute"):
+        status = rebal_stat.get_rebalance_status(
+            volumes['volume%s.name' % index]
+        )
+        if status:
+            rebalance_status = status.replace(" ", "_")
+        else:
+            rebalance_status = "not_started"
+
+    volume = NS.gluster.objects.Volume(
+        vol_id=volumes['volume%s.id' % index],
+        vol_type="arbiter" if int(volumes['volume%s.arbiter_count' % index]) > 0 \
+            else volumes['volume%s.type' % index],
+        name=volumes['volume%s.name' % index],
+        transport_type=volumes['volume%s.transport_type' % index],
+        status=volumes['volume%s.status' % index],
+        brick_count=volumes['volume%s.brickcount' % index],
+        snap_count=volumes['volume%s.snap_count' % index],
+        stripe_count=volumes['volume%s.stripe_count' % index],
+        replica_count=volumes['volume%s.replica_count' % index],
+        subvol_count=volumes['volume%s.subvol_count' % index],
+        arbiter_count=volumes['volume%s.arbiter_count' % index],
+        disperse_count=volumes['volume%s.disperse_count' % index],
+        redundancy_count=volumes['volume%s.redundancy_count' % index],
+        quorum_status=volumes['volume%s.quorum_status' % index],
+        snapd_status=volumes['volume%s.snapd_svc.online_status' % index],
+        snapd_inited=volumes['volume%s.snapd_svc.inited' % index],
+        rebal_status=rebalance_status,
+    )
+    volume.save(ttl=SYNC_TTL)
+    rebal_det = NS.gluster.objects.RebalanceDetails(
+        vol_id=volumes['volume%s.id' % index],
+        rebal_id=volumes['volume%s.rebalance.id' % index],
+        rebal_status=volumes['volume%s.rebalance.status' % index],
+        rebal_failures=volumes['volume%s.rebalance.failures' % index],
+        rebal_skipped=volumes['volume%s.rebalance.skipped' % index],
+        rebal_lookedup=volumes['volume%s.rebalance.lookedup' % index],
+        rebal_files=volumes['volume%s.rebalance.files' % index],
+        rebal_data=volumes['volume%s.rebalance.data' % index],
+    )
+    rebal_det.save(ttl=SYNC_TTL)
+    b_index = 1
+    # ipv4 address of current node
+    try:
+        network_ip = []
+        networks = NS._int.client.read(
+            "nodes/%s/Networks" % NS.node_context.
+            node_id
+        )
+        for interface in networks.leaves:
+            key = interface.key.split("/")[-1]
+            network = NS.tendrl.objects.NodeNetwork(
+                interface=key
+            ).load()
+            network_ip.extend(network.ipv4)
+    except etcd.EtcdKeyNotFound as ex:
+        Event(
+            ExceptionMessage(
+                priority="debug",
+                publisher=NS.publisher_id,
+                payload={
+                    "message": "Could not find "
+                    "any ipv4 networks for node"
+                    " %s" % NS.node_context.node_id,
+                    "exception": ex
+                }
+            )
+        )
+    while True:
+        try:
+            # Update brick node wise
+            hostname = volumes[
+                'volume%s.brick%s.hostname' % (index, b_index)
+            ]
+            if (NS.node_context.fqdn != hostname) and (
+                hostname not in network_ip):
+                b_index += 1
+                continue
+            sub_vol_size = (int(
+                volumes['volume%s.brickcount' % index]
+            )) / int(
+                volumes['volume%s.subvol_count' % index]
+            )
+            brick_name = NS.node_context.fqdn
+            brick_name += ":"
+            brick_name += volumes['volume%s.brick%s' '.path' % (
+                index,
+                b_index
+            )].split(":")[-1].replace("/", "_")
+
+            # Raise alerts if the brick path changes
+            try:
+                sbs = NS._int.client.read(
+                    "clusters/%s/Bricks/all/"
+                    "%s/status" % (
+                        NS.tendrl_context.
+                        integration_id,
+                        brick_name
+                    )
+                ).value
+                current_status = volumes.get(
+                    'volume%s.brick%s.status' % (index, b_index)
+                )
+                if current_status != sbs:
+                    msg = "Status of brick: %s " + \
+                          "under volume %s chan" + \
+                          "ged from %s to %s" % (
+                              volumes[ 'volume%s.brick%s' '.path' % (
+                                      index,
+                                      b_index
+                              )],
+                              volumes['volume%s.' 'name' % index],
+                              sbs,
+                              current_status
+                          )
+                    instance = "volume_%s|brick_%s" % (
+                        volumes['volume%s.name' % index],
+                        volumes['volume%s.brick%s.path' % (
+                            index,
+                            b_index
+                        )]
+                    )
+                    self._emit_event(
+                        "brick_status",
+                        current_status,
+                        msg,
+                        instance
+                    )
+
+            except etcd.EtcdKeyNotFound:
+                pass
+
+            brk_pth = "clusters/%s/Volumes/%s/Bricks/subvolume%s/%s"
+
+            vol_brick_path = brk_pth % (
+                NS.tendrl_context.integration_id,
+                volumes['volume%s.id' % index ],
+                str((b_index - 1) / sub_vol_size),
+                brick_name
+            )
+
+            NS._int.wclient.write(vol_brick_path, "")
+
+            brick = NS.gluster.objects.Brick(
+                    brick_name,
+                    vol_id=volumes['volume%s.id' % index],
+                    sequence_number=b_index,
+                    path=volumes[
+                        'volume%s.brick%s.path' % (index, b_index)
+                    ],
+                    hostname=volumes.get(
+                        'volume%s.brick%s.hostname' % (index, b_index)
+                    ),
+                    port=volumes.get(
+                        'volume%s.brick%s.port' % (index, b_index)
+                    ),
+                    used=True,
+                    status=volumes.get(
+                        'volume%s.brick%s.status' % (index, b_index)
+                    ),
+                    filesystem_type=volumes.get(
+                        'volume%s.brick%s.filesystem_type' % (index, b_index)
+                    ),
+                    mount_opts=volumes.get(
+                        'volume%s.brick%s.mount_options' % (index, b_index)
+                    ),
+                    utilization=brick_utilization.brick_utilization(
+                        volumes['volume%s.brick%s.path' % (index, b_index)]
+                    ),
+                )
+            brick.save(ttl=SYNC_TTL)
+            b_index += 1
+        except KeyError:
+            break

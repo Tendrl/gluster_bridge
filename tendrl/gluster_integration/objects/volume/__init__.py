@@ -8,6 +8,7 @@ class Volume(objects.BaseObject):
         vol_type=None,
         name=None,
         status=None,
+        state=None,
         brick_count=None,
         deleted=None,
         transport_type=None,
@@ -34,6 +35,7 @@ class Volume(objects.BaseObject):
         self.vol_type = vol_type
         self.name = name
         self.status = status
+        self.state = state
         self.brick_count = brick_count
         self.deleted = deleted
         self.transport_type = transport_type

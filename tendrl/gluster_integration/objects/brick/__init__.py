@@ -51,8 +51,7 @@ class Brick(objects.BaseObject):
         self.status = status
         self.filesystem_type = filesystem_type
         self.mount_opts = mount_opts
-        if utilization:
-            self.utilization = utilization
+        self.utilization = utilization
         self.used = used
         self.value = 'clusters/{0}/Bricks/all/{1}'
 

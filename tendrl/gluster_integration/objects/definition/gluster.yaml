@@ -204,6 +204,27 @@ namespace.gluster:
       value: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/Snapshots/$Snapshot.id
       list: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/Snapshots
       help: gluster volume snapshot details
+    ClientConnection:
+      attrs:
+        brick_name:
+          help: name of the brick
+          type: String
+        hostname:
+          help: client hostname
+          type: String
+        bytesread:
+          help: no of bytes read
+          type: int
+        byteswrite:
+          help: no of bytes written
+          type: int
+        opversion:
+          help: operational version
+          type: String
+      enabled: true
+      value: clusters/$TendrlContext.integration_id/Bricks/all/$Brick.brick_name/ClientConnections/$ClientConnection.hostname
+      list:  clusters/$TendrlContext.integration_id/Bricks/all/$Brick.brick_name/ClientConnections
+      help: brick client connection details
     Brick:
       atoms:
         Create:
@@ -287,6 +308,9 @@ namespace.gluster:
         utilization:
           help: Brick utilization
           type: json
+        client_count:
+          help: no of client connections
+          type: int
       enabled: true
       value: clusters/$TendrlContext.integration_id/Bricks/all/$Brick.brick_name
       list:  clusters/$TendrlContext.integration_id/Bricks/all
@@ -755,6 +779,9 @@ namespace.gluster:
         quorum_status:
           help: "Quorum status"
           type: String
+        client_count:
+          help: No of client connections
+          type: int
       enabled: true
       value: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/
       list: clusters/$TendrlContext.integration_id/Volumes

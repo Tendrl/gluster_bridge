@@ -243,6 +243,31 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
             volume.save()
         return out_dict
 
+    def _sync_volume_connections(self, volumes):
+        for volume in volumes:
+            subvol_count = 0
+            vol_connections = 0
+            while True:
+                try:
+                    subvol = NS._int.client.read(
+                        "clusters/%s/Volumes/%s/Bricks/subvolume%s" % (
+                            NS.tendrl_context.integration_id,
+                            volume.vol_id,
+                            subvol_count
+                        )
+                    )
+                    for entry in subvol.leaves:
+                        brick_name = entry.key.split("/")[-1]
+                        fetched_brick = NS.gluster.objects.Brick(
+                            name=brick_name
+                        ).load()
+                        vol_connections += int(fetched_brick.client_count)
+                    subvol_count += 1
+                except etcd.EtcdKeyNotFound:
+                    break
+            volume.client_count = vol_connections
+            volume.save()
+
     def _run(self):
         # To detect out of band deletes
         # refresh gluster object inventory at config['sync_interval']
@@ -376,6 +401,7 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                 volumes = NS.gluster.objects.Volume().load_all()
                 self._sync_cluster_status(volumes)
                 self._sync_cluster_utilization_details(volumes)
+                self._sync_volume_connections(volumes)
 
                 _cluster = NS.tendrl.objects.Cluster(
                     integration_id=NS.tendrl_context.integration_id
@@ -636,8 +662,43 @@ def sync_volumes(volumes, index):
                     utilization=brick_utilization.brick_utilization(
                         volumes['volume%s.brick%s.path' % (index, b_index)]
                     ),
+                    client_count=volumes.get(
+                        'volume%s.brick%s.client_count' % (index, b_index)
+                    )
                 )
             brick.save(ttl=SYNC_TTL)
+
+            # Sync the brick client details
+            c_index = 1
+            if volumes.get('volume%s.brick%s.client_count' % (index, b_index)) > 0:
+                while True:
+                    try:
+                        NS.gluster.objects.ClientConnection(
+                            brick_name=brick_name,
+                            hostname=volumes[
+                                'volume%s.brick%s.client%s.hostname' % (
+                                    index, b_index, c_index
+                                )
+                            ],
+                            bytesread=volumes[
+                                'volume%s.brick%s.client%s.bytesread' % (
+                                    index, b_index, c_index
+                                )
+                            ],
+                            byteswrite=volumes[
+                                'volume%s.brick%s.client%s.byteswrite' % (
+                                    index, b_index, c_index
+                                )
+                            ],
+                            opversion=volumes[
+                                'volume%s.brick%s.client%s.opversion' % (
+                                    index, b_index, c_index
+                                )
+                            ]
+                        ).save(ttl=SYNC_TTL)
+                    except KeyError:
+                        break
+                    c_index += 1
             b_index += 1
         except KeyError:
             break

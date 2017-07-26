@@ -26,6 +26,7 @@ class Brick(objects.BaseObject):
         disk_type=None,
         disk_count=None,
         stripe_size=None,
+        client_count=None,
         *args,
         **kwargs
     ):
@@ -53,6 +54,7 @@ class Brick(objects.BaseObject):
         self.mount_opts = mount_opts
         self.utilization = utilization
         self.used = used
+        self.client_count = client_count
         self.value = 'clusters/{0}/Bricks/all/{1}'
 
     def render(self):

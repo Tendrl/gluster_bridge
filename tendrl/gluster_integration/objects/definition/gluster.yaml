@@ -314,6 +314,9 @@ namespace.gluster:
         client_count:
           help: no of client connections
           type: int
+        is_arbiter:
+          help: Flag to mention if brick is arbiter
+          type: int
       enabled: true
       value: clusters/$TendrlContext.integration_id/Bricks/all/$Brick.brick_name
       list:  clusters/$TendrlContext.integration_id/Bricks/all

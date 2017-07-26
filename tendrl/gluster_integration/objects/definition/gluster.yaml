@@ -176,6 +176,9 @@ namespace.gluster:
         rebal_skipped:
           help: "Skipped files while rebalance"
           type: String
+        time_left:
+          help: time left for rebalance to complete
+          type: int
       enabled: true
       value: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/RebalanceDetails/$TendrlContext.node_id
       list: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/RebalanceDetails
@@ -781,6 +784,8 @@ namespace.gluster:
           type: String
         client_count:
           help: No of client connections
+        rebal_estimated_time:
+          help: Estimated time left for rebalance to complete
           type: int
       enabled: true
       value: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/

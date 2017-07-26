@@ -12,6 +12,7 @@ class RebalanceDetails(objects.BaseObject):
         rebal_files=None,
         rebal_status=None,
         rebal_failures=None,
+        time_left=None,
         *args,
         **kwargs
     ):
@@ -25,6 +26,7 @@ class RebalanceDetails(objects.BaseObject):
         self.rebal_files = rebal_files
         self.rebal_status = rebal_status
         self.rebal_failures = rebal_failures
+        self.time_left = time_left
         self.value = 'clusters/{0}/Volumes/{1}/RebalanceDetails/{2}'
 
     def render(self):

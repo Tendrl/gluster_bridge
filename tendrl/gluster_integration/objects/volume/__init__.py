@@ -27,6 +27,7 @@ class Volume(objects.BaseObject):
         used_capacity=None,
         pcnt_used=None,
         client_count=None,
+        rebal_estimated_time=None,
         *args,
         **kwargs
     ):
@@ -55,6 +56,7 @@ class Volume(objects.BaseObject):
         self.used_capacity = used_capacity
         self.pcnt_used = pcnt_used
         self.client_count = client_count
+        self.rebal_estimated_time = rebal_estimated_time
         self.value = 'clusters/{0}/Volumes/{1}'
 
     def render(self):

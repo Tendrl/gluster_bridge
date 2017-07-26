@@ -483,6 +483,31 @@ def sync_volumes(volumes, index):
         rebal_data=volumes['volume%s.rebalance.data' % index],
     )
     rebal_det.save(ttl=SYNC_TTL)
+    s_index = 1
+    while True:
+        try:
+            vol_snapshot = NS.gluster.objects.Snapshot(
+                vol_id=volumes['volume%s.id' % index],
+                id=volumes[
+                    'volume%s.snapshot%s.id' % (index, s_index)
+                ],
+                name=volumes[
+                    'volume%s.snapshot%s.name' % (index, s_index)
+                ],
+                time=volumes[
+                    'volume%s.snapshot%s.time' % (index, s_index)
+                ],
+                description=volumes[
+                    'volume%s.snapshot%s.description' % (index, s_index)
+                ],
+                status=volumes[
+                    'volume%s.snapshot%s.status' % (index, s_index)
+                ]
+            )
+            vol_snapshot.save(ttl=SYNC_TTL)
+            s_index += 1
+        except KeyError:
+            break
     b_index = 1
     # ipv4 address of current node
     try:

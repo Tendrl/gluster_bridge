@@ -180,6 +180,30 @@ namespace.gluster:
       value: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/RebalanceDetails/$TendrlContext.node_id
       list: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/RebalanceDetails
       help: gluster volume rebalance details
+    Snapshot:
+      attrs:
+        vol_id:
+          help: Volume id
+          type: String
+        name:
+          help: name of snapshot
+          type: String
+        id:
+          help: uuid of snapshot
+          type: Integer
+        time:
+          help: creation time of snapshot
+          typoe: String
+        description:
+          help: description of snapshot
+          type: String
+        status:
+          help: status of snapshot
+          type: String
+      enabled: true
+      value: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/Snapshots/$Snapshot.id
+      list: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/Snapshots
+      help: gluster volume snapshot details
     Brick:
       atoms:
         Create:

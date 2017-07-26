@@ -358,6 +358,20 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                 )
                 raw_data = ini2json.ini_to_dict('/var/run/glusterd-state')
                 subprocess.call(['rm', '-rf', '/var/run/glusterd-state'])
+                subprocess.call(
+                    [
+                        'gluster',
+                        'get-state',
+                        'glusterd',
+                        'odir',
+                        '/var/run',
+                        'file',
+                        'glusterd-state-vol-opts',
+                        'volumeoptions'
+                    ]
+                )
+                raw_data_options = ini2json.ini_to_dict('/var/run/glusterd-state-vol-opts')
+                subprocess.call(['rm', '-rf', '/var/run/glusterd-state-vol-opts'])
                 sync_object = NS.gluster.objects.\
                     SyncObject(data=json.dumps(raw_data))
                 sync_object.save()
@@ -383,13 +397,18 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                     index = 1
                     volumes = raw_data['Volumes']
                     while True:
-                        g = gevent.spawn(sync_volumes, volumes, index)
+                        g = gevent.spawn(
+                            sync_volumes,
+                            volumes,
+                            index,
+                            raw_data_options.get('Volume Options')
+                        )
                         g.join()
                         if not g.successful() and \
                             g.exception.__class__.__name__ == 'KeyError':
                             break
                         index += 1
-                    # populate the volume options
+                    # populate the volume specific options
                     reg_ex = re.compile("^volume[0-9]+.options+")
                     options = {}
                     for key in volumes.keys():
@@ -403,12 +422,10 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                             if k.startswith('%s.options' % volname):
                                 dict1['.'.join(k.split(".")[2:])] = v
                                 options.pop(k, None)
-                        vol_options = NS.gluster.objects.\
-                            VolumeOptions(
-                                vol_id=vol_id,
-                                options=dict1
-                            )
-                        vol_options.save()
+                        vol_options = NS.gluster.objects.VolumeOptions(
+                            vol_id=vol_id,
+                            options=dict1
+                        ).save()
 
                 # Sync cluster global details
                 volumes = NS.gluster.objects.Volume().load_all()
@@ -446,7 +463,7 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
             )
         )
 
-def sync_volumes(volumes, index):
+def sync_volumes(volumes, index, vol_options):
     SYNC_TTL = int(NS.config.data.get("sync_interval", 10)) + 250
     node_context = NS.node_context.load()
     tag_list = list(node_context.tags)
@@ -524,6 +541,23 @@ def sync_volumes(volumes, index):
         time_left=volumes.get('volume%s.rebalance.time_left' % index),
     )
     rebal_det.save(ttl=SYNC_TTL)
+
+    # Save the default values of volume options
+    vol_opt_dict = {}
+    for opt_count in \
+        range(1, int(vol_options['volume%s.options.count' % index])):
+        vol_opt_dict[
+            vol_options[
+                'volume%s.options.key%s' % (index, opt_count)
+            ]
+        ] = vol_options[
+            'volume%s.options.value%s' % (index, opt_count)
+        ]
+    NS.gluster.objects.VolumeOptions(
+        vol_id=volume.vol_id,
+        options=vol_opt_dict
+    ).save(ttl=SYNC_TTL)
+
     s_index = 1
     while True:
         try:

@@ -24,37 +24,6 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
         super(GlusterIntegrationSdsSyncStateThread, self).__init__()
         self._complete = gevent.event.Event()
 
-    def _emit_event(self, resource, curr_value, msg, instance):
-        alert = {}
-        alert['source'] = NS.publisher_id
-        alert['pid'] = os.getpid()
-        alert['time_stamp'] = tendrl_now().isoformat()
-        alert['alert_type'] = 'status'
-        severity = "INFO"
-        if curr_value.lower() == "stopped":
-            severity = "CRITICAL"
-        alert['severity'] = severity
-        alert['resource'] = resource
-        alert['current_value'] = curr_value
-        alert['tags'] = dict(
-            plugin_instance=instance,
-            message=msg,
-            cluster_id=NS.tendrl_context.integration_id,
-            cluster_name=NS.tendrl_context.cluster_name,
-            sds_name=NS.tendrl_context.sds_name,
-            fqdn=socket.getfqdn()
-        )
-        alert['node_id'] = NS.node_context.node_id
-        if not NS.node_context.node_id:
-            return
-        Event(
-            Message(
-                "notice",
-                "alerting",
-                {'message': json.dumps(alert)}
-            )
-        )
-
     def _sync_cluster_utilization_details(self, volumes):
         cluster_raw_capacity = 0
         cluster_used_capacity = 0
@@ -82,9 +51,11 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                             name=brick_name
                         ).load()
                         raw_capacity += fetched_brick.utilization['total']
-                        cluster_raw_capacity += fetched_brick.utilization['total']
+                        cluster_raw_capacity += \
+                            fetched_brick.utilization['total']
                         raw_used += fetched_brick.utilization['used']
-                        cluster_used_capacity += fetched_brick.utilization['used']
+                        cluster_used_capacity += \
+                            fetched_brick.utilization['used']
                         bricks.append(fetched_brick)
                         subvol_bricks.append(fetched_brick)
                         if fetched_brick.status != "Started":
@@ -99,24 +70,30 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
             if up_bricks == len(bricks):
                 if int(volume.disperse_count) == 0:
                     # This is distribute or replicate volume
-                    vol_usable_capacity = raw_capacity / int(volume.replica_count)
-                    vol_used_capacity = raw_used / int(volume.replica_count)
+                    vol_usable_capacity = \
+                        raw_capacity / int(volume.replica_count)
+                    vol_used_capacity = \
+                        raw_used / int(volume.replica_count)
                 else:
                     # this is a disperse volume, with all bricks online
                     # assumption : all bricks are the same size
                     disperse_yield = \
                         float(
-                            int(volume.disperse_count) - int(volume.redundancy_count)
+                            int(volume.disperse_count) -
+                            int(volume.redundancy_count)
                         ) / int(volume.disperse_count)
                     vol_usable_capacity = raw_capacity * disperse_yield
                     vol_used_capacity = raw_used * disperse_yield
             else:
-                if int(volume.replica_count) > 1 or int(volume.disperse_count) > 0:
+                if int(volume.replica_count) > 1 or \
+                    int(volume.disperse_count) > 0:
                     for subvol in subvols:
                         for brick in subvol:
                             if brick.status == "Started":
-                                vol_usable_capacity += brick.utilization['total']
-                                vol_used_capacity += brick.utilization['used']
+                                vol_usable_capacity += \
+                                    brick.utilization['total']
+                                vol_used_capacity += \
+                                    brick.utilization['used']
                             # For replicate volume use only one replica
                             if int(volume.replica_count) > 1:
                                 break
@@ -124,7 +101,9 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                     vol_usable_capacity = raw_capacity
                     vol_used_capacity = raw_used
             if vol_usable_capacity > 0:
-                vol_pcnt_used = (vol_used_capacity / float(vol_usable_capacity)) * 100
+                vol_pcnt_used = (
+                    vol_used_capacity / float(vol_usable_capacity)
+                ) * 100
             volume.usable_capacity = vol_usable_capacity
             volume.used_capacity = vol_used_capacity
             volume.pcnt_used = str(vol_pcnt_used)
@@ -132,7 +111,9 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
             cluster_usable_capacity += volume.usable_capacity
         cluster_pcnt_used = 0
         if cluster_usable_capacity > 0:
-            cluster_pcnt_used = (cluster_used_capacity / float(cluster_usable_capacity)) * 100
+            cluster_pcnt_used = (
+                cluster_used_capacity / float(cluster_usable_capacity)
+            ) * 100
 
         NS.gluster.objects.Utilization(
             raw_capacity=cluster_raw_capacity,
@@ -215,7 +196,8 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                 out_dict[volume.vol_id] = 'down'
             else:
                 out_dict[volume.vol_id] = 'up'
-                if int(volume.replica_count) > 1 or int(volume.disperse_count) > 0:
+                if int(volume.replica_count) > 1 or \
+                    int(volume.disperse_count) > 0:
                     worst_subvol = max(subvol_states)
                     if worst_subvol > 0:
                         subvol_prob = max(
@@ -356,7 +338,9 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                         'detail'
                     ]
                 )
-                raw_data = ini2json.ini_to_dict('/var/run/glusterd-state')
+                raw_data = ini2json.ini_to_dict(
+                    '/var/run/glusterd-state'
+                )
                 subprocess.call(['rm', '-rf', '/var/run/glusterd-state'])
                 subprocess.call(
                     [
@@ -370,8 +354,16 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                         'volumeoptions'
                     ]
                 )
-                raw_data_options = ini2json.ini_to_dict('/var/run/glusterd-state-vol-opts')
-                subprocess.call(['rm', '-rf', '/var/run/glusterd-state-vol-opts'])
+                raw_data_options = ini2json.ini_to_dict(
+                    '/var/run/glusterd-state-vol-opts'
+                )
+                subprocess.call(
+                    [
+                        'rm',
+                        '-rf',
+                        '/var/run/glusterd-state-vol-opts'
+                    ]
+                )
                 sync_object = NS.gluster.objects.\
                     SyncObject(data=json.dumps(raw_data))
                 sync_object.save()
@@ -422,7 +414,7 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                             if k.startswith('%s.options' % volname):
                                 dict1['.'.join(k.split(".")[2:])] = v
                                 options.pop(k, None)
-                        vol_options = NS.gluster.objects.VolumeOptions(
+                        NS.gluster.objects.VolumeOptions(
                             vol_id=vol_id,
                             options=dict1
                         ).save()
@@ -463,6 +455,39 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
             )
         )
 
+
+def emit_event(self, resource, curr_value, msg, instance):
+    alert = {}
+    alert['source'] = NS.publisher_id
+    alert['pid'] = os.getpid()
+    alert['time_stamp'] = tendrl_now().isoformat()
+    alert['alert_type'] = 'status'
+    severity = "INFO"
+    if curr_value.lower() == "stopped":
+        severity = "CRITICAL"
+    alert['severity'] = severity
+    alert['resource'] = resource
+    alert['current_value'] = curr_value
+    alert['tags'] = dict(
+        plugin_instance=instance,
+        message=msg,
+        cluster_id=NS.tendrl_context.integration_id,
+        cluster_name=NS.tendrl_context.cluster_name,
+        sds_name=NS.tendrl_context.sds_name,
+        fqdn=socket.getfqdn()
+    )
+    alert['node_id'] = NS.node_context.node_id
+    if not NS.node_context.node_id:
+        return
+    Event(
+        Message(
+            "notice",
+            "alerting",
+            {'message': json.dumps(alert)}
+        )
+    )
+
+
 def sync_volumes(volumes, index, vol_options):
     SYNC_TTL = int(NS.config.data.get("sync_interval", 10)) + 250
     node_context = NS.node_context.load()
@@ -489,7 +514,7 @@ def sync_volumes(volumes, index, vol_options):
                 instance = "volume_%s" % volumes[
                     'volume%s.name' % index
                 ]
-                self._emit_event(
+                emit_event(
                     "volume_status",
                     current_status,
                     msg,
@@ -510,8 +535,9 @@ def sync_volumes(volumes, index, vol_options):
 
     volume = NS.gluster.objects.Volume(
         vol_id=volumes['volume%s.id' % index],
-        vol_type="arbiter" if int(volumes['volume%s.arbiter_count' % index]) > 0 \
-            else volumes['volume%s.type' % index],
+        vol_type="arbiter"
+        if int(volumes['volume%s.arbiter_count' % index]) > 0
+        else volumes['volume%s.type' % index],
         name=volumes['volume%s.name' % index],
         transport_type=volumes['volume%s.transport_type' % index],
         status=volumes['volume%s.status' % index],
@@ -649,9 +675,9 @@ def sync_volumes(volumes, index, vol_options):
                     msg = "Status of brick: %s " + \
                           "under volume %s chan" + \
                           "ged from %s to %s" % (
-                              volumes[ 'volume%s.brick%s' '.path' % (
-                                      index,
-                                      b_index
+                              volumes['volume%s.brick%s' '.path' % (
+                                  index,
+                                  b_index
                               )],
                               volumes['volume%s.' 'name' % index],
                               sbs,
@@ -664,7 +690,7 @@ def sync_volumes(volumes, index, vol_options):
                             b_index
                         )]
                     )
-                    self._emit_event(
+                    emit_event(
                         "brick_status",
                         current_status,
                         msg,
@@ -678,7 +704,7 @@ def sync_volumes(volumes, index, vol_options):
 
             vol_brick_path = brk_pth % (
                 NS.tendrl_context.integration_id,
-                volumes['volume%s.id' % index ],
+                volumes['volume%s.id' % index],
                 str((b_index - 1) / sub_vol_size),
                 brick_name
             )
@@ -686,43 +712,45 @@ def sync_volumes(volumes, index, vol_options):
             NS._int.wclient.write(vol_brick_path, "")
 
             brick = NS.gluster.objects.Brick(
-                    brick_name,
-                    vol_id=volumes['volume%s.id' % index],
-                    sequence_number=b_index,
-                    path=volumes[
-                        'volume%s.brick%s.path' % (index, b_index)
-                    ],
-                    hostname=volumes.get(
-                        'volume%s.brick%s.hostname' % (index, b_index)
-                    ),
-                    port=volumes.get(
-                        'volume%s.brick%s.port' % (index, b_index)
-                    ),
-                    used=True,
-                    status=volumes.get(
-                        'volume%s.brick%s.status' % (index, b_index)
-                    ),
-                    filesystem_type=volumes.get(
-                        'volume%s.brick%s.filesystem_type' % (index, b_index)
-                    ),
-                    mount_opts=volumes.get(
-                        'volume%s.brick%s.mount_options' % (index, b_index)
-                    ),
-                    utilization=brick_utilization.brick_utilization(
-                        volumes['volume%s.brick%s.path' % (index, b_index)]
-                    ),
-                    client_count=volumes.get(
-                        'volume%s.brick%s.client_count' % (index, b_index)
-                    ),
-                    is_arbiter=volumes.get(
-                        'volume%s.brick%s.is_arbiter' % (index, b_index)
-                    ),
-                )
+                brick_name,
+                vol_id=volumes['volume%s.id' % index],
+                sequence_number=b_index,
+                path=volumes[
+                    'volume%s.brick%s.path' % (index, b_index)
+                ],
+                hostname=volumes.get(
+                    'volume%s.brick%s.hostname' % (index, b_index)
+                ),
+                port=volumes.get(
+                    'volume%s.brick%s.port' % (index, b_index)
+                ),
+                used=True,
+                status=volumes.get(
+                    'volume%s.brick%s.status' % (index, b_index)
+                ),
+                filesystem_type=volumes.get(
+                    'volume%s.brick%s.filesystem_type' % (index, b_index)
+                ),
+                mount_opts=volumes.get(
+                    'volume%s.brick%s.mount_options' % (index, b_index)
+                ),
+                utilization=brick_utilization.brick_utilization(
+                    volumes['volume%s.brick%s.path' % (index, b_index)]
+                ),
+                client_count=volumes.get(
+                    'volume%s.brick%s.client_count' % (index, b_index)
+                ),
+                is_arbiter=volumes.get(
+                    'volume%s.brick%s.is_arbiter' % (index, b_index)
+                ),
+            )
             brick.save(ttl=SYNC_TTL)
 
             # Sync the brick client details
             c_index = 1
-            if volumes.get('volume%s.brick%s.client_count' % (index, b_index)) > 0:
+            if volumes.get(
+                'volume%s.brick%s.client_count' % (index, b_index)
+            ) > 0:
                 while True:
                     try:
                         NS.gluster.objects.ClientConnection(

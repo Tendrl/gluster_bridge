@@ -4,8 +4,6 @@ from tendrl.commons.event import Event
 from tendrl.commons.message import Message
 from tendrl.commons.utils import cmd_utils
 
-ONE_GB_BYTES = 1073741824.0
-
 
 def _get_mount_point(path):
     mount = os.path.realpath(path)
@@ -30,8 +28,8 @@ def _parse_proc_mounts(filter=True):
 
 def _get_stats(mount_point):
     data = os.statvfs(mount_point)
-    total = (data.f_blocks * data.f_bsize) / ONE_GB_BYTES
-    free = (data.f_bfree * data.f_bsize) / ONE_GB_BYTES
+    total = (data.f_blocks * data.f_bsize)
+    free = (data.f_bfree * data.f_bsize)
     used_percent = 100 - (100.0 * free / total)
     total_inode = data.f_files
     free_inode = data.f_ffree

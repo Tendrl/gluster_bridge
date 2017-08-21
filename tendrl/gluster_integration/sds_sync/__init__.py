@@ -17,7 +17,8 @@ from tendrl.commons.utils.time_utils import now as tendrl_now
 from tendrl.gluster_integration import ini2json
 from tendrl.gluster_integration.sds_sync import brick_device_details
 from tendrl.gluster_integration.sds_sync import brick_utilization
-from tendrl.gluster_integration.sds_sync import rebalance_status as rebal_stat
+from tendrl.gluster_integration.sds_sync import \
+    rebalance_status as rebal_stat
 
 
 class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
@@ -208,20 +209,6 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                                 except etcd.EtcdKeyNotFound:
                                     pass
 
-                            rebalance_status = ""
-                            if volumes[
-                                    'volume%s.type' % index
-                            ].startswith("Distribute"):
-                                status = rebal_stat.get_rebalance_status(
-                                    volumes[
-                                        'volume%s.name' % index
-                                    ]
-                                )
-                                if status:
-                                    rebalance_status = status.replace(" ", "_")
-                                else:
-                                    rebalance_status = "not_started"
-
                             volume = NS.gluster.objects.Volume(
                                 vol_id=volumes[
                                     'volume%s.id' % index
@@ -271,7 +258,6 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                                 snapd_inited=volumes[
                                     'volume%s.snapd_svc.inited' % index
                                 ],
-                                rebal_status=rebalance_status,
                             )
                             volume.save(ttl=SYNC_TTL)
                             rebal_det = NS.gluster.objects.RebalanceDetails(
@@ -663,6 +649,11 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                         pcnt_used=0
                     ).save()
 
+                # Invoke the aggregated sync flow
+                if "provisioner/%s" % NS.tendrl_context.integration_id \
+                    in NS.node_context.tags:
+                    self._sync_volume_rebalance_status()
+
                 _cluster = NS.tendrl.objects.Cluster(
                     integration_id=NS.tendrl_context.integration_id
                 )
@@ -691,3 +682,17 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                 payload={"message": "%s complete" % self.__class__.__name__}
             )
         )
+
+    def _sync_volume_rebalance_status(self):
+        volumes = NS.gluster.objects.Volume().load_all()
+        for volume in volumes:
+            if volume.vol_type == "Distribute":
+                status = rebal_stat.get_rebalance_status(
+                    volume.name
+                )
+                if status:
+                    rebal_status = status.replace(" ", "_")
+                else:
+                    rebal_status = "not_started"
+                volume.rebal_status=rebal_status
+                volume.save()

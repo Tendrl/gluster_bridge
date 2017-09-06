@@ -141,21 +141,6 @@ namespace.gluster:
       value: clusters/$TendrlContext.integration_id/raw_map/
       list: clusters/TendrlContext.integration_id/TendrlContext/raw_map/
       help: gluster cluster details
-    VolumeOptions:
-      attrs:
-        cluster_id:
-          help: "Tendrl managed/generated cluster id for the sds being managed by Tendrl"
-          type: String
-        vol_id:
-          help: Volume id
-          type: String
-        options:
-          help: options
-          type: dict
-      enabled: true
-      value: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/options
-      list: clusters/$TendrlContext.integration_id/Volumes/$Volume.vol_id/options
-      help: gluster volume options
     RebalanceDetails:
       attrs:
         vol_id:

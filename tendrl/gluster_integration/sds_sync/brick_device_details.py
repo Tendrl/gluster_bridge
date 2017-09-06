@@ -54,14 +54,13 @@ def update_brick_device_details(brick_name, brick_path, devicetree):
         pvs = [dev.path for dev in device.disks]
 
     brick = NS.gluster.objects.Brick(
-        brick_name,
-        devices=disks,
-        mount_path=mount_point,
-        lv=lv,
-        vg=vg,
-        pool=pool,
-        pv=pvs,
-        size=size
-    )
-
+        name=brick_name
+    ).load()
+    brick.devices = disks
+    brick.mount_path = mount_point
+    brick.lv = lv
+    brick.vg = vg
+    brick.pool = pool
+    brick.pv = pvs
+    brick.size = size
     brick.save()

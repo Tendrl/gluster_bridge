@@ -19,7 +19,8 @@ def sync_volume_connections(volumes):
                     fetched_brick = NS.gluster.objects.Brick(
                         name=brick_name
                     ).load()
-                    vol_connections += 0 if fetched_brick.client_count == '' \
+                    vol_connections += 0 if (fetched_brick.client_count == ''
+                        or fetched_brick.client_count is None) \
                         else int(fetched_brick.client_count)
                 subvol_count += 1
             except etcd.EtcdKeyNotFound:

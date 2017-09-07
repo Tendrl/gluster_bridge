@@ -1,3 +1,11 @@
+%global selinuxtype targeted
+%global moduletype  services
+%global modulenames tendrl
+
+# todo relable should be enhanced later to specific things
+%global relabel_files() %{_sbindir}/restorecon -Rv /
+%global _format() export %1=""; for x in %{modulenames}; do %1+=%2; %1+=" "; done;
+
 Name: tendrl-gluster-integration
 Version: 1.5.1
 Release: 1%{?dist}
@@ -21,6 +29,17 @@ Requires: python-flask
 %description
 Python module for Tendrl gluster bridge to manage gluster tasks.
 
+%package -n tendrl-node-selinux
+License: GPLv2
+Group: System Environment/Base
+Summary: SELinux Policies for Tendrl Node
+BuildArch: noarch
+Requires(post): selinux-policy-base, selinux-policy-targeted, policycoreutils, policycoreutils-python libselinux-utils
+BuildRequires: selinux-policy selinux-policy-devel
+
+%description -n tendrl-node-selinux
+SELinux Policies for Tendrl Node
+
 %prep
 %setup
 
@@ -28,6 +47,7 @@ Python module for Tendrl gluster bridge to manage gluster tasks.
 rm -rf %{name}.egg-info
 
 %build
+make bzip-selinux-policy
 %{__python} setup.py build
 
 # remove the sphinx-build leftovers
@@ -42,6 +62,20 @@ install -Dm 0644 etc/tendrl/gluster-integration/gluster-integration.conf.yaml.sa
 install -Dm 0644 etc/tendrl/gluster-integration/logging.yaml.timedrotation.sample $RPM_BUILD_ROOT%{_sysconfdir}/tendrl/gluster-integration/gluster-integration_logging.yaml
 install -Dm 644 etc/tendrl/gluster-integration/*.sample $RPM_BUILD_ROOT%{_datadir}/tendrl/gluster-integration/
 
+# Install SELinux interfaces and policy modules
+install -d %{buildroot}%{_datadir}/selinux/packages
+
+install -m 0644 selinux/tendrl.pp.bz2 \
+	%{buildroot}%{_datadir}/selinux/packages
+
+%post -n tendrl-node-selinux
+%_format MODULE %{_datadir}/selinux/packages/tendrl.pp.bz2
+%{_sbindir}/semodule -n -s %{selinuxtype} -i $MODULE
+if %{_sbindir}/selinuxenabled ; then
+    %{_sbindir}/load_policy
+    %relabel_files
+fi
+
 %post
 systemctl enable tendrl-gluster-integration
 %systemd_post tendrl-gluster-integration.service
@@ -49,11 +83,24 @@ systemctl enable tendrl-gluster-integration
 %preun
 %systemd_preun tendrl-gluster-integration.service
 
+%postun -n tendrl-node-selinux
+if [ $1 -eq 0 ]; then
+    %{_sbindir}/semodule -n -r %{modulenames} &> /dev/null || :
+    if %{_sbindir}/selinuxenabled ; then
+	%{_sbindir}/load_policy
+	%relabel_files
+    fi
+fi
+
 %postun
 %systemd_postun_with_restart tendrl-gluster-integration.service
 
 %check
 py.test -v tendrl/gluster_integration/tests || :
+
+%files -n tendrl-node-selinux
+%defattr(-,root,root,0755)
+%attr(0644,root,root) %{_datadir}/selinux/packages/tendrl.pp.bz2
 
 %files -f INSTALLED_FILES
 %dir %{_var}/log/tendrl/gluster-integration
@@ -70,7 +117,7 @@ py.test -v tendrl/gluster_integration/tests || :
 * Fri Aug 25 2017 Rohan Kanade <rkanade@redhat.com> - 1.5.1-1
 - Release tendrl-gluster-integration v1.5.1
 
-* Fri Aug 08 2017 Rohan Kanade <rkanade@redhat.com> - 1.5.0-1
+* Tue Aug 08 2017 Rohan Kanade <rkanade@redhat.com> - 1.5.0-1
 - Release tendrl-gluster-integration v1.5.0
 
 * Mon Jun 19 2017 Rohan Kanade <rkanade@redhat.com> - 1.4.2-1

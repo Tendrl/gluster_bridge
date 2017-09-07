@@ -23,6 +23,12 @@ srpm: dist
 rpm: dist
 	mock -r epel-7-x86_64 rebuild $(NAME)-$(VERSION)-*.src.rpm --resultdir=. --define "dist .el7"
 
+bzip-selinux-policy:
+	@cd selinux; \
+	rm -f *.pp.bz2 tmp; \
+	make -f /usr/share/selinux/devel/Makefile; \
+	bzip2 -9 tendrl.pp
+
 gitversion:
 	# Set version and release to the latest values from Git
 	sed -i $(NAME).spec \

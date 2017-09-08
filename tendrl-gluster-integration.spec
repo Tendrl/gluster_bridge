@@ -63,8 +63,12 @@ install -Dm 0644 etc/tendrl/gluster-integration/logging.yaml.timedrotation.sampl
 install -Dm 644 etc/tendrl/gluster-integration/*.sample $RPM_BUILD_ROOT%{_datadir}/tendrl/gluster-integration/
 
 # Install SELinux interfaces and policy modules
+install -d %{buildroot}%{_datadir}/selinux/devel/include/%{moduletype}
 install -d %{buildroot}%{_datadir}/selinux/packages
 
+# tendrl
+install -p -m 644 selinux/tendrl.if \
+        %{buildroot}%{_datadir}/selinux/devel/include/%{moduletype}
 install -m 0644 selinux/tendrl.pp.bz2 \
 	%{buildroot}%{_datadir}/selinux/packages
 
@@ -101,6 +105,7 @@ py.test -v tendrl/gluster_integration/tests || :
 %files -n tendrl-node-selinux
 %defattr(-,root,root,0755)
 %attr(0644,root,root) %{_datadir}/selinux/packages/tendrl.pp.bz2
+%attr(0644,root,root) %{_datadir}/selinux/devel/include/%{moduletype}/tendrl.if
 
 %files -f INSTALLED_FILES
 %dir %{_var}/log/tendrl/gluster-integration

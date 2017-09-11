@@ -27,7 +27,8 @@ bzip-selinux-policy:
 	@cd selinux; \
 	rm -f *.pp.bz2 tmp; \
 	make -f /usr/share/selinux/devel/Makefile; \
-	bzip2 -9 tendrl.pp
+	bzip2 -9 tendrl.pp; \
+	bzip2 -9 ten-collectd.pp
 
 gitversion:
 	# Set version and release to the latest values from Git

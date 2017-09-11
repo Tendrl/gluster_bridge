@@ -1,10 +1,8 @@
 %global selinuxtype targeted
 %global moduletype  services
-%global modulenames tendrl
 
 # todo relable should be enhanced later to specific things
 %global relabel_files() %{_sbindir}/restorecon -Rv /
-%global _format() export %1=""; for x in %{modulenames}; do %1+=%2; %1+=" "; done;
 
 Name: tendrl-gluster-integration
 Version: 1.5.1
@@ -40,6 +38,17 @@ BuildRequires: selinux-policy selinux-policy-devel
 %description -n tendrl-node-selinux
 SELinux Policies for Tendrl Node
 
+%package -n tendrl-collectd-selinux
+License: GPLv2
+Group: System Environment/Base
+Summary: SELinux Policies for Tendrl-Collectd
+BuildArch: noarch
+Requires(post): selinux-policy-base, selinux-policy-targeted, policycoreutils, policycoreutils-python libselinux-utils
+BuildRequires: selinux-policy selinux-policy-devel
+
+%description -n tendrl-collectd-selinux
+SELinux Policies for Tendrl Collectd
+
 %prep
 %setup
 
@@ -67,14 +76,22 @@ install -d %{buildroot}%{_datadir}/selinux/devel/include/%{moduletype}
 install -d %{buildroot}%{_datadir}/selinux/packages
 
 # tendrl
-install -p -m 644 selinux/tendrl.if \
-        %{buildroot}%{_datadir}/selinux/devel/include/%{moduletype}
 install -m 0644 selinux/tendrl.pp.bz2 \
 	%{buildroot}%{_datadir}/selinux/packages
 
+# collectd
+install -m 0644 selinux/ten-collectd.pp.bz2 \
+	%{buildroot}%{_datadir}/selinux/packages
+
 %post -n tendrl-node-selinux
-%_format MODULE %{_datadir}/selinux/packages/tendrl.pp.bz2
-%{_sbindir}/semodule -n -s %{selinuxtype} -i $MODULE
+%selinux_modules_install -s %{selinuxtype} %{_datadir}/selinux/packages/tendrl.pp.bz2
+if %{_sbindir}/selinuxenabled ; then
+    %{_sbindir}/load_policy
+    %relabel_files
+fi
+
+%post -n tendrl-collectd-selinux
+%selinux_modules_install -s %{selinuxtype} %{_datadir}/selinux/packages/ten-collectd.pp.bz2
 if %{_sbindir}/selinuxenabled ; then
     %{_sbindir}/load_policy
     %relabel_files
@@ -89,7 +106,16 @@ systemctl enable tendrl-gluster-integration
 
 %postun -n tendrl-node-selinux
 if [ $1 -eq 0 ]; then
-    %{_sbindir}/semodule -n -r %{modulenames} &> /dev/null || :
+    %selinux_modules_uninstall -s %{selinuxtype} tendrl &> /dev/null || :
+    if %{_sbindir}/selinuxenabled ; then
+	%{_sbindir}/load_policy
+	%relabel_files
+    fi
+fi
+
+%postun -n tendrl-collectd-selinux
+if [ $1 -eq 0 ]; then
+    %selinux_modules_uninstall -s %{selinuxtype} ten-collectd &> /dev/null || :
     if %{_sbindir}/selinuxenabled ; then
 	%{_sbindir}/load_policy
 	%relabel_files
@@ -105,7 +131,10 @@ py.test -v tendrl/gluster_integration/tests || :
 %files -n tendrl-node-selinux
 %defattr(-,root,root,0755)
 %attr(0644,root,root) %{_datadir}/selinux/packages/tendrl.pp.bz2
-%attr(0644,root,root) %{_datadir}/selinux/devel/include/%{moduletype}/tendrl.if
+
+%files -n tendrl-collectd-selinux
+%defattr(-,root,root,0755)
+%attr(0644,root,root) %{_datadir}/selinux/packages/ten-collectd.pp.bz2
 
 %files -f INSTALLED_FILES
 %dir %{_var}/log/tendrl/gluster-integration

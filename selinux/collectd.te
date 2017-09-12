@@ -1,0 +1,15 @@
+policy_module(collectd, 1.0.0)
+
+########################################
+#
+# Declarations
+#
+
+type collectd_t;
+type collectd_exec_t;
+#domain_type(collectd_t)
+init_daemon_domain(collectd_t, collectd_exec_t)
+
+permissive collectd_t;
+
+########################################

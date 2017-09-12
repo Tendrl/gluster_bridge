@@ -80,7 +80,7 @@ install -m 0644 selinux/tendrl.pp.bz2 \
 	%{buildroot}%{_datadir}/selinux/packages
 
 # collectd
-install -m 0644 selinux/ten-collectd.pp.bz2 \
+install -m 0644 selinux/collectd.pp.bz2 \
 	%{buildroot}%{_datadir}/selinux/packages
 
 %post -n tendrl-node-selinux
@@ -91,7 +91,7 @@ if %{_sbindir}/selinuxenabled ; then
 fi
 
 %post -n tendrl-collectd-selinux
-%selinux_modules_install -s %{selinuxtype} %{_datadir}/selinux/packages/ten-collectd.pp.bz2
+%selinux_modules_install -s %{selinuxtype} %{_datadir}/selinux/packages/collectd.pp.bz2
 if %{_sbindir}/selinuxenabled ; then
     %{_sbindir}/load_policy
     %relabel_files
@@ -115,7 +115,7 @@ fi
 
 %postun -n tendrl-collectd-selinux
 if [ $1 -eq 0 ]; then
-    %selinux_modules_uninstall -s %{selinuxtype} ten-collectd &> /dev/null || :
+    %selinux_modules_uninstall -s %{selinuxtype} collectd &> /dev/null || :
     if %{_sbindir}/selinuxenabled ; then
 	%{_sbindir}/load_policy
 	%relabel_files
@@ -134,7 +134,7 @@ py.test -v tendrl/gluster_integration/tests || :
 
 %files -n tendrl-collectd-selinux
 %defattr(-,root,root,0755)
-%attr(0644,root,root) %{_datadir}/selinux/packages/ten-collectd.pp.bz2
+%attr(0644,root,root) %{_datadir}/selinux/packages/collectd.pp.bz2
 
 %files -f INSTALLED_FILES
 %dir %{_var}/log/tendrl/gluster-integration

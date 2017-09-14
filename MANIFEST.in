@@ -3,6 +3,7 @@ include AUTHORS
 include ChangeLog
 include tendrl-gluster-integration.service
 include version.py
+include Makefile
 exclude .gitignore
 exclude .gitreview
 graft docs

@@ -1,8 +1,7 @@
 import etcd
 
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons import objects
+from tendrl.commons.utils import log_utils as logger
 from tendrl.gluster_integration.objects.volume import Volume
 
 
@@ -42,40 +41,30 @@ class Shrink(objects.BaseAtom):
 
         action = self.parameters.get('Volume.action')
 
-        Event(
-            Message(
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "Shrinking the volume %s" %
-                    self.parameters['Volume.volname']
-                },
-                job_id=self.parameters["job_id"],
-                flow_id=self.parameters["flow_id"],
-                cluster_id=NS.tendrl_context.integration_id,
-            )
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {"message": "Shrinking the volume %s" %
+             self.parameters['Volume.volname']},
+            job_id=self.parameters["job_id"],
+            flow_id=self.parameters["flow_id"],
+            integration_id=NS.tendrl_context.integration_id
         )
-
         if NS.gdeploy_plugin.shrink_volume(
                 self.parameters.get('Volume.volname'),
                 self.parameters.get('Volume.bricks'),
                 action,
                 **args
         ):
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Shrinked the volume %s" %
-                        self.parameters['Volume.volname']
-                    },
-                    job_id=self.parameters["job_id"],
-                    flow_id=self.parameters["flow_id"],
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Shrinked the volume %s" %
+                 self.parameters['Volume.volname']},
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                integration_id=NS.tendrl_context.integration_id
             )
-
             if action != "commit" and not "decrease_"\
                "replica_count" in args:
                 return True
@@ -121,34 +110,26 @@ class Shrink(objects.BaseAtom):
             finally:
                 lock.release()
 
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Deleted bricks for volume %s"
-                        " from central store" % self.parameters[
-                            'Volume.volname'
-                        ]
-                    },
-                    job_id=self.parameters["job_id"],
-                    flow_id=self.parameters["flow_id"],
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Deleted bricks for volume %s"
+                 " from central store" % self.parameters[
+                     'Volume.volname'
+                 ]},
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                integration_id=NS.tendrl_context.integration_id
             )
             return True
         else:
-            Event(
-                Message(
-                    priority="error",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Volume shrink failed for volume %s" %
-                        self.parameters['Volume.volname']
-                    },
-                    job_id=self.parameters["job_id"],
-                    flow_id=self.parameters["flow_id"],
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "error",
+                NS.publisher_id,
+                {"message": "Volume shrink failed for volume %s" %
+                 self.parameters['Volume.volname']},
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                integration_id=NS.tendrl_context.integration_id
             )
             return False

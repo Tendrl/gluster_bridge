@@ -1,5 +1,4 @@
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
+from tendrl.commons.utils import log_utils as logger
 try:
     from python_gdeploy.actions import create_gluster_volume
     from python_gdeploy.actions import delete_volume
@@ -10,15 +9,11 @@ try:
     from python_gdeploy.actions import start_volume
     from python_gdeploy.actions import stop_volume
 except ImportError:
-    Event(
-        Message(
-            priority="info",
-            publisher=NS.publisher_id,
-            payload={
-                "message": "python-gdeploy is not installed in this node"
-            },
-            cluster_id=NS.tendrl_context.integration_id,
-        )
+    logger.log(
+        "info",
+        NS.publisher_id,
+        {"message": "python-gdeploy is not installed in this node"},
+        integration_id=NS.tendrl_context.integration_id
     )
 
 from tendrl.gluster_integration.gdeploy_wrapper.provisioner_base import\
@@ -52,28 +47,20 @@ class GdeployPlugin(ProvisionerBasePlugin):
             **args
         )
         if rc == 0:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "gluster volume %s created successfully" %
-                        volume_name
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "gluster volume %s created successfully" %
+                 volume_name},
+                integration_id=NS.tendrl_context.integration_id
             )
         else:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "gluster volume creation failed for %s."
-                        " Details: %s" % (volume_name, out)
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "gluster volume creation failed for %s."
+                 " Details: %s" % (volume_name, out)},
+                integration_id=NS.tendrl_context.integration_id
             )
             return False
         return True
@@ -91,28 +78,20 @@ class GdeployPlugin(ProvisionerBasePlugin):
             **args
         )
         if rc == 0:
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "gluster volume %s deleted successfully" %
-                        volume_name
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "gluster volume %s deleted successfully" %
+                 volume_name},
+                integration_id=NS.tendrl_context.integration_id
             )
         else:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Volume deletion failed for volume "
-                        "%s. Details: %s" % (volume_name, out)
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Volume deletion failed for volume "
+                 "%s. Details: %s" % (volume_name, out)},
+                integration_id=NS.tendrl_context.integration_id
             )
             return False
         if format_bricks:
@@ -132,28 +111,20 @@ class GdeployPlugin(ProvisionerBasePlugin):
             **args
         )
         if rc == 0:
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Volume %s started successfully" %
-                        volume_name
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Volume %s started successfully" %
+                 volume_name},
+                integration_id=NS.tendrl_context.integration_id
             )
         else:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Volume start failed for volume "
-                        "%s. Details: %s" % (volume_name, str(out))
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Volume start failed for volume "
+                 "%s. Details: %s" % (volume_name, str(out))},
+                integration_id=NS.tendrl_context.integration_id
             )
             return False
         return True
@@ -170,28 +141,20 @@ class GdeployPlugin(ProvisionerBasePlugin):
             **args
         )
         if rc == 0:
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Volume %s stopped successfully" %
-                        volume_name
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Volume %s stopped successfully" %
+                 volume_name},
+                integration_id=NS.tendrl_context.integration_id
             )
         else:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Volume stop failed for volume "
-                        "%s. Details: %s" % (volume_name, out)
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Volume stop failed for volume "
+                 "%s. Details: %s" % (volume_name, out)},
+                integration_id=NS.tendrl_context.integration_id
             )
             return False
         return True
@@ -212,28 +175,20 @@ class GdeployPlugin(ProvisionerBasePlugin):
             **args
         )
         if rc == 0:
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Rebalance %s on volume %s performed"
-                        "successfully" % (action, volume_name)
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Rebalance %s on volume %s performed"
+                 "successfully" % (action, volume_name)},
+                integration_id=NS.tendrl_context.integration_id
             )
         else:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Rebalance %s failed for volume "
-                        "%s. Details: %s" % (action, volume_name, out)
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Rebalance %s failed for volume "
+                 "%s. Details: %s" % (action, volume_name, out)},
+                integration_id=NS.tendrl_context.integration_id
             )
             return False
         return True
@@ -258,28 +213,20 @@ class GdeployPlugin(ProvisionerBasePlugin):
             **args
         )
         if rc == 0:
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Volume %s expanded successfully" %
-                        volume_name
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Volume %s expanded successfully" %
+                 volume_name},
+                integration_id=NS.tendrl_context.integration_id
             )
         else:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Volume expansion failed for volume "
-                        "%s. Details: %s" % (volume_name, out)
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Volume expansion failed for volume "
+                 "%s. Details: %s" % (volume_name, out)},
+                integration_id=NS.tendrl_context.integration_id
             )
             return False
         return True
@@ -305,28 +252,20 @@ class GdeployPlugin(ProvisionerBasePlugin):
             **args
         )
         if rc == 0:
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Volume %s shrinked successfully" %
-                        volume_name
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Volume %s shrinked successfully" %
+                 volume_name},
+                integration_id=NS.tendrl_context.integration_id
             )
         else:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Volume shrink failed for volume "
-                        "%s. Details: %s" % (volume_name, out)
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Volume shrink failed for volume "
+                 "%s. Details: %s" % (volume_name, out)},
+                integration_id=NS.tendrl_context.integration_id
             )
             return False
         return True
@@ -340,28 +279,19 @@ class GdeployPlugin(ProvisionerBasePlugin):
             stripe_count
         )
         if rc == 0 and err == "":
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Bricks Provisioned successfully"
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Bricks Provisioned successfully"},
+                integration_id=NS.tendrl_context.integration_id
             )
         else:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Bricks Provisioning Failed. Error %s" % (
-                            str(out)
-                        )
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Bricks Provisioning Failed. Error %s" % (
+                    str(out))},
+                integration_id=NS.tendrl_context.integration_id
             )
             return False
         return True

@@ -1,6 +1,5 @@
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons import objects
+from tendrl.commons.utils import log_utils as logger
 
 
 class Stop(objects.BaseAtom):
@@ -11,32 +10,24 @@ class Stop(objects.BaseAtom):
         if NS.gdeploy_plugin.stop_volume(
             self.parameters.get('Volume.volname')
         ):
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Stopped the volume %s successfully" %
-                        self.parameters['Volume.volname']
-                    },
-                    job_id=self.parameters["job_id"],
-                    flow_id=self.parameters["flow_id"],
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Stopped the volume %s successfully" %
+                 self.parameters['Volume.volname']},
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                integration_id=NS.tendrl_context.integration_id
             )
         else:
-            Event(
-                Message(
-                    priority="error",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Failed to stop the volume %s" %
-                        self.parameters['Volume.volname']
-                    },
-                    job_id=self.parameters["job_id"],
-                    flow_id=self.parameters["flow_id"],
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "error",
+                NS.publisher_id,
+                {"message": "Failed to stop the volume %s" %
+                 self.parameters['Volume.volname']},
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                integration_id=NS.tendrl_context.integration_id
             )
             return False
         return True

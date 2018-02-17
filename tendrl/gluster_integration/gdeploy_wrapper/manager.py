@@ -3,9 +3,7 @@ import os
 import pkgutil
 import re
 
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
-
+from tendrl.commons.utils import log_utils as logger
 from tendrl.gluster_integration.gdeploy_wrapper import provisioner_base
 
 
@@ -47,16 +45,12 @@ class ProvisioningManager(object):
             for name, plugin_fqdn in plugins:
                 importlib.import_module(plugin_fqdn)
         except (SyntaxError, ValueError, ImportError) as ex:
-            Event(
-                Message(
-                    priority="debug",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Failed to load the gluster provisioner "
-                        "plugins. Error %s" % ex
-                    },
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": "Failed to load the gluster provisioner "
+                 "plugins. Error %s" % ex},
+                integration_id=NS.tendrl_context.integration_id
             )
             raise ex
 

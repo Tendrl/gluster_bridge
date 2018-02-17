@@ -1,6 +1,5 @@
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons import objects
+from tendrl.commons.utils import log_utils as logger
 
 
 class Create(objects.BaseAtom):
@@ -54,34 +53,25 @@ class Create(objects.BaseAtom):
             stripe_size = self.parameters.get('Brick.stripe_size')
             args.update({"stripe_size": stripe_size})
 
-        Event(
-            Message(
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "Creating the gluster bricks"
-                },
-                job_id=self.parameters["job_id"],
-                flow_id=self.parameters["flow_id"],
-                cluster_id=NS.tendrl_context.integration_id,
-            )
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {"message": "Creating the gluster bricks"},
+            job_id=self.parameters["job_id"],
+            flow_id=self.parameters["flow_id"],
+            integration_id=NS.tendrl_context.integration_id
         )
-
         if NS.gdeploy_plugin.gluster_provision_bricks(
                 brick_dict,
                 **args
         ):
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Created the gluster bricks successfully"
-                    },
-                    job_id=self.parameters["job_id"],
-                    flow_id=self.parameters["flow_id"],
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Created the gluster bricks successfully"},
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                integration_id=NS.tendrl_context.integration_id
             )
 
             for k, v in brick_dict.iteritems():
@@ -112,16 +102,12 @@ class Create(objects.BaseAtom):
                     NS._int.wclient.write(free_brick_key, "")
             return True
         else:
-            Event(
-                Message(
-                    priority="error",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "brick creation failed"
-                    },
-                    job_id=self.parameters["job_id"],
-                    flow_id=self.parameters["flow_id"],
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "error",
+                NS.publisher_id,
+                {"message": "brick creation failed"},
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                integration_id=NS.tendrl_context.integration_id
             )
             return False

@@ -1,8 +1,7 @@
 import etcd
 
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons import objects
+from tendrl.commons.utils import log_utils as logger
 
 
 class Delete(objects.BaseAtom):
@@ -13,32 +12,24 @@ class Delete(objects.BaseAtom):
         if NS.gdeploy_plugin.stop_volume(
                 self.parameters.get('Volume.volname')
         ):
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Stopped the volume %s before delete" %
-                        self.parameters['Volume.volname']
-                    },
-                    job_id=self.parameters["job_id"],
-                    flow_id=self.parameters["flow_id"],
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Stopped the volume %s before delete" %
+                 self.parameters['Volume.volname']},
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                integration_id=NS.tendrl_context.integration_id
             )
         else:
-            Event(
-                Message(
-                    priority="error",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Could not stop volume %s before delete" %
-                        self.parameters['Volume.volname']
-                    },
-                    job_id=self.parameters["job_id"],
-                    flow_id=self.parameters["flow_id"],
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "error",
+                NS.publisher_id,
+                {"message": "Could not stop volume %s before delete" %
+                 self.parameters['Volume.volname']},
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                integration_id=NS.tendrl_context.integration_id
             )
             return False
         args = {}
@@ -51,32 +42,24 @@ class Delete(objects.BaseAtom):
                 self.parameters.get('Volume.volname'),
                 **args
         ):
-            Event(
-                Message(
-                    priority="info",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Deleted the volume %s" %
-                        self.parameters['Volume.volname']
-                    },
-                    job_id=self.parameters["job_id"],
-                    flow_id=self.parameters["flow_id"],
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "info",
+                NS.publisher_id,
+                {"message": "Deleted the volume %s" %
+                 self.parameters['Volume.volname']},
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                integration_id=NS.tendrl_context.integration_id
             )
         else:
-            Event(
-                Message(
-                    priority="error",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Failed to delete volume %s" %
-                        self.parameters['Volume.volname']
-                    },
-                    job_id=self.parameters["job_id"],
-                    flow_id=self.parameters["flow_id"],
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "error",
+                NS.publisher_id,
+                {"message": "Failed to delete volume %s" %
+                 self.parameters['Volume.volname']},
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                integration_id=NS.tendrl_context.integration_id
             )
             return False
 
@@ -90,18 +73,14 @@ class Delete(objects.BaseAtom):
                     recursive=True
                 )
             except (etcd.EtcdKeyNotFound, KeyError):
-                Event(
-                    Message(
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={
-                            "message": "Deleted the volume %s" %
-                            self.parameters['Volume.volname']
-                        },
-                        job_id=self.parameters["job_id"],
-                        flow_id=self.parameters["flow_id"],
-                        cluster_id=NS.tendrl_context.integration_id,
-                    )
+                logger.log(
+                    "info",
+                    NS.publisher_id,
+                    {"message": "Deleted the volume %s" %
+                     self.parameters['Volume.volname']},
+                    job_id=self.parameters["job_id"],
+                    flow_id=self.parameters["flow_id"],
+                    integration_id=NS.tendrl_context.integration_id
                 )
             finally:
                 return True

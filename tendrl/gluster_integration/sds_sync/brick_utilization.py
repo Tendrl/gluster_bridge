@@ -1,8 +1,7 @@
 import os
 
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons.utils import cmd_utils
+from tendrl.commons.utils import log_utils as logger
 
 
 def _get_mount_point(path):
@@ -54,12 +53,10 @@ def get_lvs():
     cmd = cmd_utils.Command(_lvm_cmd, True)
     out, err, rc = cmd.run()
     if rc != 0:
-        Event(
-            Message(
-                priority="debug",
-                publisher=NS.publisher_id,
-                payload={"message": str(err)}
-            )
+        logger.log(
+            "debug",
+            NS.publisher_id,
+            {"message": str(err)}
         )
         return None
     out = out.split('\n')

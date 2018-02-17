@@ -1,8 +1,7 @@
 import etcd
 
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons import objects
+from tendrl.commons.utils import log_utils as logger
 
 
 class RebalanceNotRunning(objects.BaseAtom):
@@ -10,17 +9,13 @@ class RebalanceNotRunning(objects.BaseAtom):
         super(RebalanceNotRunning, self).__init__(*args, **kwargs)
 
     def run(self):
-        Event(
-            Message(
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "Checking if rebalance is not running"
-                },
-                job_id=self.parameters["job_id"],
-                flow_id=self.parameters["flow_id"],
-                cluster_id=NS.tendrl_context.integration_id,
-            )
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {"message": "Checking if rebalance is not running"},
+            job_id=self.parameters["job_id"],
+            flow_id=self.parameters["flow_id"],
+            integration_id=NS.tendrl_context.integration_id
         )
         try:
             rebal_status = NS._int.client.read(
@@ -36,34 +31,26 @@ class RebalanceNotRunning(objects.BaseAtom):
                     return True
                 if rebal_status == "in progress":
                     return False
-                Event(
-                    Message(
-                        priority="info",
-                        publisher=NS.publisher_id,
-                        payload={
-                            "message": "Volume rebalance status is %s" %
-                            rebal_status
-                        },
-                        job_id=self.parameters["job_id"],
-                        flow_id=self.parameters["flow_id"],
-                        cluster_id=NS.tendrl_context.integration_id,
-                    )
+                logger.log(
+                    "info",
+                    NS.publisher_id,
+                    {"message": "Volume rebalance status is %s" %
+                     rebal_status},
+                    job_id=self.parameters["job_id"],
+                    flow_id=self.parameters["flow_id"],
+                    integration_id=NS.tendrl_context.integration_id
                 )
                 return False
             else:
                 return True
         except etcd.EtcdKeyNotFound:
-            Event(
-                Message(
-                    priority="error",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Volume %s not found" %
-                        self.parameters['Volume.volname']
-                    },
-                    job_id=self.parameters["job_id"],
-                    flow_id=self.parameters["flow_id"],
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "error",
+                NS.publisher_id,
+                {"message": "Volume %s not found" %
+                 self.parameters['Volume.volname']},
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                integration_id=NS.tendrl_context.integration_id
             )
             return False

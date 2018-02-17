@@ -1,8 +1,11 @@
+import etcd
+import json
 import signal
 import threading
 
 from tendrl.commons import manager as common_manager
 from tendrl.commons import TendrlNS
+from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import log_utils as logger
 from tendrl import gluster_integration
 from tendrl.gluster_integration.gdeploy_wrapper.manager import \
@@ -77,6 +80,52 @@ def main():
             NS.publisher_id,
             {"message": "Signal handler: stopping"}
         )
+        # Remove the node's name from gluster server tag
+        try:
+            gl_srvr_list = etcd_utils.read(
+                "/indexes/tags/gluster/server"
+            ).value
+            gl_srvr_list = json.loads(gl_srvr_list)
+            if NS.node_context.node_id in gl_srvr_list:
+                gl_srvr_list.remove(NS.node_context.node_id)
+            etcd_utils.write(
+                "/indexes/tags/gluster/server",
+                json.dumps(gl_srvr_list)
+            )
+            node_tags = json.loads(NS.node_context.tags)
+            if 'provisioner/%s' % NS.tendrl_context.integration_id \
+                in node_tags:
+                etcd_utils.delete(
+                    "/indexes/tags/provisioner/%s" %
+                    NS.tendrl_context.integration_id,
+                    recursive=True
+                )
+            int_srvr_list = etcd_utils.read(
+                "/indexes/tags/tendrl/integration/gluster"
+            ).value
+            int_srvr_list = json.loads(int_srvr_list)
+            if NS.node_context.node_id in int_srvr_list:
+                int_srvr_list.remove(NS.node_context.node_id)
+            etcd_utils.write(
+                "/indexes/tags/tendrl/integration/gluster",
+                json.dumps(int_srvr_list)
+            )
+        except etcd.EtcdKeyNotFound:
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {
+                    "message": "Couldnt remove node from "
+                    "gluster servers list tag."
+                    "integration_id: %s, node_id: %s" %
+                    (
+                        NS.tendrl_context.integration_id,
+                        NS.node_context.node_id
+                    )
+                }
+            )
+            pass
+
         complete.set()
         m.stop()
 

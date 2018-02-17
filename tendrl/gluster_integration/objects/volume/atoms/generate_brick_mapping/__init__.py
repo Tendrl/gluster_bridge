@@ -1,9 +1,8 @@
 import json
 
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons import objects
 from tendrl.commons.objects.job import Job
+from tendrl.commons.utils import log_utils as logger
 
 
 class GenerateBrickMapping(objects.BaseAtom):
@@ -11,17 +10,13 @@ class GenerateBrickMapping(objects.BaseAtom):
         super(GenerateBrickMapping, self).__init__(*args, **kwargs)
 
     def run(self):
-        Event(
-            Message(
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "Generating brick mapping for gluster volume"
-                },
-                job_id=self.parameters["job_id"],
-                flow_id=self.parameters["flow_id"],
-                cluster_id=NS.tendrl_context.integration_id,
-            )
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {"message": "Generating brick mapping for gluster volume"},
+            job_id=self.parameters["job_id"],
+            flow_id=self.parameters["flow_id"],
+            integration_id=NS.tendrl_context.integration_id
         )
         brick_count = self.parameters.get('Volume.brick_count')
         subvol_size = self.parameters.get('Volume.subvol_size')

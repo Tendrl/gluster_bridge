@@ -43,7 +43,7 @@ def sync_cluster_status(volumes, sync_ttl):
     if curr_status != old_status:
         msg = ("Health status of cluster: %s "
                "changed from %s to %s") % (
-                   NS.tendrl_context.cluster_name,
+                   NS.tendrl_context.integration_id,
                    old_status,
                    curr_status)
         instance = "cluster_%s" % NS.tendrl_context.integration_id

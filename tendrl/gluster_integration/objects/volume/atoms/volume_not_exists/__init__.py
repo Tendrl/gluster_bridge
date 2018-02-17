@@ -1,8 +1,7 @@
 import etcd
 
-from tendrl.commons.event import Event
-from tendrl.commons.message import Message
 from tendrl.commons import objects
+from tendrl.commons.utils import log_utils as logger
 
 
 class VolumeNotExists(objects.BaseAtom):
@@ -10,18 +9,14 @@ class VolumeNotExists(objects.BaseAtom):
         super(VolumeNotExists, self).__init__(*args, **kwargs)
 
     def run(self):
-        Event(
-            Message(
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={
-                    "message": "Checking if volume %s doesnt exist" %
-                    self.parameters['Volume.volname']
-                },
-                job_id=self.parameters["job_id"],
-                flow_id=self.parameters["flow_id"],
-                cluster_id=NS.tendrl_context.integration_id,
-            )
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {"message": "Checking if volume %s doesnt exist" %
+             self.parameters['Volume.volname']},
+            job_id=self.parameters["job_id"],
+            flow_id=self.parameters["flow_id"],
+            integration_id=NS.tendrl_context.integration_id
         )
         try:
             NS._int.client.read(
@@ -31,18 +26,14 @@ class VolumeNotExists(objects.BaseAtom):
                 )
             )
         except etcd.EtcdKeyNotFound:
-            Event(
-                Message(
-                    priority="warning",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "Volume %s doesnt exist" %
-                        self.parameters['Volume.volname']
-                    },
-                    job_id=self.parameters["job_id"],
-                    flow_id=self.parameters["flow_id"],
-                    cluster_id=NS.tendrl_context.integration_id,
-                )
+            logger.log(
+                "warning",
+                NS.publisher_id,
+                {"message": "Volume %s doesnt exist" %
+                 self.parameters['Volume.volname']},
+                job_id=self.parameters["job_id"],
+                flow_id=self.parameters["flow_id"],
+                integration_id=NS.tendrl_context.integration_id
             )
             return True
 

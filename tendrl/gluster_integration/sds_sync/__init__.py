@@ -9,13 +9,13 @@ import etcd
 
 from tendrl.commons.event import Event
 from tendrl.commons.message import ExceptionMessage
-from tendrl.commons.message import Message
 from tendrl.commons.objects.cluster_alert_counters import \
     ClusterAlertCounters
 from tendrl.commons import sds_sync
 from tendrl.commons.utils import cmd_utils
 from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import event_utils
+from tendrl.commons.utils import log_utils as logger
 from tendrl.commons.utils.time_utils import now as tendrl_now
 from tendrl.gluster_integration import ini2json
 from tendrl.gluster_integration.message import process_events as evt
@@ -43,12 +43,10 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
         self._complete = threading.Event()
 
     def run(self):
-        Event(
-            Message(
-                priority="info",
-                publisher=NS.publisher_id,
-                payload={"message": "%s running" % self.__class__.__name__}
-            )
+        logger.log(
+            "info",
+            NS.publisher_id,
+            {"message": "%s running" % self.__class__.__name__}
         )
 
         gluster_brick_dir = NS.gluster.objects.GlusterBrickDir()
@@ -75,14 +73,10 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                 cluster.cluster_network = node_network.subnet
                 cluster.save()
             except etcd.EtcdKeyNotFound as ex:
-                Event(
-                    Message(
-                        priority="error",
-                        publisher=NS.publisher_id,
-                        payload={
-                            "message": "Failed to sync cluster network details"
-                        }
-                    )
+                logger.log(
+                    "error",
+                    NS.publisher_id,
+                    {"message": "Failed to sync cluster network details"}
                 )
 
         _sleep = 0
@@ -101,18 +95,12 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                 _cluster = NS.tendrl.objects.Cluster(
                     integration_id=NS.tendrl_context.integration_id
                 ).load()
-                if _cluster.import_status == "failed":
+                if _cluster.status == "importing" and \
+                    _cluster.current_job['status'] == 'failed':
                     continue
 
-                try:
-                    NS._int.wclient.write(
-                        "clusters/%s/"
-                        "sync_status" % NS.tendrl_context.integration_id,
-                        "in_progress",
-                        prevExist=False
-                    )
-                except (etcd.EtcdAlreadyExist, etcd.EtcdCompareFailed) as ex:
-                    pass
+                _cluster.status = "syncing"
+                _cluster.save()
 
                 subprocess.call(
                     [
@@ -207,8 +195,10 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                                         'Connected'
                                         else 'INFO'
                                     )
-                                    # Disconnected host name to raise brick alert
-                                    if current_status.lower() == "disconnected":
+                                    # Disconnected host name to
+                                    # raise brick alert
+                                    if current_status.lower() == \
+                                        "disconnected":
                                         disconnected_hosts.append(
                                             peers[
                                                 'peer%s.primary_hostname' %
@@ -227,7 +217,7 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                     for disconnected_host in disconnected_hosts:
                         brick_status_alert(
                             disconnected_host
-                        ) 
+                        )
                 if "Volumes" in raw_data:
                     index = 1
                     volumes = raw_data['Volumes']
@@ -291,7 +281,7 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                 )
                 if _cluster.exists():
                     _cluster = _cluster.load()
-                    _cluster.sync_status = "done"
+                    _cluster.status = ""
                     _cluster.last_sync = str(tendrl_now())
                     _cluster.is_managed = "yes"
                     _cluster.save()
@@ -331,13 +321,10 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
 
             time.sleep(_sleep)
 
-        Event(
-            Message(
-                priority="debug",
-                publisher=NS.publisher_id,
-                payload={"message": "%s complete" %
-                         self.__class__.__name__}
-            )
+        logger.log(
+            "debug",
+            NS.publisher_id,
+            {"message": "%s complete" % self.__class__.__name__}
         )
 
     def _enable_disable_volume_profiling(self):
@@ -376,15 +363,11 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                     "yes" else "False"
                 volume.save()
         if len(failed_vols) > 0:
-            Event(
-                Message(
-                    priority="warning",
-                    publisher=NS.publisher_id,
-                    payload={
-                        "message": "%sing profiling failed for volumes: %s" %
-                        (action, str(failed_vols))
-                    }
-                )
+            logger.log(
+                "warning",
+                NS.publisher_id,
+                {"message": "%sing profiling failed for volumes: %s" %
+                 (action, str(failed_vols))}
             )
 
 
@@ -727,15 +710,16 @@ def brick_status_alert(hostname):
             for brick in bricks:
                 if brick.status.lower() == BRICK_STARTED:
                     # raise an alert for brick
-                    msg = ("Status of brick: %s "
-                           "under volume %s in cluster %s chan"
-                           "ged from %s to %s") % (
-                               brick.brick_path,
-                               brick.vol_name,
-                               NS.tendrl_context.integration_id,
-                               BRICK_STARTED.title(),
-                               BRICK_STOPPED.title()
-                           )
+                    msg = (
+                        "Status of brick: %s "
+                        "under volume %s in cluster %s chan"
+                        "ged from %s to %s") % (
+                            brick.brick_path,
+                            brick.vol_name,
+                            NS.tendrl_context.integration_id,
+                            BRICK_STARTED.title(),
+                            BRICK_STOPPED.title()
+                        )
                     instance = "volume_%s|brick_%s" % (
                         brick.vol_name,
                         brick.brick_path,
@@ -761,14 +745,15 @@ def brick_status_alert(hostname):
         KeyError,
         ValueError,
         AttributeError
-    )as ex:
+    ) as ex:
         Event(
             ExceptionMessage(
                 priority="error",
                 publisher=NS.publisher_id,
                 payload={
                     "message": "Unable to raise an brick status "
-                    "alert for host %s" % hostname
+                               "alert for host %s" % hostname,
+                    "exception": ex
                 }
             )
         )

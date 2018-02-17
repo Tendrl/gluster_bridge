@@ -1,5 +1,5 @@
 Name: tendrl-gluster-integration
-Version: 1.5.5
+Version: 1.6.0
 Release: 1%{?dist}
 BuildArch: noarch
 Summary: Module for Gluster Integration
@@ -63,6 +63,9 @@ py.test -v tendrl/gluster_integration/tests || :
 
 
 %changelog
+* Sat Feb 17 2018 Rohan Kanade <rkanade@redhat.com> - 1.6.0-1
+- API to un-manage clusters managed by Tendrl
+
 * Fri Feb 02 2018 Rohan Kanade <rkanade@redhat.com> - 1.5.5-1
 - Add georep related alert also for volume alert count increment
 - Add volume status related alert also for volume alert count increment

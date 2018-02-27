@@ -99,6 +99,9 @@ namespace.gluster:
       list: clusters/$TendrlContext.integration_id/GlobalDetails
       value: clusters/$TendrlContext.integration_id/GlobalDetails
       help: Clustr global details
+      watch_attrs:
+        - status
+
     GlusterBrickDir:
       attrs:
         default_brick_dir:

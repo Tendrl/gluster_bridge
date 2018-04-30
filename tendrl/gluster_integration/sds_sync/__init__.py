@@ -275,6 +275,10 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                     )
                     # update alert count
                     update_cluster_alert_count()
+                    # Update node alert count
+                    if not NS.tendrl.objects.ClusterNodeAlertCounters(
+                            ).exists():
+                        update_cluster_node_alert_count()
                 # check and enable volume profiling
                 if "provisioner/%s" % NS.tendrl_context.integration_id in \
                     NS.node_context.tags:
@@ -469,7 +473,8 @@ def sync_volumes(volumes, index, vol_options, sync_ttl):
         volume.disperse_count = volumes['volume%s.disperse_count' % index]
         volume.redundancy_count = volumes['volume%s.redundancy_count' % index]
         volume.quorum_status = volumes['volume%s.quorum_status' % index]
-        volume.snapd_status = volumes['volume%s.snapd_svc.online_status' % index]
+        volume.snapd_status = volumes[
+            'volume%s.snapd_svc.online_status' % index]
         volume.snapd_inited = volumes['volume%s.snapd_svc.inited' % index]
         if NS.tendrl.objects.GlusterVolume(
             NS.tendrl_context.integration_id,
@@ -852,3 +857,27 @@ def get_volume_alert_counts():
                                      'alert_count': 0
                                      }
     return alert_counts
+
+
+def update_cluster_node_alert_count():
+    alert_count = 0
+    severity = ["WARNING", "CRITICAL"]
+    try:
+        alerts_arr = NS.tendrl.objects.NodeAlert(
+            node_id=NS.node_context.node_id
+        ).load_all()
+        for alert in alerts_arr:
+            if alert.severity in severity:
+                alert_count += 1
+        NS.tendrl.objects.ClusterNodeAlertCounters(
+            integration_id=NS.tendrl_context.integration_id,
+            node_id=NS.node_context.node_id,
+            alert_count=alert_count
+        ).save()
+    except etcd.EtcdException as ex:
+        logger.log(
+            "debug",
+            NS.publisher_id,
+            {"message": "Unable to update node alert "
+             "count.err: %s" % ex}
+        )

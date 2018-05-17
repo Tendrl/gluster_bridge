@@ -572,8 +572,12 @@ def sync_volumes(volumes, index, vol_options, sync_ttl):
             hostname = volumes[
                 'volume%s.brick%s.hostname' % (index, b_index)
             ]
-            if socket.gethostbyname(NS.node_context.fqdn) != \
-                    socket.gethostbyname(hostname):
+            ip = socket.gethostbyname(hostname)
+            node_id = etcd_utils.read("indexes/ip/%s" % ip).value
+            fqdn = NS.tendrl.objects.ClusterNodeContext(
+                node_id=node_id
+            ).load().fqdn
+            if NS.node_context.fqdn != fqdn:
                 b_index += 1
                 continue
             sub_vol_size = (int(
@@ -641,44 +645,46 @@ def sync_volumes(volumes, index, vol_options, sync_ttl):
             )
 
             etcd_utils.write(vol_brick_path, "")
-
             brick = NS.tendrl.objects.GlusterBrick(
                 NS.tendrl_context.integration_id,
                 NS.node_context.fqdn,
-                brick_name.split(":_")[-1],
-                name=brick_name,
-                vol_id=volumes['volume%s.id' % index],
-                sequence_number=b_index,
-                brick_path=volumes[
-                    'volume%s.brick%s.path' % (index, b_index)
-                ],
-                hostname=volumes.get(
-                    'volume%s.brick%s.hostname' % (index, b_index)
-                ),
-                port=volumes.get(
-                    'volume%s.brick%s.port' % (index, b_index)
-                ),
-                vol_name=volumes['volume%s.name' % index],
-                used=True,
-                node_id=NS.node_context.node_id,
-                status=volumes.get(
-                    'volume%s.brick%s.status' % (index, b_index)
-                ),
-                filesystem_type=volumes.get(
-                    'volume%s.brick%s.filesystem_type' % (index, b_index)
-                ),
-                mount_opts=volumes.get(
-                    'volume%s.brick%s.mount_options' % (index, b_index)
-                ),
-                utilization=brick_utilization.brick_utilization(
-                    volumes['volume%s.brick%s.path' % (index, b_index)]
-                ),
-                client_count=volumes.get(
-                    'volume%s.brick%s.client_count' % (index, b_index)
-                ),
-                is_arbiter=volumes.get(
-                    'volume%s.brick%s.is_arbiter' % (index, b_index)
-                ),
+                brick_dir=brick_name.split(":_")[-1]
+            ).load()
+            brick.integration_id = NS.tendrl_context.integration_id
+            brick.fqdn = NS.node_context.fqdn
+            brick.brick_dir = brick_name.split(":_")[-1]
+            brick.name = brick_name
+            brick.vol_id = volumes['volume%s.id' % index]
+            brick.sequence_number = b_index
+            brick.brick_path = volumes[
+                'volume%s.brick%s.path' % (index, b_index)
+            ]
+            brick.hostname = volumes.get(
+                'volume%s.brick%s.hostname' % (index, b_index)
+            )
+            brick.port = volumes.get(
+                'volume%s.brick%s.port' % (index, b_index)
+            )
+            brick.vol_name = volumes['volume%s.name' % index]
+            brick.used = True
+            brick.node_id = NS.node_context.node_id
+            brick.status = volumes.get(
+                'volume%s.brick%s.status' % (index, b_index)
+            )
+            brick.filesystem_type = volumes.get(
+                'volume%s.brick%s.filesystem_type' % (index, b_index)
+            )
+            brick.mount_opts = volumes.get(
+                'volume%s.brick%s.mount_options' % (index, b_index)
+            )
+            brick.utilization = brick_utilization.brick_utilization(
+                volumes['volume%s.brick%s.path' % (index, b_index)]
+            )
+            brick.client_count = volumes.get(
+                'volume%s.brick%s.client_count' % (index, b_index)
+            )
+            brick.is_arbiter = volumes.get(
+                'volume%s.brick%s.is_arbiter' % (index, b_index)
             )
             brick.save(ttl=sync_ttl)
             # sync brick device details

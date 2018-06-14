@@ -150,8 +150,17 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                                     connected=peers['peer%s.connected' % index]
                                 )
                             try:
+                                stored_peer_status = None
+                                # find peer detail using hostname
+                                ip = socket.gethostbyname(
+                                    peers['peer%s.primary_hostname' % index]
+                                )
+                                node_id = etcd_utils.read(
+                                    "/indexes/ip/%s" % ip
+                                ).value
                                 stored_peer = NS.tendrl.objects.GlusterPeer(
-                                    peer_uuid=peers['peer%s.uuid' % index]
+                                    peer_uuid=peers['peer%s.uuid' % index],
+                                    node_id=node_id
                                 ).load()
                                 stored_peer_status = stored_peer.connected
                                 current_status = peers[
@@ -182,6 +191,10 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                                         'Connected'
                                         else 'INFO'
                                     )
+                                    # save current status in actual peer
+                                    # directory also
+                                    stored_peer.connected = current_status
+                                    stored_peer.save()
                                     # Disconnected host name to
                                     # raise brick alert
                                     if current_status.lower() == \

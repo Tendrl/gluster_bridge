@@ -991,7 +991,9 @@ def get_volume_alert_counts():
         NS.tendrl_context.integration_id
     ).load_all()
     for volume in volumes:
-        alert_counts[volume.name] = {'vol_id': volume.vol_id,
-                                     'alert_count': 0
-                                     }
+        if volume and volume.vol_id not in [None, ''] and \
+                volume.name not in [None, '']:
+            alert_counts[volume.name] = {'vol_id': volume.vol_id,
+                                         'alert_count': 0
+                                         }
     return alert_counts

@@ -41,10 +41,10 @@ def cluster_not_ready(cluster):
     @cluster: A Tendrl Cluster object
     @retuns boolean indicating if the cluster is ready or not
     """
-    status_not_ready = (cluster.status == "importing" and
-                        cluster.current_job['status'] == 'failed') or \
+    status_not_ready = ((cluster.status == "importing" and
+                         cluster.current_job['status'] == 'failed') or \
                         cluster.status == "unmanaging" or \
-                        cluster.status == "set_volume_profiling"
+                        cluster.status == "set_volume_profiling")
 
     return status_not_ready
 
@@ -281,7 +281,9 @@ def sync_by_provisioner(integration_id, node_context, raw_data, sync_ttl):
     if "provisioner/%s" % integration_id not in node_context.tags:
         return
 
-    all_volumes = NS.tendrl.objects.GlusterVolume(integration_id).load_all() or []
+    all_volumes = (
+        NS.tendrl.objects.GlusterVolume(integration_id).load_all() or [])
+    
     volumes = []
     for volume in all_volumes:
         if not str(volume.deleted).lower() == "true" or \

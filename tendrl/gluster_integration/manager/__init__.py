@@ -34,8 +34,6 @@ def main():
 
     NS.state_sync_thread = sds_sync.GlusterIntegrationSdsSyncStateThread()
 
-    NS.message_handler_thread = GlusterNativeMessageHandler()
-
     while NS.tendrl_context.integration_id is None or \
         NS.tendrl_context.integration_id == "":
         logger.log(
@@ -57,6 +55,9 @@ def main():
             NS.tendrl_context.integration_id
         }
     )
+    # Creating object form GlusterNativeMessageHandler
+    # After integration_id found
+    NS.message_handler_thread = GlusterNativeMessageHandler()
 
     NS.gluster.definitions.save()
     NS.gluster.config.save()

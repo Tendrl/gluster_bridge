@@ -277,13 +277,17 @@ def test_check_volumes(mock_glusterVolume_load, mock_sync_volumes):
 @mock.patch(
     "tendrl.gluster_integration.sds_sync.utilization.sync_utilization_details")
 @mock.patch(
-    "tendrl.gluster_integration.sds_sync.client_connections.sync_volume_connections")
+    "tendrl.gluster_integration.sds_sync.client_connections."
+    "sync_volume_connections")
 @mock.patch(
-    "tendrl.gluster_integration.sds_sync.georep_details.aggregate_session_status")
+    "tendrl.gluster_integration.sds_sync.georep_details."
+    "aggregate_session_status")
 @mock.patch(
-    "tendrl.gluster_integration.sds_sync.rebalance_status.sync_volume_rebalance_status")
+    "tendrl.gluster_integration.sds_sync.rebalance_status."
+    "sync_volume_rebalance_status")
 @mock.patch(
-    "tendrl.gluster_integration.sds_sync.rebalance_status.sync_volume_rebalance_estimated_time")
+    "tendrl.gluster_integration.sds_sync.rebalance_status."
+    "sync_volume_rebalance_estimated_time")
 @mock.patch(
     "tendrl.gluster_integration.sds_sync.snapshots.sync_volume_snapshots")
 @mock.patch(

@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 import argparse
-import sys
 
+from tendrl.commons.utils import log_utils as logger
 from tendrl.gluster_integration import gfapi
 
 
@@ -21,10 +21,14 @@ def computeVolumeStats(data):
 def showVolumeUtilization(vname):
     try:
         data = gfapi.getVolumeStatvfs(vname)
-    except gfapi.GlusterLibgfapiException:
-        sys.stderr.write("CRITICAL: Failed to get the "
-                         "Volume Utilization Data\n")
-        sys.exit(-1)
+    except gfapi.GlusterLibgfapiException as ex:
+        logger.log(
+            "critical",
+            NS.publisher_id,
+            {"message": "Failed to get the "
+             "Volume Utilization Data. err: %s" % ex}
+        )
+        return
     volumeCapacity = computeVolumeStats(data)
     # total size in KB
     total_size = volumeCapacity['sizeTotal'] / BYTES_IN_KB

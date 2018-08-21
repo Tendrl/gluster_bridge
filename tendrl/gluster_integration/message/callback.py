@@ -788,6 +788,28 @@ class Callback(object):
         event["message"] = brick_details
         self.volume_remove_brick_force(event)
 
+    def peer_disconnect(self, event):
+        try:
+            # find node id
+            ip = socket.gethostbyname(
+                event['message']['peer']
+            )
+            _node_id = etcd_utils.read(
+                "/indexes/ip/%s" % ip
+            ).value
+            node_context = NS.tendrl.objects.NodeContext(
+                node_id = _node_id
+            ).load()
+            _ptag = "provisioner/%s" % \
+                NS.tendrl_context.integration_id
+            if _ptag in node_context.tags:
+                node_context.tags.remove(_ptag)
+                node_context.save()
+                _index_key = "/indexes/tags/%s" % _ptag
+                etcd_utils.delete(_index_key)
+        except(etcd.EtcdException, KeyError) as ex:
+            pass
+
 
 def parse_subvolume(subvol):
     # volume1-replica-2 or volume_1-replica-2 or volume-1-replica-2

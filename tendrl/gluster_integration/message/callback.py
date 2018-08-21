@@ -69,15 +69,20 @@ class Callback(object):
         native_event.save()
 
     def svc_connected(self, event):
-        context = "svc_connection|" + event['message']['svc_name']
+        context = "svc_connection|" + "%s_%s" % (
+            event['message']['svc_name'],
+            NS.node_context.fqdn
+        )
         volname = event['message'].get('volume', '')
         if volname:
             context += volname
 
-        message = "Service: {0} is connected in cluster {1}".format(
-            event['message']['svc_name'],
-            self.cluster_short_name
-        )
+        message = "Service: {0} is connected on node {1} of " \
+            "cluster {2}".format(
+                event['message']['svc_name'],
+                NS.node_context.fqdn,
+                self.cluster_short_name
+            )
         native_event = NS.gluster.objects.NativeEvents(
             context,
             message=message,
@@ -87,15 +92,20 @@ class Callback(object):
         native_event.save()
 
     def svc_disconnected(self, event):
-        context = "svc_connection|" + event['message']['svc_name']
+        context = "svc_connection|" + "%s_%s" % (
+            event['message']['svc_name'],
+            NS.node_context.fqdn
+        )
         volname = event['message'].get('volume', '')
         if volname:
             context += volname
 
-        message = "Service: {0} is disconnected in cluster {1}".format(
-            event['message']['svc_name'],
-            self.cluster_short_name
-        )
+        message = "Service: {0} is disconnected on node {1} of " \
+            "cluster {2}".format(
+                event['message']['svc_name'],
+                NS.node_context.fqdn,
+                self.cluster_short_name
+            )
         native_event = NS.gluster.objects.NativeEvents(
             context,
             message=message,

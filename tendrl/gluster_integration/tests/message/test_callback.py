@@ -68,6 +68,7 @@ def test_quorum_regained(load):
 @patch.object(BaseObject, "load")
 def test_svc_connected(load):
     init()
+    NS.node_context.fqdn = "node-test"
     load.return_value = maps.NamedDict(
         short_name="77deef29-b8e5-4dc5-8247-21e2a409a66a"
     )
@@ -79,10 +80,10 @@ def test_svc_connected(load):
     NS.gluster.objects.NativeEvents = MagicMock()
     Callback().svc_connected(event)
     NS.gluster.objects.NativeEvents.assert_called_with(
-        'svc_connection|testv1',
+        'svc_connection|test_node-testv1',
         current_value='service_connected',
-        message='Service: test is connected in cluster '
-                '77deef29-b8e5-4dc5-8247-21e2a409a66a',
+        message='Service: test is connected on node node-test '
+                'of cluster 77deef29-b8e5-4dc5-8247-21e2a409a66a',
         severity='recovery'
     )
 
@@ -90,6 +91,7 @@ def test_svc_connected(load):
 @patch.object(BaseObject, "load")
 def test_svc_disconnected(load):
     init()
+    NS.node_context.fqdn = "node-test"
     load.return_value = maps.NamedDict(
         short_name="77deef29-b8e5-4dc5-8247-21e2a409a66a"
     )
@@ -101,10 +103,10 @@ def test_svc_disconnected(load):
     NS.gluster.objects.NativeEvents = MagicMock()
     Callback().svc_disconnected(event)
     NS.gluster.objects.NativeEvents.assert_called_with(
-        'svc_connection|testv1',
+        'svc_connection|test_node-testv1',
         current_value='service_disconnected',
-        message='Service: test is disconnected in cluster '
-                '77deef29-b8e5-4dc5-8247-21e2a409a66a',
+        message='Service: test is disconnected on node node-test '
+                'of cluster 77deef29-b8e5-4dc5-8247-21e2a409a66a',
         severity='warning'
     )
 

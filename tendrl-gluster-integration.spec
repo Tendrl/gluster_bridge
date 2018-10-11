@@ -15,7 +15,6 @@ BuildRequires: python-mock
 Requires: glusterfs-events
 Requires: tendrl-commons
 Requires: systemd
-Requires: python-blivet
 Requires: python-flask
 Requires: python-cherrypy
 Requires: python-paste

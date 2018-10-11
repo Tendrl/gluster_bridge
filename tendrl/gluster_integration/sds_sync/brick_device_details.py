@@ -36,41 +36,16 @@ def update_brick_device_details(brick_name, brick_path, devicetree, sync_ttl):
                 "message": "Cound not update brick device details"
             }
         )
-        return
-
-    device = devicetree.resolveDevice(mount_source)
-    size = int(device.size.to_integral())
-    lv = None
-    pool = None
-    vg = None
-    pvs = []
-    disks = [str(
-        d.path
-    ) for d in device.ancestors if d.isDisk and not d.parents]
-
-    # partitions needed for calculating io stats.
-    partitions = [str(
-        d.path
-    ) for d in device.ancestors if d.type == "partition"]
-
-    if device.type in ("lvmthinlv", "lvmlv"):
-        lv = device.name
-        if hasattr(device, "pool"):
-            pool = device.pool.name
-        vg = device.vg.name
-        pvs = [str(dev.path) for dev in device.disks]
-
-    brick = NS.tendrl.objects.GlusterBrick(
-        NS.tendrl_context.integration_id,
-        NS.node_context.fqdn,
-        brick_dir=brick_name.split(":_")[-1]
-    ).load()
-    brick.devices = disks
-    brick.partitions = partitions
-    brick.mount_path = mount_point
-    brick.lv = lv
-    brick.vg = vg
-    brick.pool = pool
-    brick.pv = pvs
-    brick.size = size
-    brick.save(ttl=sync_ttl)
+    if mount_point in devicetree.keys():
+        brick = NS.tendrl.objects.GlusterBrick(
+            NS.tendrl_context.integration_id,
+            NS.node_context.fqdn,
+            brick_dir=brick_name.split(":_")[-1]
+        ).load()
+        brick.devices = devicetree[mount_point].get("disks", [])
+        brick.partitions = devicetree[mount_point].get("partitions", [])
+        if "device_info" in devicetree[mount_point]:
+            brick.size = devicetree[mount_point]["device_info"].get("size", "")
+            brick.mount_path = \
+                devicetree[mount_point]["device_info"].get("mountpoint", "")
+        brick.save(ttl=sync_ttl)

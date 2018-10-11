@@ -1,4 +1,3 @@
-import blivet
 import json
 import re
 import socket
@@ -11,6 +10,7 @@ import etcd
 from tendrl.commons.event import Event
 from tendrl.commons.message import ExceptionMessage
 from tendrl.commons import sds_sync
+from tendrl.commons.utils import cmd_utils
 from tendrl.commons.utils import etcd_utils
 from tendrl.commons.utils import event_utils
 from tendrl.commons.utils import log_utils as logger
@@ -221,16 +221,10 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                             disconnected_host
                         )
                 if "Volumes" in raw_data:
+                    # create devicetree using lsblk
+                    devicetree = get_device_tree()
                     index = 1
                     volumes = raw_data['Volumes']
-                    # instantiating blivet class, this will be used for
-                    # getting brick_device_details
-                    b = blivet.Blivet()
-
-                    # reset blivet during every sync to get latest information
-                    # about storage devices in the machine
-                    b.reset()
-                    devicetree = b.devicetree
                     total_brick_count = 0
                     while True:
                         try:
@@ -930,3 +924,91 @@ def get_volume_alert_counts():
                                          'alert_count': 0
                                          }
     return alert_counts
+
+
+def get_device_tree():
+    devicetree = {}
+    try:
+        columns = 'NAME,KNAME,PKNAME,TYPE,MOUNTPOINT,SIZE'
+        keys = columns.split(',')
+        lsblk = ("lsblk --all --bytes --noheadings "
+                 "--output='%s' --path --raw" % columns)
+        cmd = cmd_utils.Command(lsblk)
+        out, err, rc = cmd.run()
+        if not err:
+            out = out.encode('utf8')
+            devlist = map(
+                lambda line: dict(zip(keys, line.split(' '))),
+                out.splitlines()
+            )
+            block_devices = {}
+            for dev_info in devlist:
+                if dev_info["TYPE"] == "disk":
+                    # create new block device list
+                    block_devices = {dev_info["KNAME"]: dev_info}
+                else:
+                    block_devices[dev_info["KNAME"]] = dev_info
+                # find ancestors if mountpoint present
+                if dev_info["MOUNTPOINT"]:
+                    ancestor_details = find_ancestors(
+                        block_devices, dev_info["KNAME"]
+                    )
+                    if dev_info["MOUNTPOINT"] in devicetree.keys():
+                        # if different block device mounted in same mountpoint
+                        # then append the disk and partition information under
+                        # same mountpoint
+                        disks = devicetree[dev_info["MOUNTPOINT"]]["disks"]
+                        devicetree[dev_info["MOUNTPOINT"]]["disks"] = list(
+                            set(disks + ancestor_details["disks"])
+                        )
+                        devicetree[dev_info["MOUNTPOINT"]]["partitions"] = \
+                            list(
+                                set(ancestor_details["partitions"])
+                            )
+                    else:
+                        devicetree[dev_info["MOUNTPOINT"]] = {}
+                        devicetree[dev_info["MOUNTPOINT"]]["disks"] = \
+                            ancestor_details["disks"]
+                        devicetree[dev_info["MOUNTPOINT"]]["partitions"] = \
+                            ancestor_details["partitions"]
+                        devicetree[dev_info["MOUNTPOINT"]]["device_info"] = {}
+                        devicetree[dev_info["MOUNTPOINT"]]["device_info"][
+                            "size"] = dev_info["SIZE"]
+                        devicetree[dev_info["MOUNTPOINT"]]["device_info"][
+                            "mountpoint"] = dev_info["MOUNTPOINT"]
+                        devicetree[dev_info["MOUNTPOINT"]]["device_info"][
+                            "type"] = dev_info["TYPE"]
+                        devicetree[dev_info["MOUNTPOINT"]]["device_info"][
+                            "size"] = dev_info["SIZE"]
+        return devicetree
+    except Exception as ex:
+        logger.log(
+            "error",
+            NS.publisher_id,
+            {"message": "Unable to generate devicetree.err: %s" % ex}
+        )
+
+
+def find_ancestors(block_devices, device_name):
+    # find ancestors including current dev from bottom to top
+    ancestor_details = {}
+    ancestor_details["disks"] = []
+    ancestor_details["partitions"] = []
+    while True:
+        if device_name in block_devices.keys():
+            if block_devices[device_name]["TYPE"] == "disk":
+                ancestor_details["disks"].append(
+                    block_devices[device_name]["NAME"]
+                )
+                break
+            elif block_devices[device_name]["TYPE"] == "part":
+                ancestor_details["partitions"].append(
+                    block_devices[device_name]["NAME"]
+                )
+                device_name = block_devices[device_name]["PKNAME"]
+            else:
+                # find next ancestors from next parent_name
+                device_name = block_devices[device_name]["PKNAME"]
+        else:
+            break
+    return ancestor_details

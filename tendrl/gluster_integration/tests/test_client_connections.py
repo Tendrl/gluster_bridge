@@ -1,7 +1,6 @@
 import etcd
 import importlib
 import maps
-import mock
 from mock import patch
 
 from tendrl.commons.objects import BaseObject
@@ -21,8 +20,7 @@ def read(param):
 
 @patch.object(BaseObject, "load")
 @patch.object(BaseObject, "save")
-@mock.patch("tendrl.gluster_integration.sds_sync.blivet")
-def test_sync_volume_connections(blivet, save, load):
+def test_sync_volume_connections(save, load):
     init()
     client_connections = importlib.import_module(
         'tendrl.gluster_integration.sds_sync.client_connections'

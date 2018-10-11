@@ -328,7 +328,7 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                 # check and enable volume profiling
                 if "provisioner/%s" % NS.tendrl_context.integration_id in \
                     NS.node_context.tags:
-                    self._enable_disable_volume_profiling()
+                    self._update_cluster_volume_profiling_state()
 
                 _cluster = NS.tendrl.objects.Cluster(
                     integration_id=NS.tendrl_context.integration_id
@@ -375,70 +375,16 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
             {"message": "%s complete" % self.__class__.__name__}
         )
 
-    def _enable_disable_volume_profiling(self):
-        cluster = NS.tendrl.objects.Cluster(
-            integration_id=NS.tendrl_context.integration_id
-        ).load()
-        volumes = NS.tendrl.objects.GlusterVolume(
-            NS.tendrl_context.integration_id
-        ).load_all() or []
-        # Enable / disable based on cluster flag volume_profiling_flag
-        # should be done only once while first sync. Later the volume
-        # level volume_profiling_state should be set based on individual
-        # volume level values
-        _cnc = NS.tendrl.objects.ClusterNodeContext(
-            node_id=NS.node_context.node_id
-        ).load()
-        if _cnc.first_sync_done in [None, "no", ""]:
-            if cluster.volume_profiling_flag == "enable":
-                for volume in volumes:
-                    if volume.profiling_enabled == "yes":
-                        continue
-                    p = subprocess.Popen(
-                        ["gluster",
-                         "volume",
-                         "profile",
-                         volume.name,
-                         "start"],
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE
-                    )
-                    retry = 1
-                    while True:
-                        if p.poll() is not None:
-                            break
-                        elif retry > 10 and p.poll() is None:
-                            p.kill()
-                            break
-                        retry += 1
-                        time.sleep(0.5)
-            if cluster.volume_profiling_flag == "disable":
-                for volume in volumes:
-                    if volume.profiling_enabled == "no":
-                        continue
-                    p = subprocess.Popen(
-                        ["gluster",
-                         "volume",
-                         "profile",
-                         volume.name,
-                         "start"],
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE
-                    )
-                    retry = 1
-                    while True:
-                        if p.poll() is not None:
-                            break
-                        elif retry > 10 and p.poll() is None:
-                            p.kill()
-                            break
-                        retry += 1
-                        time.sleep(0.5)
+    def _update_cluster_volume_profiling_state(self):
+        # The below code updates the cluster volume_profiling_state on each
+        # sync. Actual cluster profiling job is invoked with the completion of
+        # the import flow.
+        volume_profiling_state = None
         profiling_enabled_count = 0
         profiling_unknown_count = 0
         volumes = NS.tendrl.objects.GlusterVolume(
             NS.tendrl_context.integration_id
-        ).load_all()
+        ).load_all() or []
         for volume in volumes:
             if volume.profiling_enabled == "yes":
                 profiling_enabled_count += 1
@@ -447,15 +393,17 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
         if profiling_unknown_count == len(volumes):
             return
         if profiling_enabled_count == 0:
-            cluster.volume_profiling_state = "disabled"
+            volume_profiling_state = "disabled"
         elif profiling_enabled_count == len(volumes):
-            cluster.volume_profiling_state = "enabled"
+            volume_profiling_state = "enabled"
         elif profiling_enabled_count < len(volumes):
-            cluster.volume_profiling_state = "mixed"
-        volume_profiling_state = cluster.volume_profiling_state
-        cluster = cluster.load()
-        cluster.volume_profiling_state = volume_profiling_state
-        cluster.save()
+            volume_profiling_state = "mixed"
+        cluster = NS.tendrl.objects.Cluster(
+            integration_id=NS.tendrl_context.integration_id
+        ).load()
+        if cluster.volume_profiling_state != volume_profiling_state:
+            cluster.volume_profiling_state = volume_profiling_state
+            cluster.save()
 
 
 def sync_volumes(

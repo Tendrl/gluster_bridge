@@ -748,6 +748,7 @@ def sync_volumes(
             brick.is_arbiter = volumes.get(
                 'volume%s.brick%s.is_arbiter' % (index, b_index)
             )
+            brick.pv = []
             brick.save(ttl=sync_ttl)
             # sync brick device details
             brick_device_details.\
@@ -927,6 +928,39 @@ def get_volume_alert_counts():
 
 
 def get_device_tree():
+    """{
+
+            "/boot" : {
+                "disks": ['/dev/sda'],
+                "partitions": ['/dev/sda1'],
+                "device_info": {
+                    "type": "part",
+                    "mountpoint": "/boot",
+                    "size": 44023414784
+                },
+            },
+            "/gluster/brick1": {
+                "disks": ['/dev/sdb'],
+                "partitions": ['/dev/sdb1'],
+                "device_info": {
+                    "type": "lvm",
+                    "mountpoint": "/gluster/brick1",
+                    "size": 41873833984
+                },
+            },
+            "/gluster/brick2": {
+                "disks": ['/dev/sdc', '/dev/sde'],
+                "partitions": ['/dev/sdc1', '/dev/sde1`'],
+                "device_info": {
+                    "type": "lvm",
+                    "mountpoint": "/gluster/brick2",
+                    "size": 40231763968
+                },
+            }
+
+    }
+    """
+
     devicetree = {}
     try:
         columns = 'NAME,KNAME,PKNAME,TYPE,MOUNTPOINT,SIZE'
@@ -948,7 +982,8 @@ def get_device_tree():
                     block_devices = {dev_info["KNAME"]: dev_info}
                 else:
                     block_devices[dev_info["KNAME"]] = dev_info
-                # find ancestors if mountpoint present
+                # find ancestors if mountpoint present, current block device
+                # also considered as its ancestor
                 if dev_info["MOUNTPOINT"]:
                     ancestor_details = find_ancestors(
                         block_devices, dev_info["KNAME"]
@@ -978,19 +1013,22 @@ def get_device_tree():
                             "mountpoint"] = dev_info["MOUNTPOINT"]
                         devicetree[dev_info["MOUNTPOINT"]]["device_info"][
                             "type"] = dev_info["TYPE"]
-                        devicetree[dev_info["MOUNTPOINT"]]["device_info"][
-                            "size"] = dev_info["SIZE"]
-        return devicetree
-    except Exception as ex:
+    except (KeyError, TypeError, ValueError, AttributeError) as ex:
         logger.log(
             "error",
             NS.publisher_id,
             {"message": "Unable to generate devicetree.err: %s" % ex}
         )
+    return devicetree
 
 
 def find_ancestors(block_devices, device_name):
-    # find ancestors including current dev from bottom to top
+    # find ancestors bottom to top of its device hierarchy
+    # If mount point found for a block device then find
+    # ancestors for that device using its parent's,
+    # if the device is not a disk then loop through using its parent name,
+    # if parent also not disk then loop through its parent's parent name,
+    # this process will continue until parent with disk type present
     ancestor_details = {}
     ancestor_details["disks"] = []
     ancestor_details["partitions"] = []

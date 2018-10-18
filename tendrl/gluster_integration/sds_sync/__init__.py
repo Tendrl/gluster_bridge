@@ -87,6 +87,7 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                     _cluster.current_job['status'] == 'failed')) or \
                     _cluster.status == "unmanaging" or \
                     _cluster.status == "set_volume_profiling":
+                    time.sleep(_sleep)
                     continue
 
                 _cnc = NS.tendrl.objects.ClusterNodeContext(
@@ -223,6 +224,8 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                 if "Volumes" in raw_data:
                     # create devicetree using lsblk
                     devicetree = get_device_tree()
+                    # find lvs
+                    lvs = brick_utilization.get_lvs()
                     index = 1
                     volumes = raw_data['Volumes']
                     total_brick_count = 0
@@ -233,7 +236,8 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                                 raw_data_options.get('Volume Options'),
                                 SYNC_TTL + VOLUME_TTL,
                                 _cluster.short_name,
-                                devicetree
+                                devicetree,
+                                lvs
                             )
                             index += 1
                             SYNC_TTL += 1
@@ -457,7 +461,8 @@ def sync_volumes(
     vol_options,
     sync_ttl,
     cluster_short_name,
-    devicetree
+    devicetree,
+    lvs
 ):
     NS.node_context = NS.tendrl.objects.NodeContext().load()
     tag_list = NS.node_context.tags
@@ -740,7 +745,8 @@ def sync_volumes(
                 'volume%s.brick%s.mount_options' % (index, b_index)
             )
             brick.utilization = brick_utilization.brick_utilization(
-                volumes['volume%s.brick%s.path' % (index, b_index)]
+                volumes['volume%s.brick%s.path' % (index, b_index)],
+                lvs
             )
             brick.client_count = volumes.get(
                 'volume%s.brick%s.client_count' % (index, b_index)
@@ -748,7 +754,6 @@ def sync_volumes(
             brick.is_arbiter = volumes.get(
                 'volume%s.brick%s.is_arbiter' % (index, b_index)
             )
-            brick.pv = []
             brick.save(ttl=sync_ttl)
             # sync brick device details
             brick_device_details.\

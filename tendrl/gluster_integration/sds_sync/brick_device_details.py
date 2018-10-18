@@ -44,6 +44,7 @@ def update_brick_device_details(brick_name, brick_path, devicetree, sync_ttl):
         ).load()
         brick.devices = devicetree[mount_point].get("disks", [])
         brick.partitions = devicetree[mount_point].get("partitions", [])
+        brick.pv = []
         if "device_info" in devicetree[mount_point]:
             brick.size = devicetree[mount_point]["device_info"].get("size", "")
             brick.mount_path = \

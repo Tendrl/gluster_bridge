@@ -74,7 +74,7 @@ def get_lvs():
     return d
 
 
-def get_mount_stats(mount_path):
+def get_mount_stats(mount_path, lvs):
     def _get_mounts(mount_path=[]):
         mount_list = map(_get_mount_point, mount_path)
         mount_points = _parse_proc_mounts()
@@ -116,7 +116,6 @@ def get_mount_stats(mount_path):
         return out
 
     mount_points = _get_mounts(mount_path)
-    lvs = get_lvs()
     mount_detail = {}
     for mount, info in mount_points.iteritems():
         mount_detail[mount] = _get_stats(mount)
@@ -127,7 +126,7 @@ def get_mount_stats(mount_path):
     return mount_detail
 
 
-def brick_utilization(path):
+def brick_utilization(path, lvs):
     """{
 
          'used_percent': 0.6338674168297445,
@@ -168,4 +167,4 @@ def brick_utilization(path):
     """
     # Below logic will find mount_path from path
     mount_path = [path.split(":")[1]]
-    return get_mount_stats(mount_path).values()[0]
+    return get_mount_stats(mount_path, lvs).values()[0]

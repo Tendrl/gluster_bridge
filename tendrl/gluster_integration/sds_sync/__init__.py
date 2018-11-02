@@ -421,7 +421,7 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                          "volume",
                          "profile",
                          volume.name,
-                         "start"],
+                         "stop"],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE
                     )

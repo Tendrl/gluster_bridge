@@ -20,8 +20,8 @@ class GlobalDetails(objects.BaseObject):
         self.value = 'clusters/{0}/GlobalDetails'
 
     def render(self):
-        self.value = self.value.format(self.integration_id or
-                                       NS.tendrl_context.integration_id)
+        self.value = self.value.format(
+            self.integration_id or NS.tendrl_context.integration_id)
         return super(GlobalDetails, self).render()
 
     def save(self, update=True, ttl=None):

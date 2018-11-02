@@ -83,8 +83,8 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                 _cluster = NS.tendrl.objects.Cluster(
                     integration_id=NS.tendrl_context.integration_id
                 ).load()
-                if (_cluster.status == "importing" and
-                    _cluster.current_job['status'] == 'failed') or \
+                if (_cluster.status == "importing" and (
+                    _cluster.current_job['status'] == 'failed')) or \
                     _cluster.status == "unmanaging" or \
                     _cluster.status == "set_volume_profiling":
                     continue
@@ -189,8 +189,8 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                                         current_status,
                                         msg,
                                         instance,
-                                        'WARNING' if current_status !=
-                                        'Connected'
+                                        'WARNING'
+                                        if current_status != 'Connected'
                                         else 'INFO'
                                     )
                                     # save current status in actual peer

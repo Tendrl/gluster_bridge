@@ -1,6 +1,6 @@
 Name: tendrl-gluster-integration
 Version: 1.6.3
-Release: 9%{?dist}
+Release: 10%{?dist}
 BuildArch: noarch
 Summary: Module for Gluster Integration
 Source0: %{name}-%{version}.tar.gz
@@ -65,6 +65,9 @@ py.test -v tendrl/gluster_integration/tests || :
 
 
 %changelog
+* Thu Aug 23 2018 Shubhendu Tripathi <shtripat@redhat.com> - 1.6.3-10
+- Bugfixes (https://github.com/Tendrl/gluster-integration/milestone/10)
+
 * Fri Jul 27 2018 Shubhendu Tripathi <shtripat@redhat.com> - 1.6.3-9
 - Bugfixes (https://github.com/Tendrl/gluster-integration/milestone/9)
 

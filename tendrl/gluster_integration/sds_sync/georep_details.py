@@ -210,8 +210,9 @@ def aggregate_session_status():
                 if created_count == pair_count:
                     session_status = georep_status.CREATED
                 elif faulty_count == 0 and (
-                        stopped_count == 0 and paused_count == 0 and
+                        stopped_count == 0 and paused_count == 0 and (
                         created_count == 0
+                        )
                 ):
                     session_status = georep_status.UP
                 elif pair_count == faulty_count:

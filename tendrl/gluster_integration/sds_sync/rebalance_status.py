@@ -19,8 +19,8 @@ def sync_volume_rebalance_status(volumes):
     for volume in volumes:
         rebal_status_list = []
         if "Distribute" in volume.vol_type or (
-                "arbiter" in volume.vol_type and
-                int(volume.brick_count) > int(volume.replica_count)
+                "arbiter" in volume.vol_type and (
+                int(volume.brick_count) > int(volume.replica_count))
         ):
             vol_rebal_details = NS.gluster.objects.RebalanceDetails(
                 vol_id=volume.vol_id

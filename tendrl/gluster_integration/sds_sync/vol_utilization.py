@@ -26,10 +26,14 @@ def showVolumeUtilization(vnames):
         if volume != "":
             try:
                 data = gfapi.getVolumeStatvfs(volume)
-            except gfapi.GlusterLibgfapiException:
-                sys.stderr.write("CRITICAL: Failed to get the "
-                                 "Volume Utilization Data\n")
-                sys.exit(-1)
+            except gfapi.GlusterLibgfapiException as e:
+                if 'error' not in ret_dict.keys():
+                    ret_dict['error'] = {}
+                ret_dict['error'][volume] = \
+                    {'message': "CRITICAL: Failed to "
+                                "get the Volume Utilization Data."
+                                "Error: %s" % e}
+                continue
             volumeCapacity = computeVolumeStats(data)
             # total size in KB
             total_size = volumeCapacity['sizeTotal'] / BYTES_IN_KB
@@ -41,7 +45,9 @@ def showVolumeUtilization(vnames):
             used_inode = data.f_files - data.f_ffree
             total_inode = data.f_files
             pcnt_inode_used = (float(used_inode) / total_inode) * 100
-            ret_dict[volume] = {
+            if 'success' not in ret_dict.keys():
+                    ret_dict['success'] = {}
+            ret_dict['success'][volume] = {
                 'total': total_size,
                 'free': free_size,
                 'used': used_size,
@@ -50,7 +56,8 @@ def showVolumeUtilization(vnames):
                 'used_inode': used_inode,
                 'pcnt_inode_used': pcnt_inode_used
             }
-    print (json.dumps(ret_dict))
+
+    print(json.dumps(ret_dict))
 
 
 def parse_input():

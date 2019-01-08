@@ -10,11 +10,11 @@ from tendrl.gluster_integration.sds_sync import utilization
 
 @mock.patch(
     'subprocess.Popen.communicate',
-    mock.Mock(return_value=('{"vol1": {"total": "20000", "used": "5000",\
+    mock.Mock(return_value=('{"success":{"vol1": {"total": "20000", "used": "5000",\
         "pcnt_used": "25", "total_inode": "100", "used_inode": "20",\
         "pcnt_inode_used": "20"}, "vol2": {"total": "30000", "used": "6000",\
         "pcnt_used": "50", "total_inode": "100", "used_inode": "20",\
-        "pcnt_inode_used": "20"}}', ""))
+        "pcnt_inode_used": "20"}}}', ""))
 )
 @mock.patch(
     'tendrl.gluster_integration.objects.volume.Volume.save',
@@ -87,11 +87,11 @@ def test_sync_volume_utilization_details_with_started_volume():
 
 @mock.patch(
     'subprocess.Popen.communicate',
-    mock.Mock(return_value=('{"vol1": {"total": "20000", "used": "5000",\
+    mock.Mock(return_value=('{"success":{"vol1": {"total": "20000", "used": "5000",\
         "pcnt_used": "25", "total_inode": "100", "used_inode": "20",\
         "pcnt_inode_used": "20"}, "vol2": {"total": "20000", "used": "5000",\
         "pcnt_used": "25", "total_inode": "100", "used_inode": "20",\
-        "pcnt_inode_used": "20"}}', ""))
+        "pcnt_inode_used": "20"}}}', ""))
 )
 @mock.patch(
     'tendrl.gluster_integration.objects.volume.Volume.save',

@@ -59,10 +59,12 @@ def get_lvs():
             {"message": str(err)}
         )
         return None
-    out = out.split('\n')
-    lst = map(lambda x: dict(x),
-              map(lambda x: [e.split('=') for e in x],
-                  map(lambda x: x.strip().split('$'), out)))
+    lst = {}
+    if out != '':
+        out = out.split('\n')
+        lst = map(lambda x: dict(x),
+                  map(lambda x: [e.split('=') for e in x],
+                      map(lambda x: x.strip().split('$'), out)))
 
     d = {}
     for i in lst:

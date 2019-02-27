@@ -46,7 +46,7 @@ def showVolumeUtilization(vnames):
             total_inode = data.f_files
             pcnt_inode_used = (float(used_inode) / total_inode) * 100
             if 'success' not in ret_dict.keys():
-                    ret_dict['success'] = {}
+                ret_dict['success'] = {}
             ret_dict['success'][volume] = {
                 'total': total_size,
                 'free': free_size,

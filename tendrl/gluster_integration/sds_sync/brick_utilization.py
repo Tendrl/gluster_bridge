@@ -59,18 +59,30 @@ def get_lvs():
             {"message": str(err)}
         )
         return None
-    out = out.split('\n')
-    lst = map(lambda x: dict(x),
-              map(lambda x: [e.split('=') for e in x],
-                  map(lambda x: x.strip().split('$'), out)))
-
     d = {}
-    for i in lst:
-        if i['LVM2_LV_ATTR'][0] == 't':
-            k = "%s/%s" % (i['LVM2_VG_NAME'], i['LVM2_LV_NAME'])
-        else:
-            k = os.path.realpath(i['LVM2_LV_PATH'])
-        d.update({k: i})
+    if str(out) != '':
+        try:
+            out = out.split('\n')
+            lst = map(lambda x: dict(x),
+                      map(lambda x: [e.split('=') for e in x],
+                          map(lambda x: x.strip().split('$'), out)))
+
+            for i in lst:
+                if i['LVM2_LV_ATTR'][0] == 't':
+                    k = "%s/%s" % (i['LVM2_VG_NAME'], i['LVM2_LV_NAME'])
+                else:
+                    k = os.path.realpath(i['LVM2_LV_PATH'])
+                d.update({k: i})
+        except (ValueError, KeyError) as ex:
+            # Keyerror will raise when any changes in attributes name
+            # of lvm output
+            # ValueError will raise when any problem in output format
+            # Because parsing logic will raise error
+            logger.log(
+                "debug",
+                NS.publisher_id,
+                {"message": str(ex)}
+            )
     return d
 
 

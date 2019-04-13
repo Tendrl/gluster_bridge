@@ -86,7 +86,9 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                 if (_cluster.status == "importing" and (
                     _cluster.current_job['status'] == 'failed')) or \
                     _cluster.status == "unmanaging" or \
-                    _cluster.status == "set_volume_profiling":
+                    _cluster.status == "set_volume_profiling" or \
+                    (_cluster.is_managed == "no" and
+                     _cluster.current_job.get('status') != "in_progress"):
                     time.sleep(_sleep)
                     continue
 

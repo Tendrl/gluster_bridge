@@ -153,77 +153,110 @@ class Callback(object):
         native_event.save()
 
     def afr_quorum_met(self, event):
-        context = "afr_quorum_state|" + event['message']['subvol']
-        message = "Afr quorum is met for subvolume: {0} in cluster {1}".format(
-            event['message']['subvol'],
-            self.cluster_short_name
-        )
-        volume_name = parse_subvolume(event['message']['subvol'])
-        native_event = NS.gluster.objects.NativeEvents(
-            context,
-            message=message,
-            severity="recovery",
-            current_value="afr_quorum_met",
-            tags={"entity_type": RESOURCE_TYPE_VOLUME,
-                  "volume_name": volume_name
-                  }
-        )
-        native_event.save()
+        client_pid = event['message'].get('client-pid', '0')
+        if int(client_pid) >= 0:
+            context = "afr_quorum_state|" + event['message']['subvol']
+            message = "Afr quorum is met for subvolume: {0} in " \
+                "cluster {1}".format(
+                    event['message']['subvol'],
+                    self.cluster_short_name
+                )
+            volume_name = parse_subvolume(event['message']['subvol'])
+            native_event = NS.gluster.objects.NativeEvents(
+                context,
+                message=message,
+                severity="recovery",
+                current_value="afr_quorum_met",
+                tags={"entity_type": RESOURCE_TYPE_VOLUME,
+                      "volume_name": volume_name
+                      }
+            )
+            native_event.save()
 
     def afr_quorum_fail(self, event):
-        context = "afr_quorum_state|" + event['message']['subvol']
-        message = "Afr quorum has failed for subvolume:"\
-                  " {0} in cluster {1}".format(
-                      event['message']['subvol'],
-                      self.cluster_short_name
-                  )
-        volume_name = parse_subvolume(event['message']['subvol'])
-        native_event = NS.gluster.objects.NativeEvents(
-            context,
-            message=message,
-            severity="warning",
-            current_value="afr_quorum_failed",
-            tags={"entity_type": RESOURCE_TYPE_VOLUME,
-                  "volume_name": volume_name
-                  }
-        )
-        native_event.save()
+        client_pid = event['message'].get('client-pid', '0')
+        if int(client_pid) >= 0:
+            context = "afr_quorum_state|" + event['message']['subvol']
+            message = "Afr quorum has failed for subvolume:"\
+                      " {0} in cluster {1}".format(
+                          event['message']['subvol'],
+                          self.cluster_short_name
+                      )
+            volume_name = parse_subvolume(event['message']['subvol'])
+            native_event = NS.gluster.objects.NativeEvents(
+                context,
+                message=message,
+                severity="warning",
+                current_value="afr_quorum_failed",
+                tags={"entity_type": RESOURCE_TYPE_VOLUME,
+                      "volume_name": volume_name
+                      }
+            )
+            native_event.save()
 
     def afr_subvol_up(self, event):
-        context = "afr_subvol_state|" + event['message']['subvol']
-        message = "Afr subvolume: {0} is back up in cluster {1}".format(
-            event['message']['subvol'],
-            self.cluster_short_name
-        )
-        volume_name = parse_subvolume(event['message']['subvol'])
-        native_event = NS.gluster.objects.NativeEvents(
-            context,
-            message=message,
-            severity="recovery",
-            current_value="afr_subvol_up",
-            tags={"entity_type": RESOURCE_TYPE_VOLUME,
-                  "volume_name": volume_name
-                  }
-        )
-        native_event.save()
+        """{
+
+               'event': 'AFR_SUBVOL_UP',
+               'message': {
+                   'subvol': 'glustervol-replicate-0',
+                   'client-pid': '0'
+               },
+               'nodeid': '4fa65c79-8a81-4adc-84b7-0e2e10dba1cf',
+               'ts': 1556003999
+           }
+        """
+
+        client_pid = event['message'].get('client-pid', '0')
+        if int(client_pid) >= 0:
+            context = "afr_subvol_state|" + event['message']['subvol']
+            message = "Afr subvolume: {0} is back up in cluster {1}".format(
+                event['message']['subvol'],
+                self.cluster_short_name
+            )
+            volume_name = parse_subvolume(event['message']['subvol'])
+            native_event = NS.gluster.objects.NativeEvents(
+                context,
+                message=message,
+                severity="recovery",
+                current_value="afr_subvol_up",
+                tags={"entity_type": RESOURCE_TYPE_VOLUME,
+                      "volume_name": volume_name
+                      }
+            )
+            native_event.save()
 
     def afr_subvols_down(self, event):
-        context = "afr_subvol_state|" + event['message']['subvol']
-        message = "Afr subvolume: {0} is down in cluster {1}".format(
-            event['message']['subvol'],
-            self.cluster_short_name
-        )
-        volume_name = parse_subvolume(event['message']['subvol'])
-        native_event = NS.gluster.objects.NativeEvents(
-            context,
-            message=message,
-            severity="warning",
-            current_value="afr_subvol_down",
-            tags={"entity_type": RESOURCE_TYPE_VOLUME,
-                  "volume_name": volume_name
-                  }
-        )
-        native_event.save()
+        """{
+
+          'event': 'AFR_SUBVOLS_DOWN',
+          'message': {
+              'subvol': 'glustervol-replicate-0',
+              'client-pid': '0'
+          },
+          'nodeid': '4fa65c79-8a81-4adc-84b7-0e2e10dba1cf',
+          'ts': 1556001153
+        }
+        """
+
+        client_pid = event['message'].get('client-pid', '0')
+        if int(client_pid) >= 0:
+            context = "afr_subvol_state|" + event['message']['subvol']
+            message = "Afr subvolume: {0} is down in cluster {1}".format(
+                event['message']['subvol'],
+                self.cluster_short_name
+            )
+            volume_name = parse_subvolume(event['message']['subvol'])
+            native_event = NS.gluster.objects.NativeEvents(
+                context,
+                message=message,
+                severity="warning",
+                current_value="afr_subvol_down",
+                tags={"entity_type": RESOURCE_TYPE_VOLUME,
+                      "volume_name": volume_name
+                      }
+            )
+            native_event.save()
 
     def unknown_peer(self, event):
         context = "unknown_peer|" + event['message']['peer'].split(":")[0]

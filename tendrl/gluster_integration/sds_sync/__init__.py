@@ -44,6 +44,7 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
         self._complete = threading.Event()
 
     def run(self):
+        global VOLUME_TTL
         logger.log(
             "info",
             NS.publisher_id,
@@ -243,7 +244,6 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                             SYNC_TTL += 1
                             total_brick_count += b_count - 1
                         except KeyError:
-                            global VOLUME_TTL
                             # from second sync volume ttl is
                             # SYNC_TTL + (no.volumes) * 20 +
                             # (no.of.bricks) * 10 + 160

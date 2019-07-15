@@ -1,5 +1,4 @@
 import json
-import re
 import socket
 import subprocess
 import threading
@@ -113,28 +112,6 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                     '/var/run/glusterd-state'
                 )
                 subprocess.call(['rm', '-rf', '/var/run/glusterd-state'])
-                subprocess.call(
-                    [
-                        'gluster',
-                        'get-state',
-                        'glusterd',
-                        'odir',
-                        '/var/run',
-                        'file',
-                        'glusterd-state-vol-opts',
-                        'volumeoptions'
-                    ]
-                )
-                raw_data_options = ini2json.ini_to_dict(
-                    '/var/run/glusterd-state-vol-opts'
-                )
-                subprocess.call(
-                    [
-                        'rm',
-                        '-rf',
-                        '/var/run/glusterd-state-vol-opts'
-                    ]
-                )
                 sync_object = NS.gluster.objects.\
                     SyncObject(data=json.dumps(raw_data))
                 sync_object.save()
@@ -234,8 +211,8 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                     while True:
                         try:
                             b_count = sync_volumes(
-                                volumes, index,
-                                raw_data_options.get('Volume Options'),
+                                volumes,
+                                index,
                                 SYNC_TTL + VOLUME_TTL,
                                 _cluster.short_name,
                                 devicetree,
@@ -258,30 +235,6 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
                                 VOLUME_TTL = (volume_count * 20) + (
                                     total_brick_count * 10) + 160
                             break
-                    # populate the volume specific options
-                    reg_ex = re.compile("^volume[0-9]+.options+")
-                    options = {}
-                    for key in volumes.keys():
-                        if reg_ex.match(key):
-                            options[key] = volumes[key]
-                    for key in options.keys():
-                        volname = key.split('.')[0]
-                        vol_id = volumes['%s.id' % volname]
-                        dict1 = {}
-                        for k, v in options.items():
-                            if k.startswith('%s.options' % volname):
-                                dict1['.'.join(k.split(".")[2:])] = v
-                                options.pop(k, None)
-                        volume = NS.tendrl.objects.GlusterVolume(
-                            NS.tendrl_context.integration_id,
-                            vol_id=vol_id
-                        ).load()
-                        if volume.options is not None:
-                            dest = dict(volume.options)
-                            dest.update(dict1)
-                            volume.options = dest
-                            volume.save()
-
                 # Sync cluster global details
                 if "provisioner/%s" % NS.tendrl_context.integration_id \
                     in NS.node_context.tags:
@@ -404,8 +357,8 @@ class GlusterIntegrationSdsSyncStateThread(sds_sync.SdsSyncThread):
 
 
 def sync_volumes(
-    volumes, index,
-    vol_options,
+    volumes,
+    index,
     sync_ttl,
     cluster_short_name,
     devicetree,
@@ -521,19 +474,6 @@ def sync_volumes(
                 }
             )
         volume.save(ttl=sync_ttl)
-        # Save the default values of volume options
-        vol_opt_dict = {}
-        for opt_count in \
-            range(1, int(vol_options['volume%s.options.count' % index])):
-            vol_opt_dict[
-                vol_options[
-                    'volume%s.options.key%s' % (index, opt_count)
-                ]
-            ] = vol_options[
-                'volume%s.options.value%s' % (index, opt_count)
-            ]
-        volume.options = vol_opt_dict
-        volume.save()
 
     rebal_det = NS.gluster.objects.RebalanceDetails(
         vol_id=volumes['volume%s.id' % index],

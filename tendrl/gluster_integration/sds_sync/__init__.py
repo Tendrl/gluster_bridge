@@ -922,7 +922,7 @@ def get_device_tree():
         cmd = cmd_utils.Command(lsblk)
         out, err, rc = cmd.run()
         if not err:
-            out = out.encode('utf8')
+            out = unicode(out, errors="ignore").encode('utf8')
             devlist = map(
                 lambda line: dict(zip(keys, line.split(' '))),
                 out.splitlines()
